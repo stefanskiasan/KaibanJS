@@ -26,6 +26,8 @@ import {
   ContinuousOptimizationLog,
   TaskRepositoryLog,
   PerformanceMonitoringLog,
+  TaskCompletionAnalysisLog,
+  OrchestrationDecisionsLog,
 } from '../types/logs';
 import { logger } from '../utils/logger';
 
@@ -210,6 +212,38 @@ const logPrettyOrchestration = (log: OrchestrationStatusLog): void => {
           `   💡 Recommendations: ${perfLog.metadata.recommendations
             .slice(0, 2)
             .join(', ')}`
+      );
+      break;
+    }
+
+    case 'TASK_COMPLETION_ANALYSIS': {
+      const completionLog = log as TaskCompletionAnalysisLog;
+      logger.info(
+        `🔍 [${timestamp}] Task Completion Analysis\n` +
+          `   Completed Task: ${
+            completionLog.metadata.completedTaskTitle ||
+            completionLog.metadata.completedTaskId
+          }\n` +
+          `   Progress: ${
+            completionLog.metadata.totalTasks -
+            completionLog.metadata.remainingTasks
+          }/${completionLog.metadata.totalTasks} tasks completed\n` +
+          `   Remaining: ${completionLog.metadata.remainingTasks} tasks`
+      );
+      break;
+    }
+
+    case 'ORCHESTRATION_DECISIONS': {
+      const decisionsLog = log as OrchestrationDecisionsLog;
+      const metadata = decisionsLog.metadata;
+      logger.info(
+        `🤖 [${timestamp}] Orchestration Decisions Applied\n` +
+          `   Decisions Generated: ${metadata.decisionsGenerated}\n` +
+          `   📝 Modified Tasks: ${metadata.modifyTasks}\n` +
+          `   ➕ Added Tasks: ${metadata.addTasks}\n` +
+          `   ➖ Removed Tasks: ${metadata.removeTasks}\n` +
+          `   🎯 Priority Changes: ${metadata.changePriorities}\n` +
+          `   ⏱️ Processing Time: ${metadata.processingTime}ms`
       );
       break;
     }

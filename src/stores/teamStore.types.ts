@@ -99,7 +99,8 @@ export interface TeamStoreState {
   maxConcurrency: number;
   // Orchestration Extensions
   enableOrchestration?: boolean;
-  availableTasks?: Task[];
+  continuousOrchestration?: boolean;
+  availableTemplateTasks?: Task[];
   allowTaskGeneration?: boolean;
   orchestrationStrategy?: string;
   mode?: 'conservative' | 'adaptive' | 'innovative' | 'learning';
@@ -139,13 +140,14 @@ export interface TeamStoreActions {
   ) => T;
   addWorkflowLog: (log: WorkflowLog) => void;
   // Orchestration Actions
-  setAvailableTasks: (tasks: Task[]) => void;
-  addAvailableTask: (task: Task) => void;
-  removeAvailableTask: (taskId: string) => void;
+  setAvailableTemplateTasks: (tasks: Task[]) => void;
+  addAvailableTemplateTask: (task: Task) => void;
+  removeAvailableTemplateTask: (taskId: string) => void;
   updateOrchestrationMode: (
     mode: 'conservative' | 'adaptive' | 'innovative' | 'learning'
   ) => void;
   updateOrchestrationStrategy: (strategy: string) => void;
+  setContinuousOrchestration: (enabled: boolean) => void;
 }
 
 export type NewLogParams<T extends WorkflowLog> = {

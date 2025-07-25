@@ -1,0 +1,21 @@
+{
+  "name": "examples",
+  "version": "1.0.0",
+  "description": "This directory contains comprehensive examples demonstrating the intelligent orchestration features of KaibanJS. These examples show how to use AI-powered task management, adaptive workflows, and autonomous task generation to build sophisticated multi-agent systems.",
+  "main": "board-02-conservative-mode.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "kaiban": "kaiban run",
+    "kaiban:deploy": "kaiban deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@langchain/openai": "^0.6.3",
+    "dotenv": "^17.2.1",
+    "kaibanjs": "file:..",
+    "kaiban-board": "^0.3.2"
+  }
+}

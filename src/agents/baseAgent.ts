@@ -55,6 +55,10 @@ export interface LLMConfig {
   n?: number;
   /** stream */
   stream?: boolean;
+  /** Maximum tokens to generate */
+  maxTokens?: number;
+  /** Request timeout in milliseconds */
+  timeout?: number;
 }
 
 /** Environment variables */

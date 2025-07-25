@@ -96,7 +96,7 @@ describe('Intelligent Orchestration', () => {
       agents: [developer, tester],
       tasks: [],
       enableOrchestration: true, // Enable orchestration for testing
-      availableTasks: taskRepository,
+      availableTemplateTasks: taskRepository,
       allowTaskGeneration: true,
       orchestrationStrategy: 'Test strategy for efficient development',
       mode: 'adaptive',
@@ -109,7 +109,7 @@ describe('Intelligent Orchestration', () => {
   describe('Team Configuration', () => {
     test('should initialize with orchestration properties', () => {
       expect(team.enableOrchestration).toBe(true);
-      expect(team.availableTasks).toHaveLength(3);
+      expect(team.availableTemplateTasks).toHaveLength(3);
       expect(team.allowTaskGeneration).toBe(true);
       expect(team.orchestrationStrategy).toBe(
         'Test strategy for efficient development'
@@ -156,12 +156,12 @@ describe('Intelligent Orchestration', () => {
       // Test that other methods show warnings but don't throw
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-      teamWithoutOrchestration.addAvailableTasks([]);
+      teamWithoutOrchestration.addAvailableTemplateTasks([]);
       expect(consoleSpy).toHaveBeenCalledWith(
         'Orchestration is not enabled for this team. Task repository operations are ignored.'
       );
 
-      teamWithoutOrchestration.removeAvailableTask('test-id');
+      teamWithoutOrchestration.removeAvailableTemplateTask('test-id');
       expect(consoleSpy).toHaveBeenCalledWith(
         'Orchestration is not enabled for this team. Task repository operations are ignored.'
       );
@@ -222,18 +222,18 @@ describe('Intelligent Orchestration', () => {
         template: true,
       });
 
-      team.addAvailableTasks([newTask]);
-      expect(team.availableTasks).toHaveLength(4);
-      expect(team.store.getState().availableTasks).toHaveLength(4);
+      team.addAvailableTemplateTasks([newTask]);
+      expect(team.availableTemplateTasks).toHaveLength(4);
+      expect(team.store.getState().availableTemplateTasks).toHaveLength(4);
     });
 
     test('should remove tasks from repository', () => {
       const taskToRemove = taskRepository[0];
-      team.removeAvailableTask(taskToRemove.id);
+      team.removeAvailableTemplateTask(taskToRemove.id);
 
-      expect(team.availableTasks).toHaveLength(2);
+      expect(team.availableTemplateTasks).toHaveLength(2);
       expect(
-        team.availableTasks.find((t) => t.id === taskToRemove.id)
+        team.availableTemplateTasks.find((t) => t.id === taskToRemove.id)
       ).toBeUndefined();
     });
 
@@ -552,15 +552,16 @@ describe('Intelligent Orchestration', () => {
         template: true,
       });
 
-      team.store.getState().setAvailableTasks([newTask]);
-      expect(team.store.getState().availableTasks).toHaveLength(1);
-      expect(team.store.getState().availableTasks[0].description).toBe(
+      team.store.getState().setAvailableTemplateTasks([newTask]);
+      expect(team.store.getState().availableTemplateTasks).toHaveLength(1);
+      expect(team.store.getState().availableTemplateTasks[0].description).toBe(
         'Store test task'
       );
     });
 
     test('should add available task to store', () => {
-      const initialCount = team.store.getState().availableTasks?.length || 0;
+      const initialCount =
+        team.store.getState().availableTemplateTasks?.length || 0;
 
       const newTask = new Task({
         description: 'Added task',
@@ -568,18 +569,19 @@ describe('Intelligent Orchestration', () => {
         agent: developer,
       });
 
-      team.store.getState().addAvailableTask(newTask);
-      expect(team.store.getState().availableTasks).toHaveLength(
+      team.store.getState().addAvailableTemplateTask(newTask);
+      expect(team.store.getState().availableTemplateTasks).toHaveLength(
         initialCount + 1
       );
     });
 
     test('should remove available task from store', () => {
       const taskToRemove = taskRepository[0];
-      const initialCount = team.store.getState().availableTasks?.length || 0;
+      const initialCount =
+        team.store.getState().availableTemplateTasks?.length || 0;
 
-      team.store.getState().removeAvailableTask(taskToRemove.id);
-      expect(team.store.getState().availableTasks).toHaveLength(
+      team.store.getState().removeAvailableTemplateTask(taskToRemove.id);
+      expect(team.store.getState().availableTemplateTasks).toHaveLength(
         initialCount - 1
       );
     });
@@ -629,7 +631,7 @@ describe('Intelligent Orchestration', () => {
         agents: [developer],
         tasks: [],
         enableOrchestration: true,
-        availableTasks: taskRepository,
+        availableTemplateTasks: taskRepository,
         allowTaskGeneration: true,
       });
 
@@ -642,7 +644,7 @@ describe('Intelligent Orchestration', () => {
         agents: [developer],
         tasks: [],
         enableOrchestration: true,
-        availableTasks: [],
+        availableTemplateTasks: [],
         allowTaskGeneration: false,
       });
 
@@ -658,7 +660,7 @@ describe('Intelligent Orchestration', () => {
         agents: [developer],
         tasks: [],
         enableOrchestration: true,
-        availableTasks: taskRepository,
+        availableTemplateTasks: taskRepository,
         allowTaskGeneration: false, // Generation not allowed
       });
 
@@ -722,7 +724,7 @@ describe('Orchestration Integration', () => {
     expect(() => team.start()).not.toThrow();
 
     // Should be able to use orchestration methods
-    expect(() => team.addAvailableTasks([])).not.toThrow();
+    expect(() => team.addAvailableTemplateTasks([])).not.toThrow();
     expect(() => team.updateOrchestrationMode('adaptive')).not.toThrow();
     expect(() =>
       team.updateOrchestrationStrategy('New strategy')

@@ -212,7 +212,7 @@ const OrchestrationComponent = () => {
         agents: Object.values(agents),
         tasks: [...existingTasks],
         enableOrchestration: true, // Enable AI orchestration ✨
-        availableTasks: taskRepository,
+        availableTemplateTasks: taskRepository,
         allowTaskGeneration: true,
         orchestrationStrategy: `
           Build a modern web application with:
@@ -231,7 +231,7 @@ const OrchestrationComponent = () => {
       });
 
       addLog(
-        `🎯 Orchestration enabled with ${team.availableTasks.length} available templates`
+        `🎯 Orchestration enabled with ${team.availableTemplateTasks.length} available templates`
       );
       addLog('🤖 Starting AI-driven task orchestration...');
       addLog('Watch for orchestration events below! ⬇️', 'info');
@@ -311,13 +311,15 @@ const OrchestrationComponent = () => {
         agents: Object.values(agents),
         tasks: existingTasks,
         enableOrchestration: true,
-        availableTasks: taskRepository,
+        availableTemplateTasks: taskRepository,
         allowTaskGeneration: false,
         mode: 'conservative',
         env: { OPENAI_API_KEY: import.meta.env.VITE_OPENAI_API_KEY || '' },
       });
 
-      addLog(`📚 Initial repository: ${team.availableTasks.length} tasks`);
+      addLog(
+        `📚 Initial repository: ${team.availableTemplateTasks.length} tasks`
+      );
 
       // Add new task to repository
       const newTask = new Task({
@@ -334,9 +336,9 @@ const OrchestrationComponent = () => {
       });
 
       addLog('📚 Adding new task to repository...');
-      team.addAvailableTasks([newTask]);
+      team.addAvailableTemplateTasks([newTask]);
       addLog(
-        `✅ Repository updated: ${team.availableTasks.length} tasks available`
+        `✅ Repository updated: ${team.availableTemplateTasks.length} tasks available`
       );
 
       // Update strategy
@@ -355,7 +357,7 @@ const OrchestrationComponent = () => {
         ...prev,
         repository: {
           initialTasks: taskRepository.length,
-          finalTasks: team.availableTasks.length,
+          finalTasks: team.availableTemplateTasks.length,
           newTaskAdded: newTask.description,
           updatedStrategy: true,
           updatedMode: 'innovative',

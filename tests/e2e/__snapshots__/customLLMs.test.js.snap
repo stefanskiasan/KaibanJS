@@ -41,13 +41,7 @@ exports[`Custom LLMs Instances Workflows Using OpenAI Intance initializes the te
             "callbacks": undefined,
             "max_retries": 1,
             "model": "gpt-4o-mini",
-            "openai_api_key": {
-              "id": [
-                "OPENAI_API_KEY",
-              ],
-              "lc": 1,
-              "type": "secret",
-            },
+            "openai_api_key": undefined,
             "verbose": undefined,
           },
           "lc": 1,
@@ -127,13 +121,7 @@ exports[`Custom LLMs Instances Workflows Using OpenAI Intance initializes the te
           "kwargs": {
             "callbacks": undefined,
             "model": "gpt-4o-mini",
-            "openai_api_key": {
-              "id": [
-                "OPENAI_API_KEY",
-              ],
-              "lc": 1,
-              "type": "secret",
-            },
+            "openai_api_key": undefined,
             "verbose": undefined,
           },
           "lc": 1,
@@ -189,6 +177,7 @@ exports[`Custom LLMs Instances Workflows Using OpenAI Intance initializes the te
   "name": "Resume Creation Team",
   "tasks": [
     {
+      "adaptable": false,
       "agent": {
         "agentInstance": {
           "background": "Data Processor",
@@ -227,13 +216,7 @@ exports[`Custom LLMs Instances Workflows Using OpenAI Intance initializes the te
               "callbacks": undefined,
               "max_retries": 1,
               "model": "gpt-4o-mini",
-              "openai_api_key": {
-                "id": [
-                  "OPENAI_API_KEY",
-                ],
-                "lc": 1,
-                "type": "secret",
-              },
+              "openai_api_key": undefined,
               "verbose": undefined,
             },
             "lc": 1,
@@ -279,6 +262,7 @@ exports[`Custom LLMs Instances Workflows Using OpenAI Intance initializes the te
   experience, skills, and job history from the user's 'aboutMe' input. 
   aboutMe: {aboutMe}",
       "duration": "[REDACTED]",
+      "dynamicPriority": false,
       "endTime": "[REDACTED]",
       "expectedOutput": "Structured data ready to be used for a resume creation.",
       "externalValidationRequired": false,
@@ -286,15 +270,23 @@ exports[`Custom LLMs Instances Workflows Using OpenAI Intance initializes the te
       "id": "[REDACTED]",
       "interpolatedTaskDescription": null,
       "isDeliverable": false,
+      "mergeCompatible": [],
+      "orchestrationRules": undefined,
       "outputSchema": null,
+      "priority": "medium",
+      "qualityGates": [],
+      "resourceRequirements": undefined,
       "result": null,
+      "splitStrategy": "none",
       "startTime": "[REDACTED]",
       "stats": null,
       "status": "TODO",
       "store": [Function],
+      "template": false,
       "title": "",
     },
     {
+      "adaptable": false,
       "agent": {
         "agentInstance": {
           "background": "Extensive experience in recruiting, 
@@ -334,13 +326,7 @@ exports[`Custom LLMs Instances Workflows Using OpenAI Intance initializes the te
             "kwargs": {
               "callbacks": undefined,
               "model": "gpt-4o-mini",
-              "openai_api_key": {
-                "id": [
-                  "OPENAI_API_KEY",
-                ],
-                "lc": 1,
-                "type": "secret",
-              },
+              "openai_api_key": undefined,
               "verbose": undefined,
             },
             "lc": 1,
@@ -386,6 +372,7 @@ exports[`Custom LLMs Instances Workflows Using OpenAI Intance initializes the te
     Enrich the resume content by inferring additional details from the provided information.
     Include sections such as a personal summary, detailed work experience, skills, and educational background.",
       "duration": "[REDACTED]",
+      "dynamicPriority": false,
       "endTime": "[REDACTED]",
       "expectedOutput": "A professionally formatted resume in markdown format, 
     ready for submission to potential employers.",
@@ -394,12 +381,19 @@ exports[`Custom LLMs Instances Workflows Using OpenAI Intance initializes the te
       "id": "[REDACTED]",
       "interpolatedTaskDescription": null,
       "isDeliverable": false,
+      "mergeCompatible": [],
+      "orchestrationRules": undefined,
       "outputSchema": null,
+      "priority": "medium",
+      "qualityGates": [],
+      "resourceRequirements": undefined,
       "result": null,
+      "splitStrategy": "none",
       "startTime": "[REDACTED]",
       "stats": null,
       "status": "TODO",
       "store": [Function],
+      "template": false,
       "title": "",
     },
   ],

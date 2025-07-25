@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Enhanced
 
 - **Task System** - Extended with orchestration-specific features
+
   - `Task.adaptable` - Mark tasks as AI-modifiable
   - `Task.template` - Mark tasks as repository templates
   - `Task.orchestrationRules` - Define AI adaptation guidelines
@@ -45,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved task dependency management
 
 - **Agent System** - Better skill and workload management
+
   - Enhanced agent-task matching algorithms
   - Improved skills-based task distribution
   - Better agent availability tracking
@@ -58,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Playground & Examples
 
 - **Comprehensive Playground Support** - Test all orchestration features
+
   - TypeScript playground with 4 detailed orchestration demos
   - JavaScript playground with simplified demonstrations
   - React Storybook with interactive orchestration UI

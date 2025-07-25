@@ -131,7 +131,7 @@ const runDemo = async () => {
       agents: [developer, designer],
       tasks: [...existingTasks], // Start with existing
       enableOrchestration: true, // Enable AI orchestration ✨
-      availableTasks: taskRepository,
+      availableTemplateTasks: taskRepository,
       allowTaskGeneration: true,
       orchestrationStrategy: `
         Build a modern web application with:
@@ -183,9 +183,9 @@ const runDemo = async () => {
     });
 
     console.log('📚 Adding task to repository...');
-    orchestratedTeam.addAvailableTasks([newTask]);
+    orchestratedTeam.addAvailableTemplateTasks([newTask]);
     console.log(
-      `✅ Repository updated: ${orchestratedTeam.availableTasks.length} tasks`
+      `✅ Repository updated: ${orchestratedTeam.availableTemplateTasks.length} tasks`
     );
 
     console.log('\n⚙️ Updating strategy...');

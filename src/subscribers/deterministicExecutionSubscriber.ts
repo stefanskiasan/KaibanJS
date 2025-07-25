@@ -287,19 +287,109 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
     }
   };
 
-  const _handleTaskStatusUpdate = ({
+  /**
+   * Handle orchestration decisions after task completion
+   */
+  const _handleOrchestrationTaskCompletion = async (
+    completedTask: Task,
+    state: CombinedStoresState
+  ): Promise<void> => {
+    try {
+      // Import orchestrator dynamically to avoid circular dependencies
+      const { IntelligentOrchestrator } = await import('../orchestration');
+
+      // Create temporary team object for orchestrator
+      const tempTeam = {
+        enableOrchestration: state.enableOrchestration,
+        availableTemplateTasks: state.availableTemplateTasks || [],
+        allowTaskGeneration: state.allowTaskGeneration,
+        orchestrationStrategy: state.orchestrationStrategy,
+        mode: state.mode || 'adaptive',
+        maxActiveTasks: state.maxActiveTasks || 5,
+        taskPrioritization: state.taskPrioritization || 'dynamic',
+        workloadDistribution: state.workloadDistribution || 'balanced',
+        adaptationInterval: state.adaptationInterval || 300000,
+        llmConfig: state.llmConfig,
+        llmInstance: state.llmInstance,
+        getTasks: () => state.tasks,
+        agents: state.agents,
+      } as any;
+
+      const orchestrator = new IntelligentOrchestrator(tempTeam);
+
+      // Let orchestrator analyze task completion and make decisions
+      const orchestrationDecisions =
+        await orchestrator.orchestrateTaskCompletion(
+          completedTask,
+          state.tasks
+        );
+
+      // Apply orchestration decisions
+      await _applyOrchestrationDecisions(orchestrationDecisions, state);
+    } catch (error) {
+      console.warn('Orchestration task completion analysis failed:', error);
+      // Continue with normal flow if orchestration fails
+    }
+  };
+
+  /**
+   * Apply orchestration decisions to the workflow
+   */
+  const _applyOrchestrationDecisions = async (
+    decisions: any,
+    state: CombinedStoresState
+  ): Promise<void> => {
+    // Implement decision application logic
+    if (decisions.modifyTasks && decisions.modifyTasks.length > 0) {
+      for (const modification of decisions.modifyTasks) {
+        const targetTask = state.tasks.find(
+          (t) => t.id === modification.taskId
+        );
+        if (targetTask) {
+          // Apply task modifications
+          Object.assign(targetTask, modification.changes);
+        }
+      }
+    }
+
+    if (decisions.addTasks && decisions.addTasks.length > 0) {
+      // Add new tasks to the team
+      state.addTasks(decisions.addTasks);
+      // Reinitialize graphs to include new tasks
+      _initializeGraph();
+    }
+
+    if (decisions.removeTasks && decisions.removeTasks.length > 0) {
+      // Remove tasks from workflow
+      for (const taskId of decisions.removeTasks) {
+        const taskIndex = state.tasks.findIndex((t) => t.id === taskId);
+        if (taskIndex !== -1) {
+          state.tasks.splice(taskIndex, 1);
+        }
+      }
+      _initializeGraph();
+    }
+  };
+
+  const _handleTaskStatusUpdate = async ({
     currentLog,
     state,
   }: {
     currentLog: TaskStatusLog;
     state: CombinedStoresState;
-  }): void => {
+  }): Promise<void> => {
     const task = currentLog.task;
     const taskStatus = currentLog.taskStatus;
 
     switch (taskStatus) {
       case TASK_STATUS_enum.DONE:
         executionDepGraph.removeNode(task.id);
+
+        // 🤖 ORCHESTRATION HOOK: Task completion analysis
+        if (state.enableOrchestration && state.continuousOrchestration) {
+          await _handleOrchestrationTaskCompletion(task, state);
+        }
+
         _queueTasksReadyToExecute(state);
         break;
 
@@ -344,9 +434,12 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
             state,
           });
         } else if (currentLog.logType === 'TaskStatusUpdate') {
+          // Handle async orchestration
           _handleTaskStatusUpdate({
             currentLog: currentLog as TaskStatusLog,
             state,
+          }).catch((error) => {
+            console.error('Task status update handling error:', error);
           });
         }
       }

@@ -108,7 +108,8 @@ const createTeamStore = (
     maxConcurrency: initialState.maxConcurrency || 5,
     // Orchestration Extensions
     enableOrchestration: initialState.enableOrchestration || false,
-    availableTasks: initialState.availableTasks || [],
+    continuousOrchestration: initialState.continuousOrchestration || false,
+    availableTemplateTasks: initialState.availableTemplateTasks || [],
     allowTaskGeneration: initialState.allowTaskGeneration || false,
     orchestrationStrategy: initialState.orchestrationStrategy,
     mode: initialState.mode || 'adaptive',
@@ -832,14 +833,15 @@ const createTeamStore = (
       })),
 
     // Orchestration Actions
-    setAvailableTasks: (tasks: Task[]) => set({ availableTasks: tasks }),
-    addAvailableTask: (task: Task) =>
+    setAvailableTemplateTasks: (tasks: Task[]) =>
+      set({ availableTemplateTasks: tasks }),
+    addAvailableTemplateTask: (task: Task) =>
       set((state) => ({
-        availableTasks: [...(state.availableTasks || []), task],
+        availableTemplateTasks: [...(state.availableTemplateTasks || []), task],
       })),
-    removeAvailableTask: (taskId: string) =>
+    removeAvailableTemplateTask: (taskId: string) =>
       set((state) => ({
-        availableTasks: (state.availableTasks || []).filter(
+        availableTemplateTasks: (state.availableTemplateTasks || []).filter(
           (task) => task.id !== taskId
         ),
       })),
@@ -848,6 +850,8 @@ const createTeamStore = (
     ) => set({ mode }),
     updateOrchestrationStrategy: (strategy: string) =>
       set({ orchestrationStrategy: strategy }),
+    setContinuousOrchestration: (enabled: boolean) =>
+      set({ continuousOrchestration: enabled }),
   });
 
   const subscribeWithSelectorFn =

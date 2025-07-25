@@ -16,10 +16,20 @@ export class TaskSelectionPromptTemplate {
   static build(
     context: OrchestrationContext,
     projectGoal: string,
-    availableTasks: Task[]
+    availableTasks: Task[],
+    orchestrationMode: 'initial' | 'continuous' = 'initial'
   ): string {
     return `
-# INTELLIGENT TASK SELECTION
+# INTELLIGENT TASK SELECTION - ${orchestrationMode.toUpperCase()} MODE
+
+## ORCHESTRATION MODE: ${orchestrationMode.toUpperCase()}
+${
+  orchestrationMode === 'initial'
+    ? `🚀 **INITIAL ORCHESTRATION**: Setting up the complete workflow from the beginning.
+     Focus on: Comprehensive planning, dependency resolution, strategic foundation.`
+    : `🔄 **CONTINUOUS ORCHESTRATION**: Adapting workflow based on real-time progress.
+     Focus on: Incremental improvements, opportunity exploitation, dynamic adjustment.`
+}
 
 ## PROJECT GOAL
 ${projectGoal}
@@ -76,39 +86,85 @@ ${availableTasks
     }
 - **Adaptable**: ${task.adaptable ? 'Yes' : 'No'}
 - **Agent**: ${task.agent?.name || 'Auto-select'}
-${task.orchestrationRules ? `- **Rules**: ${task.orchestrationRules}` : ''}
+${
+  task.orchestrationRules
+    ? `- **Orchestration Rules**: ${task.orchestrationRules}`
+    : ''
+}
+- **Priority**: ${task.priority || 'medium'}
+- **Split Strategy**: ${task.splitStrategy || 'none'}
+${
+  task.mergeCompatible && task.mergeCompatible.length > 0
+    ? `- **Merge Compatible**: ${task.mergeCompatible.join(', ')}`
+    : ''
+}
 `
   )
   .join('')}
 
-## SELECTION CRITERIA
-1. **Strategic Alignment** (25%): Tasks that directly contribute to the project goal
-2. **Gap Analysis** (25%): Tasks that fill missing capabilities not covered by existing tasks
-3. **Dependency Resolution** (20%): Tasks that unblock other work or have satisfied dependencies
-4. **Resource Optimization** (15%): Tasks that match available agent skills and capacity
-5. **Risk Mitigation** (10%): Tasks that address critical risks or technical debt
-6. **Complementarity** (5%): Tasks that work well with existing tasks
+## ${orchestrationMode.toUpperCase()} SELECTION CRITERIA
+${
+  orchestrationMode === 'initial'
+    ? `### Initial Orchestration Priorities:
+1. **Strategic Foundation** (30%): Tasks that establish core project architecture and direction
+2. **Dependency Chain Setup** (25%): Tasks that enable downstream work and unblock critical paths
+3. **Resource Optimization** (20%): Tasks that optimally utilize available agent skills from the start
+4. **Risk Prevention** (15%): Tasks that proactively address known risks and establish quality gates
+5. **Comprehensive Coverage** (10%): Tasks that ensure no critical areas are overlooked`
+    : `### Continuous Orchestration Priorities:
+1. **Opportunity Exploitation** (30%): Tasks that leverage new opportunities revealed by recent work
+2. **Dynamic Gap Filling** (25%): Tasks that address gaps discovered during execution
+3. **Progress Acceleration** (20%): Tasks that can speed up current bottlenecks or blocked work
+4. **Quality Enhancement** (15%): Tasks that improve or validate recent outputs
+5. **Adaptive Optimization** (10%): Tasks that optimize workflow based on current performance`
+}
 
-## INSTRUCTIONS
-Select the optimal tasks for the current context. Consider:
+## TASK ORCHESTRATION RULES CONSIDERATION
+When selecting tasks, ALWAYS respect task-specific orchestration rules:
+- Tasks with explicit orchestrationRules MUST follow those rules
+- Priority levels (high/medium/low) should influence selection order
+- Dynamic priority tasks can be re-prioritized based on current context
+- Adaptable tasks can be modified to better fit current needs
+- Non-adaptable tasks must be used as-is without modifications
+
+## ${orchestrationMode.toUpperCase()} INSTRUCTIONS
+${
+  orchestrationMode === 'initial'
+    ? `### Initial Orchestration Guidelines:
+Select tasks to establish a comprehensive, well-structured workflow foundation:
 ${
   context.existingTasks.length > 0
-    ? `- **Build upon existing work**: Complement the ${
+    ? `- **Comprehensive Integration**: Integrate with the ${
         context.existingTasks.length
       } existing tasks
-- **Avoid duplication**: Don't select tasks that overlap significantly with existing ones
-- **Fill gaps**: Prioritize tasks that add missing skills or capabilities
+- **Strategic Enhancement**: Add tasks that strengthen the overall workflow architecture
+- **Foundation Building**: Focus on tasks that enable long-term project success
 - **Maximum ${Math.max(
         0,
         5 - context.existingTasks.length
-      )} additional tasks** can be added`
-    : `- Maximum ${
-        context.activeTasks.length < 3 ? 3 - context.activeTasks.length : 0
-      } new tasks can be started`
+      )} strategic additions** recommended`
+    : `- **Complete Foundation**: Establish 3-5 core tasks that form the project backbone
+- **Dependency Architecture**: Create clear task dependency chains
+- **Resource Distribution**: Balance initial workload across all available agents`
 }
-- Prioritize unblocking critical paths
-- Balance workload across available agents
-- Ensure prerequisite tasks are completed first
+- **Long-term Vision**: Prioritize tasks that support future workflow expansion
+- **Quality Framework**: Include validation and quality assurance tasks from the start
+- **Risk Mitigation**: Address potential issues before they become problems`
+    : `### Continuous Orchestration Guidelines:
+Select tasks that optimize and enhance the current workflow dynamically:
+${
+  context.existingTasks.length > 0
+    ? `- **Incremental Enhancement**: Add 1-3 tasks that build upon recent progress
+- **Opportunity Capture**: Leverage insights and opportunities from completed tasks
+- **Dynamic Adaptation**: Adjust workflow based on current performance and bottlenecks
+- **Smart Additions**: Only add tasks that provide clear immediate or strategic value`
+    : `- **Reactive Planning**: Start 1-2 high-impact tasks based on current needs
+- **Agile Response**: Focus on tasks that address immediate opportunities or challenges`
+}
+- **Performance Optimization**: Prioritize tasks that improve current workflow efficiency
+- **Quality Enhancement**: Add validation or improvement tasks for recent work
+- **Bottleneck Resolution**: Focus on tasks that unblock or accelerate current work`
+}
 
 ## RESPONSE FORMAT
 Respond with a JSON object:
@@ -162,7 +218,16 @@ export class TaskAdaptationPromptTemplate {
 **Adaptable**: ${task.adaptable ? 'Yes' : 'No'}
 
 ## ORCHESTRATION RULES
-${task.orchestrationRules || 'No specific rules provided'}
+${
+  task.orchestrationRules
+    ? `
+**IMPORTANT**: The following orchestration rules MUST be followed when adapting this task:
+${task.orchestrationRules}
+
+These rules take precedence over general adaptation guidelines.
+`
+    : 'No specific orchestration rules provided - use general adaptation guidelines.'
+}
 
 ## CURRENT CONTEXT
 - **Available Agents**: ${context.availableAgents
@@ -186,7 +251,13 @@ ${instructions}
 
 ## ADAPTATION OPTIONS
 - **Split Task**: Break into smaller, parallelizable components
+  - Consider if task.splitStrategy is 'auto' or 'manual'
+  - Identify natural boundaries for splitting
+  - Ensure sub-tasks maintain coherence
 - **Merge Opportunity**: Combine with related tasks for efficiency
+  - Check task.mergeCompatible array for compatible task IDs
+  - Verify merged scope remains manageable
+  - Ensure agent can handle combined workload
 - **Priority Adjustment**: Increase/decrease based on current needs
 - **Agent Reassignment**: Optimize for skills and workload
 - **Scope Modification**: Adjust deliverables based on constraints
@@ -213,6 +284,23 @@ Respond with a JSON object:
     "requiredSkills": ["skill1", "skill2"],
     "adaptationLevel": "minor|moderate|major",
     "qualityGates": ["gate1", "gate2"]
+  },
+  "splitRecommendation": {
+    "shouldSplit": true|false,
+    "reasoning": "Why splitting is or isn't recommended",
+    "subTasks": [
+      {
+        "description": "Sub-task 1 description",
+        "estimatedTime": "time estimate",
+        "agent": "suggested agent"
+      }
+    ]
+  },
+  "mergeRecommendation": {
+    "shouldMerge": true|false,
+    "mergeWithTaskIds": ["task_id1", "task_id2"],
+    "reasoning": "Why merging is or isn't recommended",
+    "mergedDescription": "Combined task description if merged"
   },
   "adaptationReasoning": "Detailed explanation of why these adaptations were made",
   "impactAssessment": "How adaptations affect project timeline and quality",
@@ -488,6 +576,153 @@ Respond with a JSON object:
 }
 
 /**
+ * Template for task completion analysis prompts (for continuous orchestration)
+ */
+export class TaskCompletionAnalysisPromptTemplate {
+  static build(
+    completedTask: Task,
+    context: OrchestrationContext,
+    taskResult: any,
+    instructions: string
+  ): string {
+    return `
+# INTELLIGENT TASK COMPLETION ANALYSIS
+
+## COMPLETED TASK ANALYSIS
+**Task**: ${completedTask.description}
+**Agent**: ${completedTask.agent?.name || 'Unknown'}
+**Expected Output**: ${completedTask.expectedOutput}
+**Duration**: ${completedTask.duration || 'Not tracked'}
+**Result Quality**: ${taskResult ? 'Completed' : 'Failed'}
+
+## TASK RESULT
+\`\`\`
+${
+  typeof taskResult === 'object'
+    ? JSON.stringify(taskResult, null, 2)
+    : taskResult || 'No result available'
+}
+\`\`\`
+
+## CURRENT PROJECT STATE
+- **Total Tasks**: ${context.existingTasks.length}
+- **Active Tasks**: ${context.activeTasks.length}
+- **Blocked Tasks**: ${context.blockedTasks.length}
+- **Available Agents**: ${context.availableAgents.map((a) => a.name).join(', ')}
+- **Project Progress**: ${context.projectProgress}%
+- **Current Phase**: ${context.projectPhase}
+- **Resource Availability**: ${context.resourceAvailability}
+
+## REMAINING TASKS IN PIPELINE
+${context.existingTasks
+  .filter((task) => task.status !== 'DONE')
+  .map(
+    (task, index) => `
+### Pending Task ${index + 1}: ${task.description}
+- **Status**: ${task.status}
+- **Agent**: ${task.agent?.name || 'Unassigned'}
+- **Dependencies**: ${
+      task.resourceRequirements?.dependencies?.join(', ') || 'None'
+    }
+- **Expected Output**: ${task.expectedOutput}
+`
+  )
+  .join('')}
+
+## ORCHESTRATION STRATEGY
+${instructions}
+
+## CONTINUOUS ORCHESTRATION ANALYSIS
+Analyze the completed task's impact and determine if workflow adjustments are needed:
+
+### 1. **Impact Assessment**
+- How does this task completion affect the overall project?
+- Are there any dependencies that are now unblocked?
+- What new opportunities or risks have emerged?
+
+### 2. **Gap Analysis**
+- Are there any missing tasks now evident from the completion?
+- Do we need additional validation or follow-up work?
+- Are there integration points that require attention?
+
+### 3. **Workflow Optimization**
+- Can remaining tasks be optimized based on this completion?
+- Should task priorities be adjusted?
+- Are there parallel execution opportunities?
+
+### 4. **Quality Assessment**
+- Does the result quality suggest process improvements?
+- Are there patterns that could improve future tasks?
+- Should testing or validation be enhanced?
+
+### 5. **Resource Reallocation**
+- Should agent assignments be reconsidered?
+- Are there skill gaps that have become apparent?
+- Can workload be better distributed?
+
+## INSTRUCTIONS
+Based on the completed task analysis, provide actionable recommendations for workflow optimization. Focus on:
+- **New Tasks**: Only suggest if critical gaps are identified
+- **Task Modifications**: Adjust existing tasks based on new information
+- **Priority Changes**: Reorder tasks based on dependencies and learnings
+- **Resource Optimization**: Improve agent utilization and skill matching
+
+## RESPONSE FORMAT
+Respond with a JSON object:
+
+\`\`\`json
+{
+  "analysis": {
+    "taskImpact": "How this completion affects the overall project",
+    "dependenciesUnblocked": ["list", "of", "unblocked", "tasks"],
+    "newOpportunities": ["opportunity1", "opportunity2"],
+    "identifiedRisks": ["risk1", "risk2"],
+    "qualityAssessment": "Assessment of result quality and implications"
+  },
+  "recommendations": {
+    "newTasks": [
+      {
+        "reason": "Why this task is needed",
+        "description": "Task description",
+        "priority": "high|medium|low",
+        "suggestedAgent": "agent_name or auto_select",
+        "estimatedTime": "time estimate",
+        "dependencies": ["dependency1", "dependency2"]
+      }
+    ],
+    "taskModifications": [
+      {
+        "taskId": "existing_task_id",
+        "modificationType": "priority|scope|agent|dependencies",
+        "newValue": "updated value",
+        "reasoning": "Why this change is needed"
+      }
+    ],
+    "priorityAdjustments": [
+      {
+        "taskId": "task_id",
+        "newPriority": "high|medium|low",
+        "reasoning": "Why priority should change"
+      }
+    ],
+    "resourceOptimizations": [
+      {
+        "type": "agent_reassignment|workload_balancing|skill_development",
+        "description": "What optimization to apply",
+        "expectedBenefit": "Expected improvement"
+      }
+    ]
+  },
+  "urgency": "immediate|next_iteration|next_review",
+  "confidenceLevel": "high|medium|low",
+  "nextReviewTrigger": "When to reassess these recommendations"
+}
+\`\`\`
+`;
+  }
+}
+
+/**
  * Main prompt template factory
  */
 export class OrchestrationPromptFactory {
@@ -498,4 +733,38 @@ export class OrchestrationPromptFactory {
     WorkflowOptimizationPromptTemplate.build;
   static createPerformanceAnalysisPrompt =
     PerformanceAnalysisPromptTemplate.build;
+  static createTaskCompletionAnalysisPrompt =
+    TaskCompletionAnalysisPromptTemplate.build;
+
+  /**
+   * Create initial orchestration task selection prompt
+   */
+  static createInitialTaskSelectionPrompt(
+    context: OrchestrationContext,
+    projectGoal: string,
+    availableTasks: Task[]
+  ): string {
+    return TaskSelectionPromptTemplate.build(
+      context,
+      projectGoal,
+      availableTasks,
+      'initial'
+    );
+  }
+
+  /**
+   * Create continuous orchestration task selection prompt
+   */
+  static createContinuousTaskSelectionPrompt(
+    context: OrchestrationContext,
+    projectGoal: string,
+    availableTasks: Task[]
+  ): string {
+    return TaskSelectionPromptTemplate.build(
+      context,
+      projectGoal,
+      availableTasks,
+      'continuous'
+    );
+  }
 }

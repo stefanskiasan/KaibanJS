@@ -42,10 +42,12 @@ If you've used tools like Trello, Jira, or ClickUp, you'll be familiar with how 
 
 - 🔨 Create, visualize, and manage AI agents, tasks, tools, and teams
 - 🤖 **Enable intelligent orchestration** with AI-powered task management
-- 🎯 Orchestrate AI workflows seamlessly
+- 🔄 **Continuous orchestration** after each task completion for real-time optimization
+- 🎯 Orchestrate AI workflows seamlessly with granular control
 - 📊 Visualize workflows in real-time
 - 🔍 Track progress as tasks move through different stages
 - 🧠 **Let AI analyze gaps** and select optimal tasks automatically
+- ⚡ **Dynamic workflow adaptation** based on task completion analysis
 - 🤝 Collaborate more effectively on AI projects
 
 ## Try It Out
@@ -153,6 +155,75 @@ team
 
 </details>
 
+<details style="margin-bottom:10px;">
+  <summary><b style="color:black;">4. Intelligent Orchestration (New!)</b></summary>
+
+```js
+// Define agents with specialized skills
+const developer = new Agent({
+  name: 'Senior Developer',
+  role: 'Full-Stack Developer',
+  goal: 'Build robust, scalable applications',
+  llmConfig: { provider: 'openai', model: 'gpt-4o' },
+});
+
+// Create template tasks for the AI to choose from
+const templateTasks = [
+  new Task({
+    description: 'Implement user authentication system',
+    expectedOutput: 'Complete authentication with JWT tokens',
+    agent: developer,
+    adaptable: true,
+    template: true,
+  }),
+  new Task({
+    description: 'Create responsive user interface',
+    expectedOutput: 'Mobile-first responsive UI components',
+    agent: developer,
+    adaptable: true,
+    template: true,
+  }),
+];
+
+// Enable intelligent orchestration with continuous optimization
+const smartTeam = new Team({
+  name: 'AI-Orchestrated Development Team',
+  agents: [developer],
+  tasks: [], // Start empty - AI will select optimal tasks
+  enableOrchestration: true, // Enable AI-powered orchestration
+  continuousOrchestration: true, // Run AI after each task completion
+  availableTemplateTasks: templateTasks,
+  allowTaskGeneration: true,
+  orchestrationStrategy: 'Build a secure, user-friendly web application',
+  mode: 'adaptive',
+  llmConfig: { provider: 'openai', model: 'gpt-4o' },
+});
+
+// Let AI orchestrate the entire workflow
+async function runIntelligentWorkflow() {
+  // AI selects and adapts tasks based on project goal
+  await smartTeam.activateOrchestration(
+    'Create a complete web application with user authentication'
+  );
+
+  // Start workflow with continuous AI optimization
+  const result = await smartTeam.start();
+  console.log('AI-orchestrated workflow completed:', result);
+}
+
+runIntelligentWorkflow();
+```
+
+**Key Features:**
+
+- 🤖 **AI Task Selection**: Let AI choose optimal tasks from your repository
+- 🔄 **Continuous Optimization**: AI analyzes each task completion and adjusts workflow
+- ⚡ **Dynamic Adaptation**: Tasks can be modified, added, or removed based on context
+- 🎯 **Goal-Oriented**: AI works towards your specified project objectives
+- 📊 **Intelligent Prioritization**: AI-driven task prioritization and dependency management
+
+</details>
+
 ## Basic Concepts
 
 **Agents**
@@ -194,7 +265,7 @@ const team = new Team({
     Build a modern web application with excellent UX,
     focusing on performance and maintainability.
   `,
-  mode: 'adaptive'
+  mode: 'adaptive',
 });
 
 // AI analyzes gaps and selects optimal tasks

@@ -5,14 +5,16 @@ This playground demonstrates the new **Intelligent Orchestration** features in K
 ## 🎯 What's New in Orchestration
 
 ### Core Features
+
 - **🤖 AI-Driven Task Management**: Let AI select and adapt tasks based on project goals
-- **📋 Existing Tasks Support**: Build upon foundation work instead of starting fresh  
+- **📋 Existing Tasks Support**: Build upon foundation work instead of starting fresh
 - **🔍 Gap Analysis**: Intelligent detection of missing skills and capabilities
 - **📚 Task Repository**: Dynamic template management with AI selection
 - **⚙️ Adaptive Modes**: Conservative, adaptive, and innovative strategies
 - **📊 Comprehensive Logging**: Full visibility into AI decision-making
 
 ### enableOrchestration Flag
+
 ```javascript
 const team = new Team({
   name: 'My Team',
@@ -22,25 +24,28 @@ const team = new Team({
   availableTasks: taskRepository,
   allowTaskGeneration: true,
   orchestrationStrategy: 'Build a modern web app...',
-  mode: 'adaptive'
+  mode: 'adaptive',
 });
 ```
 
 ## 📁 Playground Files
 
 ### Node.js TypeScript (`nodejs-ts/`)
+
 - **`orchestration-playground.ts`** - Comprehensive TypeScript demonstration
   - 4 detailed demos with extensive logging
   - Shows all orchestration features
   - Production-ready examples
 
-### Node.js JavaScript (`nodejs/`)  
+### Node.js JavaScript (`nodejs/`)
+
 - **`orchestration-demo.js`** - Simplified JavaScript version
   - Quick demo for JavaScript developers
   - Easy to understand examples
   - Essential features covered
 
 ### React Storybook (`react/`)
+
 - **`OrchestrationDemo.stories.js`** - Interactive React component
   - Visual playground in Storybook
   - Real-time logging display
@@ -50,12 +55,14 @@ const team = new Team({
 ## 🚀 Running the Demos
 
 ### Prerequisites
+
 1. **OpenAI API Key** - Add to your `.env.local`:
    ```bash
    OPENAI_API_KEY=your_openai_api_key_here
    ```
 
 ### Node.js TypeScript
+
 ```bash
 cd playground/nodejs-ts
 npm install
@@ -64,6 +71,7 @@ node dist/orchestration-playground.js
 ```
 
 ### Node.js JavaScript
+
 ```bash
 cd playground/nodejs
 npm install
@@ -71,6 +79,7 @@ node orchestration-demo.js
 ```
 
 ### React Storybook
+
 ```bash
 cd playground/react
 npm install
@@ -81,20 +90,23 @@ npm run storybook
 ## 🎭 Demo Scenarios
 
 ### 1. Traditional vs Orchestrated
+
 **Traditional KaibanJS:**
+
 ```javascript
 const team = new Team({
   enableOrchestration: false, // Fixed workflow
-  tasks: predefinedTasks      // No AI involvement
+  tasks: predefinedTasks, // No AI involvement
 });
 ```
 
 **Intelligent Orchestration:**
+
 ```javascript
 const team = new Team({
-  enableOrchestration: true,  // AI-driven workflow ✨
+  enableOrchestration: true, // AI-driven workflow ✨
   availableTasks: repository, // AI selects from these
-  allowTaskGeneration: true   // AI can create new tasks
+  allowTaskGeneration: true, // AI can create new tasks
 });
 
 const result = await team.activateOrchestration(
@@ -104,14 +116,17 @@ const result = await team.activateOrchestration(
 ```
 
 ### 2. Gap Analysis in Action
+
 The AI analyzes existing tasks and identifies gaps:
 
 **Existing Foundation:**
+
 - ✅ Development environment setup
-- ✅ Initial UI wireframes  
+- ✅ Initial UI wireframes
 - ✅ CI/CD pipeline
 
 **AI-Identified Gaps:**
+
 - ❌ User authentication (security gap)
 - ❌ Component library (frontend gap)
 - ❌ API endpoints (backend gap)
@@ -120,6 +135,7 @@ The AI analyzes existing tasks and identifies gaps:
 **Result:** AI selects complementary tasks to fill gaps!
 
 ### 3. Repository Management
+
 ```javascript
 // Add new task templates
 team.addAvailableTasks([newNotificationTask]);
@@ -142,7 +158,7 @@ Watch for these orchestration events:
    Existing Tasks: 3
    Available Tasks: 8
 
-🔍 [14:23:16] Context Analysis Started  
+🔍 [14:23:16] Context Analysis Started
    📊 Active Tasks: 0 | Available Agents: 3
    📈 Progress: 0% | Phase: planning
 
@@ -161,17 +177,20 @@ Watch for these orchestration events:
 ## 🔧 Configuration Options
 
 ### Orchestration Modes
+
 - **`conservative`**: Minimal changes, safe selections
-- **`adaptive`**: Balanced approach, context-aware (default)  
+- **`adaptive`**: Balanced approach, context-aware (default)
 - **`innovative`**: Experimental features, creative solutions
 - **`learning`**: Continuous improvement and optimization
 
 ### Task Prioritization
+
 - **`static`**: Fixed priority order
 - **`dynamic`**: Context-based prioritization
 - **`ai-driven`**: AI determines optimal priorities
 
-### Workload Distribution  
+### Workload Distribution
+
 - **`balanced`**: Equal distribution across agents
 - **`skills-based`**: Match tasks to agent expertise (recommended)
 - **`availability`**: Based on agent availability
@@ -179,15 +198,17 @@ Watch for these orchestration events:
 ## 🎉 Key Benefits
 
 ### For Developers
+
 - **⚡ Faster Setup**: AI handles complex task planning
 - **🧠 Smart Decisions**: Leverage AI expertise for optimal workflows
 - **🔍 Gap Detection**: Never miss critical project components
 - **📈 Scalability**: Easily adapt to changing requirements
 
 ### For Teams
+
 - **🤝 Collaboration**: AI considers all team member skills
 - **⚖️ Load Balancing**: Optimal task distribution
-- **📊 Visibility**: Comprehensive logging and analytics  
+- **📊 Visibility**: Comprehensive logging and analytics
 - **🎯 Goal Alignment**: AI ensures tasks align with project objectives
 
 ## 🐛 Troubleshooting
@@ -195,34 +216,38 @@ Watch for these orchestration events:
 ### Common Issues
 
 **"Orchestration is not enabled"**
+
 ```javascript
 // ❌ Wrong
 const team = new Team({
-  enableOrchestration: false
+  enableOrchestration: false,
 });
 
-// ✅ Correct  
+// ✅ Correct
 const team = new Team({
-  enableOrchestration: true
+  enableOrchestration: true,
 });
 ```
 
 **"No LLM configuration"**
+
 ```bash
 # Add to .env.local
 OPENAI_API_KEY=your_key_here
 ```
 
 **"Empty orchestration result"**
+
 - Check `availableTasks` array is not empty
 - Ensure `allowTaskGeneration: true` if needed
 - Verify agent skills match task requirements
 
 ### Debug Mode
+
 ```javascript
 const team = new Team({
   enableOrchestration: true,
-  logLevel: 'debug' // Enable detailed logging
+  logLevel: 'debug', // Enable detailed logging
 });
 ```
 
@@ -237,6 +262,7 @@ const team = new Team({
 ## 🤝 Contributing
 
 Found an issue or want to enhance the playground?
+
 1. Check existing issues in the KaibanJS repository
 2. Create detailed bug reports with orchestration logs
 3. Suggest new demo scenarios or features

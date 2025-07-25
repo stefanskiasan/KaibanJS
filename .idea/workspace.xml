@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="feat: Implement orchestration module with continuous optimization and task management capabilities">
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/01-basic-orchestration.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/02-conservative-mode.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/03-innovative-mode.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/04-learning-mode.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/05-skills-based-distribution.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/06-ai-driven-prioritization.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/07-task-adaptation.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/08-continuous-optimization.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/09-task-generation.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/10-enterprise-setup.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/11-e-commerce-project.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/12-microservices-architecture.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/13-continuous-orchestration-basic.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/14-continuous-vs-initial-comparison.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/15-runtime-orchestration-control.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/utils/agents.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/utils/tasks.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/CHANGELOG.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ORCHESTRATION_PROPERTIES.md" beforeDir="false" afterPath="$PROJECT_DIR$/ORCHESTRATION_PROPERTIES.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/simple-orchestration-example.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/ORCHESTRATION_PLAYGROUND.md" beforeDir="false" afterPath="$PROJECT_DIR$/playground/ORCHESTRATION_PLAYGROUND.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/nodejs/orchestration-demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/playground/nodejs/orchestration-demo.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/playground/react/src/stories/OrchestrationDemo.stories.js" beforeDir="false" afterPath="$PROJECT_DIR$/playground/react/src/stories/OrchestrationDemo.stories.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/agents/baseAgent.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/agents/baseAgent.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/stores/teamStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/teamStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/stores/teamStore.types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/teamStore.types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/subscribers/orchestrationSubscriber.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/subscribers/orchestrationSubscriber.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/logs/orchestrationLogs.types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/logs/orchestrationLogs.types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/orchestration.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/orchestration.test.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.localhost:5173.executor": "Debug",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/asanstefanski/KundenProjekte/KaibanJS/examples",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "ts.external.directory.path": "/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/typescript/lib"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/examples" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="localhost:5173" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:5173/">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.localhost:5173" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value=" Implement orchestration module with logging and task management capabilities" />
+    <MESSAGE value="feat: Implement orchestration module with continuous optimization and task management capabilities" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Implement orchestration module with continuous optimization and task management capabilities" />
+  </component>
+</project>

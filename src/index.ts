@@ -91,6 +91,8 @@ export interface ITaskParams {
     dependencies?: string[];
   };
   template?: boolean;
+  priority?: 'high' | 'medium' | 'low';
+  qualityGates?: string[];
 }
 
 /**
@@ -107,7 +109,8 @@ export interface ITeamParams {
   memory?: boolean;
   // Orchestration Extensions
   enableOrchestration?: boolean;
-  availableTasks?: Task[];
+  continuousOrchestration?: boolean;
+  availableTemplateTasks?: Task[];
   allowTaskGeneration?: boolean;
   orchestrationStrategy?: string;
   mode?: 'conservative' | 'adaptive' | 'innovative' | 'learning';
@@ -255,6 +258,8 @@ export class Task {
     dependencies?: string[];
   };
   template: boolean;
+  priority: 'high' | 'medium' | 'low';
+  qualityGates: string[];
 
   constructor({
     title = '',
@@ -276,6 +281,8 @@ export class Task {
     mergeCompatible = [],
     resourceRequirements,
     template = false,
+    priority = 'medium',
+    qualityGates = [],
   }: ITaskParams) {
     this.id = id;
     this.title = title; // Title is now optional with a default empty string
@@ -302,6 +309,8 @@ export class Task {
     this.mergeCompatible = mergeCompatible;
     this.resourceRequirements = resourceRequirements;
     this.template = template;
+    this.priority = priority;
+    this.qualityGates = qualityGates;
   }
 }
 
@@ -314,7 +323,8 @@ export class Team {
   store: TeamStore;
   // Orchestration Extensions
   enableOrchestration: boolean;
-  availableTasks: Task[];
+  continuousOrchestration: boolean;
+  availableTemplateTasks: Task[];
   allowTaskGeneration: boolean;
   orchestrationStrategy?: string;
   mode: 'conservative' | 'adaptive' | 'innovative' | 'learning';
@@ -341,7 +351,8 @@ export class Team {
     memory = true,
     // Orchestration Extensions
     enableOrchestration = false,
-    availableTasks = [],
+    continuousOrchestration = false,
+    availableTemplateTasks = [],
     allowTaskGeneration = false,
     orchestrationStrategy,
     mode = 'adaptive',
@@ -354,7 +365,8 @@ export class Team {
   }: ITeamParams) {
     // Initialize Orchestration Properties
     this.enableOrchestration = enableOrchestration;
-    this.availableTasks = availableTasks;
+    this.continuousOrchestration = continuousOrchestration;
+    this.availableTemplateTasks = availableTemplateTasks;
     this.allowTaskGeneration = allowTaskGeneration;
     this.orchestrationStrategy = orchestrationStrategy;
     this.mode = mode;
@@ -364,6 +376,15 @@ export class Team {
     this.adaptationInterval = adaptationInterval;
     this.llmConfig = llmConfig;
     this.llmInstance = llmInstance;
+
+    // Validate LLM configuration when orchestration is enabled
+    if (enableOrchestration && !llmConfig && !llmInstance) {
+      throw new Error(
+        'LLM configuration is required when orchestration is enabled. ' +
+          'Please provide either llmConfig or llmInstance in team configuration. ' +
+          'Fallback strategies are not supported - LLM is mandatory for intelligent orchestration.'
+      );
+    }
 
     this.store = createTeamStore({
       name,
@@ -376,7 +397,8 @@ export class Team {
       memory,
       // Pass orchestration config to store
       enableOrchestration,
-      availableTasks,
+      continuousOrchestration,
+      availableTemplateTasks,
       allowTaskGeneration,
       orchestrationStrategy,
       mode,
@@ -436,9 +458,29 @@ export class Team {
    * This method initiates the process of agents working on tasks.
    *
    * @param inputs - Optional inputs to override or supplement the initial inputs.
+   * @param options - Optional configuration for automatic orchestration.
+   * @param options.projectGoal - The project goal for orchestration. If not provided, uses orchestrationStrategy as fallback.
+   * @param options.preserveExistingTasks - Whether to keep existing tasks when orchestrating (default: true).
    * @returns A promise that resolves when the workflow completes or rejects on error.
    */
-  async start(inputs: Record<string, unknown> = {}): Promise<WorkflowResult> {
+  async start(
+    inputs: Record<string, unknown> = {},
+    options?: {
+      projectGoal?: string;
+      preserveExistingTasks?: boolean;
+    }
+  ): Promise<WorkflowResult> {
+    // Automatically run orchestration if enabled and a project goal is available
+    if (this.enableOrchestration) {
+      const goal = options?.projectGoal || this.orchestrationStrategy;
+      if (goal) {
+        await this.activateOrchestration(
+          goal,
+          options?.preserveExistingTasks ?? true
+        );
+      }
+    }
+
     return new Promise((resolve, reject) => {
       const unsubscribe = this.store.subscribe(
         (state: CombinedStoresState) => state.teamWorkflowStatus,
@@ -734,12 +776,12 @@ export class Team {
   }
 
   /**
-   * Add tasks to the available task repository.
+   * Add tasks to the available template task repository.
    * These tasks can be selected and adapted by the orchestrator.
    *
    * @param tasks - Array of template tasks to add to the repository
    */
-  addAvailableTasks(tasks: Task[]): void {
+  addAvailableTemplateTasks(tasks: Task[]): void {
     if (!this.enableOrchestration) {
       console.warn(
         'Orchestration is not enabled for this team. Task repository operations are ignored.'
@@ -747,8 +789,10 @@ export class Team {
       return;
     }
 
-    this.availableTasks.push(...tasks);
-    this.store.getState().setAvailableTasks(this.availableTasks);
+    this.availableTemplateTasks.push(...tasks);
+    this.store
+      .getState()
+      .setAvailableTemplateTasks(this.availableTemplateTasks);
 
     // Log task repository update
     const log = createOrchestrationLog(
@@ -757,7 +801,7 @@ export class Team {
       {
         operation: 'ADD',
         taskCount: tasks.length,
-        repositorySize: this.availableTasks.length,
+        repositorySize: this.availableTemplateTasks.length,
         affectedTaskIds: tasks.map((task) => task.id),
       }
     );
@@ -765,11 +809,11 @@ export class Team {
   }
 
   /**
-   * Remove a task from the available task repository.
+   * Remove a task from the available template task repository.
    *
    * @param taskId - ID of the task to remove
    */
-  removeAvailableTask(taskId: string): void {
+  removeAvailableTemplateTask(taskId: string): void {
     if (!this.enableOrchestration) {
       console.warn(
         'Orchestration is not enabled for this team. Task repository operations are ignored.'
@@ -777,10 +821,10 @@ export class Team {
       return;
     }
 
-    this.availableTasks = this.availableTasks.filter(
+    this.availableTemplateTasks = this.availableTemplateTasks.filter(
       (task) => task.id !== taskId
     );
-    this.store.getState().removeAvailableTask(taskId);
+    this.store.getState().removeAvailableTemplateTask(taskId);
 
     // Log task repository update
     const log = createOrchestrationLog(
@@ -789,7 +833,7 @@ export class Team {
       {
         operation: 'REMOVE',
         taskCount: 1,
-        repositorySize: this.availableTasks.length,
+        repositorySize: this.availableTemplateTasks.length,
         affectedTaskIds: [taskId],
       }
     );
@@ -830,5 +874,87 @@ export class Team {
 
     this.mode = mode;
     this.store.getState().updateOrchestrationMode(mode);
+  }
+
+  /**
+   * Enable or disable continuous orchestration.
+   * Controls whether orchestration runs only at the beginning or also after each task completion.
+   *
+   * @param enabled - True to enable continuous orchestration, false for initial-only
+   */
+  setContinuousOrchestration(enabled: boolean): void {
+    if (!this.enableOrchestration) {
+      console.warn(
+        'Orchestration is not enabled for this team. Continuous orchestration cannot be configured.'
+      );
+      return;
+    }
+
+    this.continuousOrchestration = enabled;
+    this.store.getState().setContinuousOrchestration(enabled);
+  }
+
+  /**
+   * Get orchestration performance metrics.
+   * Returns detailed metrics about orchestration operations, task statistics, and system health.
+   *
+   * @returns Orchestration metrics summary or null if orchestration is not enabled
+   */
+  async getOrchestrationMetrics(): Promise<{
+    performance: Record<string, any>;
+    taskStatistics: Record<string, any>;
+    systemHealth: Record<string, any>;
+  } | null> {
+    if (!this.enableOrchestration) {
+      console.warn(
+        'Orchestration is not enabled for this team. No metrics available.'
+      );
+      return null;
+    }
+
+    try {
+      const { IntelligentOrchestrator } = await import('./orchestration');
+      const orchestrator = new IntelligentOrchestrator(this);
+      return orchestrator.getOrchestrationMetrics();
+    } catch (error) {
+      console.error('Failed to retrieve orchestration metrics:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Generate task dependency graph visualization data.
+   * Returns nodes, edges, and metrics for visualizing task dependencies.
+   *
+   * @param tasks - Optional array of tasks to visualize (defaults to current team tasks)
+   * @returns Dependency graph data or null if orchestration is not enabled
+   */
+  async generateDependencyGraph(tasks?: Task[]): Promise<{
+    nodes: Array<{
+      id: string;
+      label: string;
+      type: string;
+      status: string;
+      agent?: string;
+    }>;
+    edges: Array<{ from: string; to: string; label?: string }>;
+    metrics: { depth: number; parallelism: number; criticalPath: string[] };
+  } | null> {
+    if (!this.enableOrchestration) {
+      console.warn(
+        'Orchestration is not enabled for this team. Dependency graph not available.'
+      );
+      return null;
+    }
+
+    try {
+      const { IntelligentOrchestrator } = await import('./orchestration');
+      const orchestrator = new IntelligentOrchestrator(this);
+      const tasksToVisualize = tasks || this.getTasks();
+      return orchestrator.generateDependencyGraph(tasksToVisualize);
+    } catch (error) {
+      console.error('Failed to generate dependency graph:', error);
+      return null;
+    }
   }
 }

@@ -198,6 +198,34 @@ export interface PerformanceMonitoringLog extends BaseWorkflowLog {
   };
 }
 
+// Task completion analysis logs
+export interface TaskCompletionAnalysisLog extends BaseWorkflowLog {
+  logType: 'OrchestrationStatusUpdate';
+  orchestrationEvent: 'TASK_COMPLETION_ANALYSIS';
+  metadata: {
+    message: string;
+    completedTaskId: string;
+    completedTaskTitle?: string;
+    totalTasks: number;
+    remainingTasks: number;
+  };
+}
+
+// Orchestration decisions logs
+export interface OrchestrationDecisionsLog extends BaseWorkflowLog {
+  logType: 'OrchestrationStatusUpdate';
+  orchestrationEvent: 'ORCHESTRATION_DECISIONS';
+  metadata: {
+    message: string;
+    decisionsGenerated: number;
+    modifyTasks: number;
+    addTasks: number;
+    removeTasks: number;
+    changePriorities: number;
+    processingTime: number;
+  };
+}
+
 // Union type for all orchestration logs
 export type OrchestrationStatusLog =
   | OrchestrationActivatedLog
@@ -211,7 +239,9 @@ export type OrchestrationStatusLog =
   | OrchestrationCompletedLog
   | OrchestrationErrorLog
   | TaskRepositoryLog
-  | PerformanceMonitoringLog;
+  | PerformanceMonitoringLog
+  | TaskCompletionAnalysisLog
+  | OrchestrationDecisionsLog;
 
 // Orchestration event types for filtering
 export type OrchestrationEventType =
@@ -226,4 +256,40 @@ export type OrchestrationEventType =
   | 'COMPLETED'
   | 'ERROR'
   | 'TASK_REPOSITORY_UPDATE'
-  | 'PERFORMANCE_MONITORING';
+  | 'PERFORMANCE_MONITORING'
+  | 'TASK_COMPLETION_ANALYSIS'
+  | 'ORCHESTRATION_DECISIONS'
+  | 'PERFORMANCE_METRICS_SUMMARY'
+  | 'FALLBACK_TASK_SELECTION'
+  | 'FALLBACK_TASK_ADAPTATION'
+  | 'FALLBACK_TASK_GENERATION'
+  | 'LLM_RECOVERY_SUCCESS'
+  | 'LLM_RECOVERY_FAILED'
+  | 'WORKFLOW_RECOVERY'
+  | 'GENERIC_RECOVERY'
+  | 'EMERGENCY_TASK_CREATED'
+  | 'RECOVERY_SUCCESS'
+  | 'CONTINUOUS_ORCHESTRATION_STARTED'
+  | 'CONTINUOUS_ORCHESTRATION_COMPLETED'
+  | 'CONTINUOUS_ORCHESTRATION_ERROR'
+  | 'TASK_COMPLETION_ANALYSIS_ERROR'
+  | 'RECOMMENDATIONS_APPLIED'
+  | 'RECOMMENDATIONS_APPLICATION_ERROR'
+  | 'CONTINUOUS_TASK_GENERATION'
+  | 'HEALTH_CHECK'
+  | 'CONFIG_VALIDATION'
+  | 'CONTINUOUS_TASK_SELECTION'
+  | 'TASK_SPLIT_RECOMMENDED'
+  | 'TASK_MERGE_RECOMMENDED'
+  | 'ORCHESTRATION_ERROR'
+  | 'GAP_ANALYSIS_COMPLETED'
+  | 'HIGH_RISK_TASKS_IDENTIFIED'
+  | 'RESOURCE_OPTIMIZATION'
+  | 'TASKS_REDISTRIBUTED'
+  | 'TASK_RETRY'
+  | 'TASK_REASSIGNED'
+  | 'TASK_SPLIT_FOR_RECOVERY'
+  | 'FALLBACK_TASK_CREATED'
+  | 'TASK_SKIPPED'
+  | 'LEARNING_INSIGHTS'
+  | 'STRATEGY_ADJUSTED';
