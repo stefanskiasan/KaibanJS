@@ -255,7 +255,9 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
         ? previousLogs[previousLogs.length - 1]
         : null;
     const previousStatus =
-      previousLog?.workflowStatus || WORKFLOW_STATUS_enum.INITIAL;
+      previousLog && 'workflowStatus' in previousLog
+        ? previousLog.workflowStatus
+        : WORKFLOW_STATUS_enum.INITIAL;
 
     switch (status) {
       case WORKFLOW_STATUS_enum.PAUSED:

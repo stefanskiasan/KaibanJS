@@ -29,70 +29,73 @@ const subscribeWorkflowStatusUpdates = (useStore: TeamStore): void => {
       if (newLogs.length > previousLogs.length) {
         const newLog = newLogs[newLogs.length - 1];
         if (newLog.logType === 'WorkflowStatusUpdate') {
-          switch (newLog.workflowStatus) {
-            case WORKFLOW_STATUS_enum.INITIAL:
-              logPrettyWorkflowStatus({
-                status: WORKFLOW_STATUS_enum.INITIAL,
-                message: 'Workflow is being initialized.',
-              });
-              break;
-            case WORKFLOW_STATUS_enum.RUNNING:
-              logPrettyWorkflowStatus({
-                status: WORKFLOW_STATUS_enum.RUNNING,
-                message: 'Workflow is actively processing tasks.',
-              });
-              break;
-            case WORKFLOW_STATUS_enum.STOPPING:
-              logPrettyWorkflowStatus({
-                status: WORKFLOW_STATUS_enum.STOPPING,
-                message: 'Workflow is stopping.',
-              });
-              break;
-            case WORKFLOW_STATUS_enum.STOPPED:
-              logPrettyWorkflowStatus({
-                status: WORKFLOW_STATUS_enum.STOPPED,
-                message: 'Workflow has been stopped.',
-              });
-              break;
-            case WORKFLOW_STATUS_enum.ERRORED:
-              logPrettyWorkflowStatus({
-                status: WORKFLOW_STATUS_enum.ERRORED,
-                message: 'Workflow encountered an error.',
-              });
-              break;
-            case WORKFLOW_STATUS_enum.FINISHED:
-              logPrettyWorkflowStatus({
-                status: WORKFLOW_STATUS_enum.FINISHED,
-                message: 'Workflow has successfully completed all tasks.',
-              });
-              logPrettyWorkflowResult(newLog as WorkflowFinishedLog);
-              break;
-            case WORKFLOW_STATUS_enum.BLOCKED:
-              logPrettyWorkflowStatus({
-                status: WORKFLOW_STATUS_enum.BLOCKED,
-                message:
-                  'Workflow is blocked due to one or more blocked tasks.',
-              });
-              break;
-            case WORKFLOW_STATUS_enum.RESUMED:
-              logPrettyWorkflowStatus({
-                status: WORKFLOW_STATUS_enum.RESUMED,
-                message: 'Workflow has been resumed.',
-              });
-              break;
-            case WORKFLOW_STATUS_enum.PAUSED:
-              logPrettyWorkflowStatus({
-                status: WORKFLOW_STATUS_enum.PAUSED,
-                message: 'Workflow has been paused.',
-              });
-              break;
-            default:
-              console.warn(
-                `Encountered an unexpected workflow status: ${
-                  (newLog as WorkflowLog).workflowStatus
-                }`
-              );
-              break;
+          // Check if this log has workflowStatus property (it should be a WorkflowStatusLog)
+          if ('workflowStatus' in newLog) {
+            switch (newLog.workflowStatus) {
+              case WORKFLOW_STATUS_enum.INITIAL:
+                logPrettyWorkflowStatus({
+                  status: WORKFLOW_STATUS_enum.INITIAL,
+                  message: 'Workflow is being initialized.',
+                });
+                break;
+              case WORKFLOW_STATUS_enum.RUNNING:
+                logPrettyWorkflowStatus({
+                  status: WORKFLOW_STATUS_enum.RUNNING,
+                  message: 'Workflow is actively processing tasks.',
+                });
+                break;
+              case WORKFLOW_STATUS_enum.STOPPING:
+                logPrettyWorkflowStatus({
+                  status: WORKFLOW_STATUS_enum.STOPPING,
+                  message: 'Workflow is stopping.',
+                });
+                break;
+              case WORKFLOW_STATUS_enum.STOPPED:
+                logPrettyWorkflowStatus({
+                  status: WORKFLOW_STATUS_enum.STOPPED,
+                  message: 'Workflow has been stopped.',
+                });
+                break;
+              case WORKFLOW_STATUS_enum.ERRORED:
+                logPrettyWorkflowStatus({
+                  status: WORKFLOW_STATUS_enum.ERRORED,
+                  message: 'Workflow encountered an error.',
+                });
+                break;
+              case WORKFLOW_STATUS_enum.FINISHED:
+                logPrettyWorkflowStatus({
+                  status: WORKFLOW_STATUS_enum.FINISHED,
+                  message: 'Workflow has successfully completed all tasks.',
+                });
+                logPrettyWorkflowResult(newLog as WorkflowFinishedLog);
+                break;
+              case WORKFLOW_STATUS_enum.BLOCKED:
+                logPrettyWorkflowStatus({
+                  status: WORKFLOW_STATUS_enum.BLOCKED,
+                  message:
+                    'Workflow is blocked due to one or more blocked tasks.',
+                });
+                break;
+              case WORKFLOW_STATUS_enum.RESUMED:
+                logPrettyWorkflowStatus({
+                  status: WORKFLOW_STATUS_enum.RESUMED,
+                  message: 'Workflow has been resumed.',
+                });
+                break;
+              case WORKFLOW_STATUS_enum.PAUSED:
+                logPrettyWorkflowStatus({
+                  status: WORKFLOW_STATUS_enum.PAUSED,
+                  message: 'Workflow has been paused.',
+                });
+                break;
+              default:
+                console.warn(
+                  `Encountered an unexpected workflow status: ${
+                    (newLog as any).workflowStatus
+                  }`
+                );
+                break;
+            }
           }
         }
       }

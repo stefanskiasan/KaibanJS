@@ -21,6 +21,10 @@ import { BaseAgent, Env, ReactChampionAgent } from './agents';
 import { subscribeTaskStatusUpdates } from './subscribers/taskSubscriber';
 import { subscribeWorkflowStatusUpdates } from './subscribers/teamSubscriber';
 import {
+  subscribeOrchestrationStatusUpdates,
+  createOrchestrationLog,
+} from './subscribers/orchestrationSubscriber';
+import {
   AGENT_STATUS_enum,
   TASK_STATUS_enum,
   WORKFLOW_STATUS_enum,
@@ -37,7 +41,8 @@ import {
   WorkflowStats,
 } from './types/logs';
 import { BaseTool } from './tools/baseTool';
-import { LangChainChatModel, LLMConfig } from './utils/agents';
+import { LangChainChatModel } from './utils/agents';
+import { LLMConfig } from './agents/baseAgent';
 import { DefaultPrompts } from './utils/prompts';
 import { TaskFeedback, TaskResult, TaskStats } from './stores/taskStore.types';
 import { AgentLoopResult } from './utils/llm.types';
@@ -74,6 +79,18 @@ export interface ITaskParams {
   outputSchema?: ZodSchema | null;
   allowParallelExecution?: boolean;
   referenceId?: string;
+  // Orchestration Extensions
+  adaptable?: boolean;
+  orchestrationRules?: string;
+  dynamicPriority?: boolean;
+  splitStrategy?: 'none' | 'manual' | 'auto';
+  mergeCompatible?: string[];
+  resourceRequirements?: {
+    estimatedTime?: string;
+    skillsRequired?: string[];
+    dependencies?: string[];
+  };
+  template?: boolean;
 }
 
 /**
@@ -88,6 +105,18 @@ export interface ITeamParams {
   env?: Env;
   insights?: string;
   memory?: boolean;
+  // Orchestration Extensions
+  enableOrchestration?: boolean;
+  availableTasks?: Task[];
+  allowTaskGeneration?: boolean;
+  orchestrationStrategy?: string;
+  mode?: 'conservative' | 'adaptive' | 'innovative' | 'learning';
+  maxActiveTasks?: number;
+  taskPrioritization?: 'static' | 'dynamic' | 'ai-driven';
+  workloadDistribution?: 'balanced' | 'skills-based' | 'availability';
+  adaptationInterval?: number;
+  llmConfig?: LLMConfig;
+  llmInstance?: LangChainChatModel;
 }
 
 export class Agent {
@@ -214,6 +243,18 @@ export class Task {
   referenceId?: string;
   inputs?: Record<string, unknown>;
   store?: TeamStore;
+  // Orchestration Extensions
+  adaptable: boolean;
+  orchestrationRules?: string;
+  dynamicPriority: boolean;
+  splitStrategy: 'none' | 'manual' | 'auto';
+  mergeCompatible: string[];
+  resourceRequirements?: {
+    estimatedTime?: string;
+    skillsRequired?: string[];
+    dependencies?: string[];
+  };
+  template: boolean;
 
   constructor({
     title = '',
@@ -227,6 +268,14 @@ export class Task {
     outputSchema = null,
     allowParallelExecution = false,
     referenceId = undefined,
+    // Orchestration Extensions
+    adaptable = false,
+    orchestrationRules,
+    dynamicPriority = false,
+    splitStrategy = 'none',
+    mergeCompatible = [],
+    resourceRequirements,
+    template = false,
   }: ITaskParams) {
     this.id = id;
     this.title = title; // Title is now optional with a default empty string
@@ -245,6 +294,14 @@ export class Task {
     this.expectedOutput = expectedOutput;
     this.allowParallelExecution = allowParallelExecution;
     this.referenceId = referenceId;
+    // Initialize Orchestration Extensions
+    this.adaptable = adaptable;
+    this.orchestrationRules = orchestrationRules;
+    this.dynamicPriority = dynamicPriority;
+    this.splitStrategy = splitStrategy;
+    this.mergeCompatible = mergeCompatible;
+    this.resourceRequirements = resourceRequirements;
+    this.template = template;
   }
 }
 
@@ -255,6 +312,18 @@ export class Task {
  */
 export class Team {
   store: TeamStore;
+  // Orchestration Extensions
+  enableOrchestration: boolean;
+  availableTasks: Task[];
+  allowTaskGeneration: boolean;
+  orchestrationStrategy?: string;
+  mode: 'conservative' | 'adaptive' | 'innovative' | 'learning';
+  maxActiveTasks: number;
+  taskPrioritization: 'static' | 'dynamic' | 'ai-driven';
+  workloadDistribution: 'balanced' | 'skills-based' | 'availability';
+  adaptationInterval: number;
+  llmConfig?: LLMConfig;
+  llmInstance?: LangChainChatModel;
 
   /**
    * Creates a new Team instance.
@@ -270,7 +339,32 @@ export class Team {
     env = {},
     insights = '',
     memory = true,
+    // Orchestration Extensions
+    enableOrchestration = false,
+    availableTasks = [],
+    allowTaskGeneration = false,
+    orchestrationStrategy,
+    mode = 'adaptive',
+    maxActiveTasks = 5,
+    taskPrioritization = 'dynamic',
+    workloadDistribution = 'balanced',
+    adaptationInterval = 300000,
+    llmConfig,
+    llmInstance,
   }: ITeamParams) {
+    // Initialize Orchestration Properties
+    this.enableOrchestration = enableOrchestration;
+    this.availableTasks = availableTasks;
+    this.allowTaskGeneration = allowTaskGeneration;
+    this.orchestrationStrategy = orchestrationStrategy;
+    this.mode = mode;
+    this.maxActiveTasks = maxActiveTasks;
+    this.taskPrioritization = taskPrioritization;
+    this.workloadDistribution = workloadDistribution;
+    this.adaptationInterval = adaptationInterval;
+    this.llmConfig = llmConfig;
+    this.llmInstance = llmInstance;
+
     this.store = createTeamStore({
       name,
       agents: [],
@@ -280,6 +374,18 @@ export class Team {
       logLevel,
       insights,
       memory,
+      // Pass orchestration config to store
+      enableOrchestration,
+      availableTasks,
+      allowTaskGeneration,
+      orchestrationStrategy,
+      mode,
+      maxActiveTasks,
+      taskPrioritization,
+      workloadDistribution,
+      adaptationInterval,
+      llmConfig,
+      llmInstance,
     });
 
     // Add agents and tasks to the store, they will be set with the store automatically
@@ -291,6 +397,11 @@ export class Team {
 
     // Subscribe to WorkflowStatus updates: Used mainly for loggin purposes
     subscribeWorkflowStatusUpdates(this.store);
+
+    // Subscribe to Orchestration updates: Used for orchestration event logging
+    if (this.enableOrchestration) {
+      subscribeOrchestrationStatusUpdates(this.store);
+    }
 
     // Subscribe to Deterministic Execution: Used to execute tasks in a deterministic order
     subscribeDeterministicExecution(this.store);
@@ -575,5 +686,149 @@ export class Team {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Activate intelligent orchestration for this team.
+   * This creates an orchestrator instance and starts autonomous task management.
+   *
+   * @param projectGoal - The overall goal for the orchestrator to optimize towards
+   * @param preserveExistingTasks - Whether to keep existing tasks and build upon them (default: true)
+   * @returns Promise resolving to the orchestrated tasks
+   */
+  async activateOrchestration(
+    projectGoal: string,
+    preserveExistingTasks: boolean = true
+  ): Promise<Task[]> {
+    if (!this.enableOrchestration) {
+      throw new Error(
+        'Orchestration is not enabled for this team. Set enableOrchestration: true in team configuration.'
+      );
+    }
+
+    const { IntelligentOrchestrator } = await import('./orchestration');
+    const orchestrator = new IntelligentOrchestrator(this);
+
+    return orchestrator.orchestrateWorkflow(projectGoal, preserveExistingTasks);
+  }
+
+  /**
+   * Start continuous workflow optimization.
+   * This enables the orchestrator to continuously monitor and optimize the workflow.
+   */
+  async startContinuousOptimization(): Promise<void> {
+    if (!this.enableOrchestration) {
+      throw new Error(
+        'Orchestration is not enabled for this team. Set enableOrchestration: true in team configuration.'
+      );
+    }
+
+    if (!this.llmConfig && !this.llmInstance) {
+      throw new Error('LLM configuration required for continuous optimization');
+    }
+
+    const { IntelligentOrchestrator } = await import('./orchestration');
+    const orchestrator = new IntelligentOrchestrator(this);
+
+    await orchestrator.startContinuousOptimization();
+  }
+
+  /**
+   * Add tasks to the available task repository.
+   * These tasks can be selected and adapted by the orchestrator.
+   *
+   * @param tasks - Array of template tasks to add to the repository
+   */
+  addAvailableTasks(tasks: Task[]): void {
+    if (!this.enableOrchestration) {
+      console.warn(
+        'Orchestration is not enabled for this team. Task repository operations are ignored.'
+      );
+      return;
+    }
+
+    this.availableTasks.push(...tasks);
+    this.store.getState().setAvailableTasks(this.availableTasks);
+
+    // Log task repository update
+    const log = createOrchestrationLog(
+      'TASK_REPOSITORY_UPDATE',
+      'Tasks added to repository',
+      {
+        operation: 'ADD',
+        taskCount: tasks.length,
+        repositorySize: this.availableTasks.length,
+        affectedTaskIds: tasks.map((task) => task.id),
+      }
+    );
+    this.store.getState().addWorkflowLog(log);
+  }
+
+  /**
+   * Remove a task from the available task repository.
+   *
+   * @param taskId - ID of the task to remove
+   */
+  removeAvailableTask(taskId: string): void {
+    if (!this.enableOrchestration) {
+      console.warn(
+        'Orchestration is not enabled for this team. Task repository operations are ignored.'
+      );
+      return;
+    }
+
+    this.availableTasks = this.availableTasks.filter(
+      (task) => task.id !== taskId
+    );
+    this.store.getState().removeAvailableTask(taskId);
+
+    // Log task repository update
+    const log = createOrchestrationLog(
+      'TASK_REPOSITORY_UPDATE',
+      'Task removed from repository',
+      {
+        operation: 'REMOVE',
+        taskCount: 1,
+        repositorySize: this.availableTasks.length,
+        affectedTaskIds: [taskId],
+      }
+    );
+    this.store.getState().addWorkflowLog(log);
+  }
+
+  /**
+   * Update the orchestration strategy.
+   *
+   * @param strategy - New orchestration strategy instructions
+   */
+  updateOrchestrationStrategy(strategy: string): void {
+    if (!this.enableOrchestration) {
+      console.warn(
+        'Orchestration is not enabled for this team. Strategy updates are ignored.'
+      );
+      return;
+    }
+
+    this.orchestrationStrategy = strategy;
+    this.store.getState().updateOrchestrationStrategy(strategy);
+  }
+
+  /**
+   * Update the orchestration mode.
+   *
+   * @param mode - New orchestration mode
+   */
+  updateOrchestrationMode(
+    mode: 'conservative' | 'adaptive' | 'innovative' | 'learning'
+  ): void {
+    if (!this.enableOrchestration) {
+      console.warn(
+        'Orchestration is not enabled for this team. Mode updates are ignored.'
+      );
+      return;
+    }
+
+    this.mode = mode;
+    this.store.getState().updateOrchestrationMode(mode);
   }
 }

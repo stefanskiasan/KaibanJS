@@ -1,0 +1,1034 @@
+# KaibanJS Extension Concept: Intelligent Task Orchestration with Autonomous Decision-Making
+
+## Executive Summary
+
+This document presents a comprehensive concept for extending KaibanJS with intelligent task orchestration capabilities. The proposed enhancement introduces autonomous decision-making through an intelligent orchestrator that can dynamically select, adapt, and generate tasks from a repository, while maintaining granular control through task-level permissions and LLM-powered reasoning.
+
+The extension transforms KaibanJS from a static framework for predefined workflows into an adaptive platform for intelligent multi-agent systems that can respond to changing circumstances and continuously optimize their performance.
+
+## Core Innovation: The Missing Capability
+
+Current KaibanJS implementations require developers to predefine all tasks and their execution order. This limitation restricts the framework's ability to adapt to dynamic project requirements and emergent challenges. The proposed extension addresses this gap by introducing an intelligent orchestrator that can:
+
+- Autonomously select appropriate tasks from a repository based on current context
+- Dynamically adapt existing tasks to changing circumstances
+- Generate entirely new tasks when gaps are identified in the workflow
+- Optimize task sequencing and resource allocation in real-time
+- Leverage Kanban workflow management as an integral part of decision-making
+
+## Proposed Extension Architecture
+
+### New Team-Level Attributes
+
+The extension introduces several new attributes to the Team class that enable intelligent orchestration while maintaining compatibility with the existing KaibanJS API:
+
+#### taskRepository
+A fundamental addition that provides the orchestrator with a curated collection of Task instances from which to choose. This repository serves as the orchestrator's toolkit, containing both standard operational tasks and specialized Kanban workflow management tasks.
+
+The repository is structured as an array of Task instances: `taskRepository: [new Task(), new Task(), ...]`. Each task in the repository can be marked as a template, allowing the orchestrator to use it as a foundation for generating customized variations based on current project needs.
+
+#### createNewTasksByOrchestrator
+A boolean flag that grants the orchestrator permission to generate entirely new tasks when existing repository options are insufficient. When enabled, the orchestrator can analyze project gaps and create custom tasks to address specific challenges or opportunities that weren't anticipated during initial planning.
+
+This capability is particularly valuable in dynamic development environments where requirements evolve rapidly, and the system needs to adapt by creating new workflows rather than simply selecting from predefined options.
+
+#### orchestratorInstructions
+A text-based prompt that provides strategic guidance to the orchestrator's decision-making process. Unlike complex configuration objects, this attribute uses natural language instructions that can be easily understood and modified by team leads and project managers.
+
+The instructions can cover various aspects of orchestration strategy, including priority frameworks, quality thresholds, resource optimization guidelines, and adaptation triggers. This approach makes the system accessible to non-technical stakeholders while providing sophisticated control over orchestrator behavior.
+
+#### orchestratorMode
+A string value that defines the orchestrator's operational approach. Supported modes include 'conservative' for risk-averse environments, 'adaptive' for balanced optimization, 'innovative' for experimental approaches, and 'learning' for systems that evolve their strategies over time.
+
+#### LLM Integration for Teams
+Following the established KaibanJS pattern, teams now support LLM configuration through either `llmConfig` objects or `llmInstance` properties. This enables the orchestrator to leverage large language models for complex reasoning, natural language processing of instructions, and contextual decision-making that goes far beyond rule-based systems.
+
+### Enhanced Task-Level Attributes
+
+The extension also introduces task-level attributes that provide granular control over orchestrator behavior:
+
+#### allowUpdateTaskByOrchestrator
+A boolean attribute that explicitly controls whether the orchestrator is permitted to modify this specific task. This granular permission system ensures that critical tasks (such as security audits or compliance checks) remain protected from automatic modifications while allowing flexible tasks to be fully adaptive.
+
+When set to `false`, the task becomes immutable from the orchestrator's perspective, ensuring that critical processes execute exactly as defined. When set to `true`, the orchestrator gains full flexibility to adapt the task based on current circumstances and strategic objectives.
+
+#### orchestratorInstructions (Task-Level)
+Task-specific instructions that override team-level guidance for this particular task. These instructions provide contextual guidance for how the orchestrator should handle this specific task, including adaptation strategies, quality criteria, and special considerations.
+
+This dual-level instruction system (team and task) enables sophisticated orchestration strategies where general principles guide overall behavior while specific tasks receive tailored treatment based on their unique requirements and constraints.
+
+## Implementation Details and Code Examples
+
+### Enhanced Team Configuration Based on KaibanJS API
+
+```javascript
+import { Agent, Task, Team } from 'kaibanjs';
+
+// Define agents with their own LLM configurations
+const developer = new Agent({
+  name: 'Developer',
+  role: 'Software Engineer',
+  goal: 'Implement features efficiently',
+  background: 'Full-stack development',
+  tools: [codeAnalysisTool, deploymentTool],
+  llmConfig: {
+    provider: 'openai',
+    model: 'gpt-4'
+  }
+});
+
+const tester = new Agent({
+  name: 'Tester',
+  role: 'Quality Assurance',
+  goal: 'Ensure code quality and functionality',
+  background: 'Testing and validation',
+  tools: [testingTool, bugTrackingTool],
+  llmConfig: {
+    provider: 'anthropic',
+    model: 'claude-3-sonnet'
+  }
+});
+
+const projectManager = new Agent({
+  name: 'ProjectManager',
+  role: 'Coordination and Planning',
+  goal: 'Optimize team workflow and delivery',
+  background: 'Project management',
+  tools: [planningTool, communicationTool],
+  kanbanTools: ['block_task', 'unblock_task', 'move_task', 'create_subtask'],
+  llmConfig: {
+    provider: 'openai',
+    model: 'gpt-4'
+  }
+});
+
+// Task Repository - Array of Task instances
+const taskRepository = [
+  // Standard Development Tasks
+  new Task({
+    description: 'Review code changes for quality and standards',
+    agent: developer, // or 'auto_select' for dynamic assignment
+    category: 'quality_assurance',
+    complexity: 'medium',
+    estimatedTime: '30-60 minutes',
+    requiredSkills: ['code_analysis', 'best_practices'],
+    dependencies: ['code_completion'],
+    template: true, // Marked as template for orchestrator
+    allowUpdateTaskByOrchestrator: true,
+    orchestratorInstructions: `
+      ADAPTIVE CODE REVIEW TASK
+
+      This task can be flexibly adapted based on:
+      - Code complexity and scope of changes
+      - Available reviewer expertise and workload
+      - Project timeline and quality requirements
+
+      Adaptation options:
+      - Adjust review depth based on code criticality
+      - Assign to most suitable reviewer based on expertise
+      - Split into multiple reviews for large changesets
+      - Prioritize based on deployment timeline
+
+      Quality criteria: Security compliance, performance impact, maintainability
+      Never skip: Security-related changes, API modifications, database schema changes
+    `,
+    criteria: {
+      codeComplexity: 'variable',
+      securityRelevant: 'boolean',
+      performanceCritical: 'boolean'
+    }
+  }),
+
+  new Task({
+    description: 'Implement new feature based on requirements',
+    agent: developer,
+    category: 'development',
+    complexity: 'high',
+    estimatedTime: '2-8 hours',
+    requiredSkills: ['programming', 'architecture'],
+    dependencies: ['requirements_analysis'],
+    template: true,
+    allowUpdateTaskByOrchestrator: true,
+    orchestratorInstructions: `
+      FLEXIBLE FEATURE IMPLEMENTATION
+
+      Adaptation strategies:
+      - Break down into smaller components for parallel development
+      - Adjust scope based on timeline constraints
+      - Optimize for current technology stack and team expertise
+      - Consider integration points and dependencies
+
+      Quality gates: Unit tests required, code review mandatory, documentation updated
+      Performance targets: No degradation of existing functionality
+    `,
+    criteria: {
+      featureComplexity: 'variable',
+      technologyStack: 'variable',
+      integrationPoints: 'array'
+    }
+  }),
+
+  // Critical Security Task - No orchestrator updates allowed
+  new Task({
+    description: 'Perform comprehensive security audit of authentication system',
+    agent: securitySpecialist,
+    category: 'security',
+    complexity: 'high',
+    estimatedTime: '4-6 hours',
+    requiredSkills: ['security_audit', 'authentication_systems'],
+    template: true,
+    allowUpdateTaskByOrchestrator: false, // Critical task - no modifications allowed
+    orchestratorInstructions: `
+      CRITICAL SECURITY TASK - NO MODIFICATIONS ALLOWED
+
+      This task must be executed exactly as defined. The orchestrator may:
+      - NOT change the description
+      - NOT change the assigned agent
+      - NOT reduce the priority
+      - NOT split or merge the task
+
+      On blocking: Escalate immediately to security team
+      On resource shortage: Defer other tasks but execute this one
+      Quality criteria: 100% compliance with security standards required
+    `
+  }),
+
+  // Kanban Workflow Tasks - As Task instances
+  new Task({
+    description: 'Block a task due to dependencies or issues',
+    agent: projectManager,
+    category: 'workflow_management',
+    complexity: 'low',
+    estimatedTime: '5-10 minutes',
+    requiredSkills: ['workflow_management'],
+    kanbanSpecific: true,
+    workflowImpact: 'blocking',
+    template: true,
+    allowUpdateTaskByOrchestrator: true,
+    orchestratorInstructions: `
+      INTELLIGENT TASK BLOCKING
+
+      Use this task when:
+      - Dependencies are not met and cannot be resolved quickly
+      - Resource conflicts prevent task execution
+      - Quality gates are not satisfied
+
+      Always document:
+      - Specific blocking reason
+      - Expected resolution timeline
+      - Alternative actions or workarounds
+      - Notification requirements
+    `,
+    criteria: {
+      blockingReason: 'variable',
+      expectedResolution: 'timeframe',
+      alternativeActions: 'array'
+    }
+  }),
+
+  new Task({
+    description: 'Create subtasks for complex feature implementation',
+    agent: projectManager,
+    category: 'workflow_management',
+    complexity: 'medium',
+    estimatedTime: '15-30 minutes',
+    requiredSkills: ['task_decomposition', 'project_planning'],
+    kanbanSpecific: true,
+    workflowImpact: 'structuring',
+    template: true,
+    allowUpdateTaskByOrchestrator: true,
+    orchestratorInstructions: `
+      INTELLIGENT TASK DECOMPOSITION
+
+      Goal: Break down complex tasks into manageable, parallelizable subtasks
+
+      Decomposition strategies:
+      - By technical components (Frontend, Backend, Database)
+      - By user stories or features
+      - By dependencies and critical path
+      - By available skill sets in the team
+
+      Optimization criteria:
+      - Maximize parallelization
+      - Minimize dependencies between subtasks
+      - Balance workload between agents
+      - Consider learning opportunities for junior developers
+
+      Optimal subtask size: 2-8 hours per subtask
+      Dependency management: Document all inter-task dependencies
+    `
+  })
+];
+
+// Enhanced Team configuration with new attributes
+const intelligentTeam = new Team({
+  name: 'Adaptive Development Team',
+  agents: [developer, tester, projectManager],
+  tasks: [], // Will be populated at runtime by orchestrator
+
+  // LLM configuration for the orchestrator
+  llmConfig: {
+    provider: 'openai',
+    model: 'gpt-4-turbo',
+    temperature: 0.3, // Lower temperature for more consistent decisions
+    maxTokens: 4000,
+    timeout: 30000
+  },
+
+  // New attributes for intelligent orchestration
+  taskRepository: taskRepository,
+  createNewTasksByOrchestrator: true,
+
+  orchestratorInstructions: `
+    You are an intelligent orchestrator for a development team. Your task is to select tasks from the repository, adapt them, and create new ones as needed to optimally achieve team goals.
+
+    PRIORITIES:
+    1. Maximize team productivity
+    2. Ensure high code quality (minimum 85%)
+    3. Meet project deadlines
+    4. Optimize resource utilization
+
+    WORKFLOW MANAGEMENT:
+    - Keep maximum 3 tasks in progress simultaneously
+    - Proactively identify blocked tasks and resolve within 2 hours
+    - Use Kanban tools (block_task, unblock_task, move_task, create_subtask) strategically
+    - Automatically break down complex tasks into subtasks when necessary
+
+    TASK SELECTION:
+    - Select tasks based on: Priority (30%), Dependencies (25%), Resource availability (20%), Skill match (15%), Learning value (10%)
+    - Prefer tasks that don't block critical paths
+    - Consider current agent capabilities and workload
+
+    QUALITY ASSURANCE:
+    - All code changes must be reviewed
+    - Test coverage must be at least 80%
+    - Performance metrics must stay within SLA bounds
+
+    ADAPTABILITY:
+    - On performance decline: analyze and adjust strategy
+    - On new requirements: replan and optimize
+    - On resource changes: redistribute workload
+    - On quality issues: increase review rigor
+
+    Be proactive, learning-capable, and focus on continuous workflow improvement.
+  `,
+
+  orchestratorMode: 'adaptive'
+});
+
+export default intelligentTeam;
+```
+
+### Intelligent Orchestrator Implementation with LLM Integration
+
+```javascript
+import { SystemMessage, HumanMessage } from "langchain/schema";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { ChatAnthropic } from "langchain/chat_models/anthropic";
+
+class EnhancedIntelligentOrchestrator {
+  constructor(team) {
+    this.team = team;
+    this.taskRepository = team.taskRepository;
+    this.instructions = team.orchestratorInstructions;
+    this.mode = team.orchestratorMode;
+    this.llm = this.initializeLLM(team);
+    this.workflowState = new WorkflowStateManager();
+    this.performanceMetrics = new PerformanceTracker();
+    this.conversationHistory = [];
+  }
+
+  initializeLLM(team) {
+    if (team.llmInstance) {
+      return team.llmInstance;
+    }
+
+    if (team.llmConfig) {
+      return this.createLLMFromConfig(team.llmConfig);
+    }
+
+    throw new Error('Team must have either llmConfig or llmInstance for orchestrator functionality');
+  }
+
+  createLLMFromConfig(config) {
+    switch (config.provider) {
+      case 'openai':
+        return new ChatOpenAI({
+          modelName: config.model || 'gpt-4',
+          temperature: config.temperature || 0.3,
+          maxTokens: config.maxTokens || 4000,
+          timeout: config.timeout || 30000
+        });
+
+      case 'anthropic':
+        return new ChatAnthropic({
+          modelName: config.model || 'claude-3-sonnet',
+          temperature: config.temperature || 0.3,
+          maxTokens: config.maxTokens || 4000
+        });
+
+      default:
+        throw new Error(`Unsupported LLM provider: ${config.provider}`);
+    }
+  }
+
+  async orchestrateWorkflow(projectGoal) {
+    // Analyze current state
+    const context = await this.analyzeCurrentContext();
+
+    // Select optimal tasks from repository using LLM
+    const selectedTasks = await this.selectOptimalTasksWithLLM(context, projectGoal);
+
+    // Generate new tasks if necessary
+    const generatedTasks = await this.generateAdditionalTasksWithLLM(context, selectedTasks);
+
+    // Adapt tasks to current circumstances
+    const adaptedTasks = await this.adaptTasksToContextWithLLM([...selectedTasks, ...generatedTasks]);
+
+    // Integrate Kanban management
+    const finalTasks = await this.integrateKanbanManagement(adaptedTasks);
+
+    // Assign tasks to team
+    this.team.tasks = finalTasks;
+
+    return finalTasks;
+  }
+
+  async selectOptimalTasksWithLLM(context, projectGoal) {
+    const availableTasks = this.taskRepository.filter(task => task.template);
+
+    const prompt = this.buildTaskSelectionPrompt(context, projectGoal, availableTasks);
+
+    try {
+      const response = await this.llm.call([
+        new SystemMessage(this.team.orchestratorInstructions),
+        new HumanMessage(prompt)
+      ]);
+
+      const selection = this.parseTaskSelectionResponse(response.content, availableTasks);
+
+      // Log decision for learning
+      this.conversationHistory.push({
+        timestamp: new Date(),
+        type: 'task_selection',
+        context: context,
+        prompt: prompt,
+        response: response.content,
+        selection: selection
+      });
+
+      return selection;
+
+    } catch (error) {
+      console.error('LLM task selection error:', error);
+      return this.fallbackTaskSelection(context, availableTasks);
+    }
+  }
+
+  buildTaskSelectionPrompt(context, projectGoal, availableTasks) {
+    return `
+PROJECT GOAL: ${projectGoal}
+
+CURRENT CONTEXT:
+- Active tasks: ${context.activeTasks.length}
+- Available agents: ${context.availableAgents.map(a => a.name).join(', ')}
+- Project progress: ${context.projectProgress}%
+- Current blockers: ${context.blockedTasks.length}
+- Quality metrics: Code coverage ${context.codeCoverage}%, Performance ${context.performanceScore}
+
+AVAILABLE TASKS IN REPOSITORY:
+${availableTasks.map((task, index) => `
+${index + 1}. ${task.description}
+   - Category: ${task.category}
+   - Complexity: ${task.complexity}
+   - Estimated time: ${task.estimatedTime}
+   - Required skills: ${task.requiredSkills.join(', ')}
+   - Can be modified: ${task.allowUpdateTaskByOrchestrator}
+`).join('\n')}
+
+TASK SELECTION REQUEST:
+Based on the current context and project goal, which tasks from the repository should be selected and in what order? Consider dependencies, resource availability, and strategic priorities.
+
+Respond in the following JSON format:
+{
+  "selectedTasks": [
+    {
+      "taskIndex": <index_in_repository>,
+      "priority": "<high|medium|low>",
+      "reasoning": "<why this task was selected>",
+      "suggestedAgent": "<agent_name_or_auto_select>",
+      "adaptations": "<suggested modifications if allowed>"
+    }
+  ],
+  "overallStrategy": "<explanation of the selection strategy>",
+  "riskAssessment": "<potential risks and mitigation strategies>"
+}
+    `;
+  }
+
+  async generateAdditionalTasksWithLLM(context, selectedTasks) {
+    if (!this.team.createNewTasksByOrchestrator) return [];
+
+    // Identify gaps in task coverage
+    const gaps = await this.identifyTaskGapsWithLLM(context, selectedTasks);
+
+    const generatedTasks = [];
+
+    for (const gap of gaps) {
+      const newTask = await this.generateNewTaskWithLLM(gap, context);
+      if (newTask) {
+        generatedTasks.push(newTask);
+      }
+    }
+
+    return generatedTasks;
+  }
+
+  async generateNewTaskWithLLM(gap, context) {
+    const prompt = `
+TASK GENERATION REQUEST:
+
+IDENTIFIED GAP:
+- Description: ${gap.description}
+- Category: ${gap.category}
+- Estimated complexity: ${gap.estimatedComplexity}
+- Required skills: ${gap.requirements.join(', ')}
+- Dependencies: ${gap.dependencies.join(', ')}
+
+CURRENT TEAM CONTEXT:
+- Available agents: ${context.availableAgents.map(a => `${a.name} (${a.role})`).join(', ')}
+- Current workload: ${context.workload}
+- Project phase: ${context.projectPhase}
+
+SIMILAR TASKS IN REPOSITORY:
+${context.similarTasks.map(task => `- ${task.description} (${task.category})`).join('\n')}
+
+Generate a new task that fills this gap. Respond in the following JSON format:
+{
+  "description": "<detailed task description>",
+  "agent": "<optimally assigned agent or 'auto_select'>",
+  "category": "<task category>",
+  "complexity": "<low|medium|high>",
+  "estimatedTime": "<time estimate>",
+  "requiredSkills": ["<skill1>", "<skill2>"],
+  "dependencies": ["<dependency1>", "<dependency2>"],
+  "priority": "<high|medium|low>",
+  "acceptanceCriteria": ["<criterion1>", "<criterion2>"],
+  "allowUpdateTaskByOrchestrator": <true|false>,
+  "orchestratorInstructions": "<specific instructions for this task>"
+}
+    `;
+
+    try {
+      const response = await this.llm.call([
+        new SystemMessage(this.team.orchestratorInstructions),
+        new HumanMessage(prompt)
+      ]);
+
+      const taskData = this.parseTaskGenerationResponse(response.content);
+
+      return new Task({
+        description: taskData.description,
+        agent: taskData.agent === 'auto_select' ? 'auto_select' : this.findAgentByName(taskData.agent),
+        category: taskData.category,
+        complexity: taskData.complexity,
+        estimatedTime: taskData.estimatedTime,
+        requiredSkills: taskData.requiredSkills,
+        dependencies: taskData.dependencies,
+        priority: taskData.priority,
+        acceptanceCriteria: taskData.acceptanceCriteria,
+        allowUpdateTaskByOrchestrator: taskData.allowUpdateTaskByOrchestrator,
+        orchestratorInstructions: taskData.orchestratorInstructions,
+        generated: true,
+        generatedAt: new Date(),
+        generatedBy: 'orchestrator_llm',
+        sourceGap: gap
+      });
+
+    } catch (error) {
+      console.error('LLM task generation error:', error);
+      return this.generateTaskWithFallback(gap, context);
+    }
+  }
+
+  async evaluateTaskModificationPermissions(task) {
+    // Check task-level permission
+    if (task.allowUpdateTaskByOrchestrator === false) {
+      return {
+        canModify: false,
+        reason: 'Task explicitly prohibits orchestrator modifications',
+        allowedActions: ['scheduling', 'resource_coordination', 'monitoring']
+      };
+    }
+
+    return {
+      canModify: true,
+      reason: 'Full modification permissions granted',
+      allowedActions: ['modify', 'split', 'merge', 'reassign', 'reprioritize']
+    };
+  }
+
+  async adaptTaskWithLLMInstructions(task, context) {
+    const permissions = await this.evaluateTaskModificationPermissions(task);
+
+    if (!permissions.canModify) {
+      // Only perform allowed actions
+      return this.performLimitedTaskActions(task, permissions.allowedActions, context);
+    }
+
+    // Combine team and task-level instructions
+    const combinedInstructions = this.combineInstructions(
+      this.team.orchestratorInstructions,
+      task.orchestratorInstructions
+    );
+
+    // Perform full task adaptation with LLM
+    return this.performFullTaskAdaptationWithLLM(task, combinedInstructions, context);
+  }
+
+  async performFullTaskAdaptationWithLLM(task, instructions, context) {
+    if (!task.allowUpdateTaskByOrchestrator) {
+      return task; // No changes allowed
+    }
+
+    const prompt = `
+TASK ADAPTATION REQUEST:
+
+CURRENT TASK:
+- Description: ${task.description}
+- Agent: ${task.agent?.name || 'auto_select'}
+- Category: ${task.category}
+- Complexity: ${task.complexity}
+- Estimated time: ${task.estimatedTime}
+- Current instructions: ${task.orchestratorInstructions || 'No specific instructions'}
+
+CONTEXT CHANGES:
+- New priorities: ${context.newPriorities?.join(', ') || 'None'}
+- Resource availability: ${context.resourceAvailability}
+- Time constraints: ${context.timeConstraints}
+- Quality requirements: ${context.qualityRequirements}
+
+COMBINED INSTRUCTIONS:
+${instructions}
+
+Adapt the task to the new circumstances. Respond in the following JSON format:
+{
+  "description": "<adapted description>",
+  "agent": "<optimally assigned agent or 'auto_select'>",
+  "priority": "<high|medium|low>",
+  "estimatedTime": "<adjusted time estimate>",
+  "orchestratorInstructions": "<updated specific instructions>",
+  "adaptationReason": "<justification for the adaptations>",
+  "riskMitigation": "<measures to minimize risks>"
+}
+    `;
+
+    try {
+      const response = await this.llm.call([
+        new SystemMessage(instructions),
+        new HumanMessage(prompt)
+      ]);
+
+      const adaptationData = this.parseTaskAdaptationResponse(response.content);
+
+      // Create adapted task
+      const adaptedTask = { ...task };
+      adaptedTask.description = adaptationData.description;
+      adaptedTask.agent = adaptationData.agent === 'auto_select' ? 'auto_select' : this.findAgentByName(adaptationData.agent);
+      adaptedTask.priority = adaptationData.priority;
+      adaptedTask.estimatedTime = adaptationData.estimatedTime;
+      adaptedTask.orchestratorInstructions = adaptationData.orchestratorInstructions;
+      adaptedTask.adaptationHistory = adaptedTask.adaptationHistory || [];
+      adaptedTask.adaptationHistory.push({
+        timestamp: new Date(),
+        reason: adaptationData.adaptationReason,
+        changes: adaptationData,
+        context: context
+      });
+
+      return adaptedTask;
+
+    } catch (error) {
+      console.error('LLM task adaptation error:', error);
+      return task; // Return original task on errors
+    }
+  }
+
+  combineInstructions(teamInstructions, taskInstructions) {
+    if (!taskInstructions) {
+      return teamInstructions;
+    }
+
+    return `
+TEAM-LEVEL INSTRUCTIONS:
+${teamInstructions}
+
+TASK-SPECIFIC INSTRUCTIONS (take precedence):
+${taskInstructions}
+
+CONFLICT RESOLUTION: Task-specific instructions override team instructions in case of conflicts.
+    `;
+  }
+
+  parseTaskSelectionResponse(response, availableTasks) {
+    try {
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return parsed.selectedTasks.map(selection => {
+          const task = availableTasks[selection.taskIndex];
+          return {
+            ...task,
+            priority: selection.priority,
+            suggestedAgent: selection.suggestedAgent,
+            selectionReasoning: selection.reasoning,
+            suggestedAdaptations: selection.adaptations
+          };
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to parse LLM task selection response:', error);
+    }
+
+    // Fallback: Select first few tasks
+    return availableTasks.slice(0, 3);
+  }
+
+  parseTaskGenerationResponse(response) {
+    try {
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+    } catch (error) {
+      console.warn('Failed to parse LLM task generation response:', error);
+    }
+
+    // Fallback with basic structure
+    return {
+      description: 'Generated task based on identified gap',
+      agent: 'auto_select',
+      category: 'general',
+      complexity: 'medium',
+      estimatedTime: '2-4 hours',
+      requiredSkills: ['general'],
+      dependencies: [],
+      priority: 'medium',
+      acceptanceCriteria: ['Task completed successfully'],
+      allowUpdateTaskByOrchestrator: true,
+      orchestratorInstructions: 'Standard task execution guidelines apply'
+    };
+  }
+
+  parseTaskAdaptationResponse(response) {
+    try {
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+    } catch (error) {
+      console.warn('Failed to parse LLM task adaptation response:', error);
+    }
+
+    // Fallback: minimal changes
+    return {
+      description: 'Task adapted for current context',
+      agent: 'auto_select',
+      priority: 'medium',
+      estimatedTime: '2-4 hours',
+      orchestratorInstructions: 'Adapted task instructions',
+      adaptationReason: 'Context-based adaptation',
+      riskMitigation: 'Standard risk mitigation measures'
+    };
+  }
+
+  findAgentByName(agentName) {
+    return this.team.agents.find(agent => agent.name === agentName) || this.team.agents[0];
+  }
+
+  async startContinuousOptimization() {
+    // Implement continuous monitoring and optimization
+    setInterval(async () => {
+      const currentState = await this.analyzeCurrentContext();
+      const optimizations = await this.identifyOptimizationOpportunities(currentState);
+
+      if (optimizations.length > 0) {
+        await this.applyOptimizations(optimizations);
+      }
+    }, 300000); // Check every 5 minutes
+  }
+}
+```
+
+## LLM Provider Integration for Teams
+
+### Necessity of Team-Level LLM Provider
+
+Since the intelligent orchestrator requires a Large Language Model for its decision-making processes, the Team object must be configured with an LLM provider analogous to Agent objects. This extension follows the established KaibanJS pattern and ensures consistency in API design.
+
+The orchestrator needs LLM capabilities for various complex tasks: analyzing task dependencies, interpreting natural language instructions, dynamically generating new tasks based on project goals, intelligent agent assignment based on skills and workload, and continuous optimization of workflow strategies.
+
+### LLM Provider Options for Teams
+
+#### Built-in Provider Configuration
+
+Teams can utilize the same built-in providers as Agents, with specific optimizations for orchestrator tasks:
+
+```javascript
+// OpenAI for strategic planning
+const strategicTeam = new Team({
+  name: 'Strategic Planning Team',
+  llmConfig: {
+    provider: 'openai',
+    model: 'gpt-4-turbo',
+    temperature: 0.2, // Low for consistent strategies
+    maxTokens: 6000,
+    presencePenalty: 0.1,
+    frequencyPenalty: 0.1
+  },
+  // ... additional team configuration
+});
+
+// Anthropic Claude for complex reasoning tasks
+const reasoningTeam = new Team({
+  name: 'Complex Analysis Team',
+  llmConfig: {
+    provider: 'anthropic',
+    model: 'claude-3-opus',
+    temperature: 0.1, // Very low for precise analysis
+    maxTokens: 8000
+  },
+  // ... additional team configuration
+});
+
+// Google Gemini for multimodal orchestration
+const multimodalTeam = new Team({
+  name: 'Multimodal Content Team',
+  llmConfig: {
+    provider: 'google',
+    model: 'gemini-pro',
+    temperature: 0.4,
+    maxTokens: 4000
+  },
+  // ... additional team configuration
+});
+```
+
+#### Custom LLM Instance Integration
+
+For specialized use cases, teams can also use custom LLM instances:
+
+```javascript
+import { ChatOllama } from "langchain/chat_models/ollama";
+import { AzureChatOpenAI } from "langchain/chat_models/azure_openai";
+
+// Local Ollama model for privacy-critical environments
+const localOrchestratorLLM = new ChatOllama({
+  baseUrl: "http://localhost:11434",
+  model: "llama2:13b",
+  temperature: 0.2,
+  numCtx: 4096
+});
+
+const secureTeam = new Team({
+  name: 'Secure Local Team',
+  llmInstance: localOrchestratorLLM,
+  // ... additional team configuration
+});
+
+// Azure OpenAI for enterprise environments
+const enterpriseOrchestratorLLM = new AzureChatOpenAI({
+  azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
+  azureOpenAIApiInstanceName: process.env.AZURE_OPENAI_INSTANCE_NAME,
+  azureOpenAIApiDeploymentName: "gpt-4-deployment",
+  azureOpenAIApiVersion: "2024-02-15-preview",
+  temperature: 0.3,
+  maxTokens: 4000
+});
+
+const enterpriseTeam = new Team({
+  name: 'Enterprise Team',
+  llmInstance: enterpriseOrchestratorLLM,
+  // ... additional team configuration
+});
+```
+
+## Enhanced Task-Level Attributes for Granular Orchestrator Control
+
+### Detailed Task-Level Attribute Implementation
+
+The extension of the Task class with orchestrator-specific attributes enables even finer control over the intelligent orchestrator's behavior. These task-level attributes complement the team-level configuration and provide precise control mechanisms for each individual task.
+
+#### allowUpdateTaskByOrchestrator
+
+The `allowUpdateTaskByOrchestrator` attribute is a boolean value that explicitly controls whether the orchestrator is authorized to modify this specific task. This granular control is particularly important for critical or sensitive tasks that should not be automatically altered.
+
+When `allowUpdateTaskByOrchestrator: true` is set, the orchestrator can adapt various aspects of the task, including priority, agent assignment, parameters, and even the description to fit current circumstances. This is especially useful for flexible, adaptive tasks that need to respond to changing project requirements.
+
+Conversely, `allowUpdateTaskByOrchestrator: false` prevents the orchestrator from modifying the task, even if the team-level attribute `createNewTasksByOrchestrator: true` is set. This provides an important safety layer for critical tasks that must be executed exactly as defined, such as security audits, compliance checks, or final deployment steps.
+
+#### orchestratorInstructions at Task Level
+
+The `orchestratorInstructions` attribute at the task level enables the definition of specific instructions for handling this individual task. These task-specific instructions complement the general team-level instructions and provide contextual guidance for complex or specialized tasks.
+
+These task-specific instructions can cover various aspects, from technical requirements to quality criteria to specific workflow considerations. They enable the orchestrator to make informed decisions about task adaptations, agent assignments, and priority setting based on the specific context and requirements of the respective task.
+
+### Extended Task Definitions with New Attributes
+
+```javascript
+// Critical Security Task - no orchestrator updates allowed
+new Task({
+  description: 'Perform comprehensive security audit of authentication system',
+  agent: securitySpecialist,
+  category: 'security',
+  complexity: 'high',
+  estimatedTime: '4-6 hours',
+  requiredSkills: ['security_audit', 'authentication_systems'],
+  template: true,
+
+  // New Task-Level Attributes
+  allowUpdateTaskByOrchestrator: false, // Critical task - no changes allowed
+  orchestratorInstructions: `
+    CRITICAL SECURITY TASK - NO MODIFICATIONS ALLOWED
+
+    This task must be executed exactly as defined. The orchestrator may:
+    - NOT change the description
+    - NOT change the assigned agent
+    - NOT reduce the priority
+    - NOT split or merge the task
+
+    On blocking: Escalate immediately to the Security team
+    On resource shortage: Defer other tasks but execute this one
+    Quality criteria: 100% compliance with Security standards required
+  `
+}),
+
+// Flexible Development Task - full orchestrator control
+new Task({
+  description: 'Implement user interface improvements based on feedback',
+  agent: 'auto_select', // Orchestrator selects optimal agent
+  category: 'development',
+  complexity: 'medium',
+  estimatedTime: '2-4 hours',
+  requiredSkills: ['frontend_development', 'ui_design'],
+  template: true,
+
+  allowUpdateTaskByOrchestrator: true, // Full flexibility allowed
+  orchestratorInstructions: `
+    ADAPTIVE UI IMPROVEMENT TASK
+
+    This task can be flexibly adapted based on:
+    - Available frontend developers
+    - Current priority of other UI tasks
+    - Feedback complexity and scope
+
+    Adaptation options:
+    - Split into smaller UI components for high complexity
+    - Merge with similar UI tasks for efficiency
+    - Adjust priority based on user impact
+    - Optimize agent assignment for skill match
+
+    Quality criteria: Responsive design, accessibility standards, browser compatibility
+    Performance goal: No degradation of loading times
+  `
+})
+```
+
+### Benefits of Task-Level Attributes
+
+#### Granular Control
+
+The introduction of task-level attributes enables unprecedented granular control over orchestrator behavior. Developers can specify for each individual task whether and how it may be modified, which is particularly important for critical or sensitive tasks.
+
+#### Contextual Intelligence
+
+Task-specific instructions enable the orchestrator to make contextual decisions based on the specific requirements and characteristics of each task. This leads to more intelligent and appropriate adaptations.
+
+#### Security and Compliance
+
+The ability to protect certain tasks from orchestrator modifications ensures that critical processes such as security audits, compliance checks, or production deployments are executed exactly as defined.
+
+#### Flexibility Where Desired
+
+At the same time, the attributes enable maximum flexibility for tasks that can benefit from adaptive behavior, such as research tasks or UI improvements.
+
+#### Learning Optimization
+
+The combination of team and task-level instructions enables the system to learn and apply both general strategies and specific tactics, leading to continuously improved performance.
+
+## Summary of the Proposed Extension
+
+### New Team Attributes Overview
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `taskRepository` | `Array<Task>` | Array of Task instances (incl. Kanban tasks) available to the orchestrator |
+| `createNewTasksByOrchestrator` | `boolean` | Allows the orchestrator to generate entirely new tasks |
+| `orchestratorInstructions` | `string` | Text prompt with strategic instructions for the orchestrator |
+| `orchestratorMode` | `string` | Operating mode ('conservative', 'adaptive', 'innovative', 'learning') |
+| `llmConfig` | `object` | LLM configuration for the orchestrator (provider, model, temperature, etc.) |
+| `llmInstance` | `LLM` | Alternative: Custom LLM instance for the orchestrator |
+
+### New Task Attributes Overview
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `allowUpdateTaskByOrchestrator` | `boolean` | Controls whether the orchestrator may modify this specific task |
+| `orchestratorInstructions` | `string` | Task-specific instructions for the orchestrator (override team-level instructions) |
+
+### Core Benefits of the Extension
+
+**Autonomous Intelligence**: The orchestrator can independently decide which tasks from the repository to use, how to adapt them, or whether to generate new tasks.
+
+**LLM-powered Decisions**: Through integration of Large Language Models, the orchestrator can make complex, context-aware decisions that go beyond simple rule-based systems.
+
+**Granular Control**: Task-level attributes enable precise control over which tasks may be modified and which must remain strictly controlled.
+
+**Contextual Instructions**: Both team and task-specific instructions enable intelligent, context-aware orchestrator decisions.
+
+**Kanban Integration**: Workflow management tasks (block_task, unblock_task, move_task, create_subtask) are managed as normal Task instances in the repository and can be intelligently deployed.
+
+**Security and Compliance**: Critical tasks can be protected from orchestrator modifications while flexible tasks remain fully adaptive.
+
+**Flexibility**: The system can respond to unforeseen situations without developers having to predefine all possible scenarios.
+
+**Learning Capability**: Through continuous optimization and adaptation, the system becomes more efficient over time.
+
+**Easy Integration**: The extension uses the existing KaibanJS API and is fully backward compatible.
+
+### Implementation Steps
+
+1. **Extend the Team class** with new attributes (taskRepository, createNewTasksByOrchestrator, orchestratorInstructions, orchestratorMode, llmConfig, llmInstance)
+2. **Extend the Task class** with task-level attributes (allowUpdateTaskByOrchestrator, orchestratorInstructions)
+3. **Implement LLM integration** for teams analogous to existing agent LLM integration
+4. **Implement the IntelligentOrchestrator** as new core component with LLM-powered decision making
+5. **Extend the Task class** with metadata for template functionality and orchestrator control
+6. **Integrate Kanban tasks** as normal Task instances in the repository
+7. **Implement algorithms** for task selection, adaptation, and generation considering task-level permissions
+8. **Develop instruction parsers** for interpreting team and task-level instructions
+9. **Implement security mechanisms** for protecting critical tasks from unwanted modifications
+10. **Develop LLM prompt templates** for various orchestrator decision types
+
+### Application Examples
+
+**E-Commerce Development**: The orchestrator could automatically orchestrate code reviews, tests, and deployment tasks based on the complexity of new features.
+
+**Content Management**: When creating content, the system could automatically generate and optimally distribute research, writing, and review tasks.
+
+**Data Analysis**: For complex analysis projects, the orchestrator could automatically orchestrate data collection, cleaning, analysis, and visualization.
+
+### Future Potential
+
+This extension lays the foundation for truly autonomous multi-agent systems that can self-organize and optimize. It opens the door to:
+
+- **Self-learning workflows** that adapt to new domains
+- **Emergent strategies** that arise through agent interaction
+- **Adaptive systems** that respond to environmental changes
+- **Intelligent automation** that complements human creativity
+
+The proposed extension transforms KaibanJS from a tool for predefined workflows into a platform for intelligent, adaptive multi-agent systems that have the potential to revolutionize how we automate and optimize complex tasks.
+
+---
+
+**Next Steps**: Implementation of this extension would make KaibanJS one of the most advanced frameworks for multi-agent systems and open new possibilities for intelligent automation across various application domains.
+

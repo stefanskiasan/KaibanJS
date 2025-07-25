@@ -102,6 +102,7 @@
     "dependency-graph": "^1.0.0",
     "dotenv": "^16.4.5",
     "figlet": "^1.7.0",
+    "kaiban-board": "^0.3.2",
     "langchain": "0.3.24",
     "loglevel": "^1.9.1",
     "ora": "^8.1.0",

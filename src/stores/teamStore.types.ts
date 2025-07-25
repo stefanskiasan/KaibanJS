@@ -1,6 +1,7 @@
 import { StoreApi, UseBoundStore } from 'zustand';
 import { Agent, Task } from '..';
 import { BaseAgent, Env, LLMConfig } from '../agents/baseAgent';
+import { LangChainChatModel } from '../utils/agents';
 import {
   AGENT_STATUS_enum,
   FEEDBACK_STATUS_enum,
@@ -96,6 +97,18 @@ export interface TeamStoreState {
   workflowExecutionStrategy: string;
   workflowController: Record<string, unknown>;
   maxConcurrency: number;
+  // Orchestration Extensions
+  enableOrchestration?: boolean;
+  availableTasks?: Task[];
+  allowTaskGeneration?: boolean;
+  orchestrationStrategy?: string;
+  mode?: 'conservative' | 'adaptive' | 'innovative' | 'learning';
+  maxActiveTasks?: number;
+  taskPrioritization?: 'static' | 'dynamic' | 'ai-driven';
+  workloadDistribution?: 'balanced' | 'skills-based' | 'availability';
+  adaptationInterval?: number;
+  llmConfig?: LLMConfig;
+  llmInstance?: LangChainChatModel;
 }
 
 export interface TeamStoreActions {
@@ -124,6 +137,15 @@ export interface TeamStoreActions {
   prepareWorkflowStatusUpdateLog: <T extends WorkflowLog>(
     params: NewLogParams<T>
   ) => T;
+  addWorkflowLog: (log: WorkflowLog) => void;
+  // Orchestration Actions
+  setAvailableTasks: (tasks: Task[]) => void;
+  addAvailableTask: (task: Task) => void;
+  removeAvailableTask: (taskId: string) => void;
+  updateOrchestrationMode: (
+    mode: 'conservative' | 'adaptive' | 'innovative' | 'learning'
+  ) => void;
+  updateOrchestrationStrategy: (strategy: string) => void;
 }
 
 export type NewLogParams<T extends WorkflowLog> = {

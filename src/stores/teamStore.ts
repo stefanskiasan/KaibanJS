@@ -106,6 +106,18 @@ const createTeamStore = (
     workflowExecutionStrategy: '_deterministic',
     workflowController: initialState.workflowController || {},
     maxConcurrency: initialState.maxConcurrency || 5,
+    // Orchestration Extensions
+    enableOrchestration: initialState.enableOrchestration || false,
+    availableTasks: initialState.availableTasks || [],
+    allowTaskGeneration: initialState.allowTaskGeneration || false,
+    orchestrationStrategy: initialState.orchestrationStrategy,
+    mode: initialState.mode || 'adaptive',
+    maxActiveTasks: initialState.maxActiveTasks || 5,
+    taskPrioritization: initialState.taskPrioritization || 'dynamic',
+    workloadDistribution: initialState.workloadDistribution || 'balanced',
+    adaptationInterval: initialState.adaptationInterval || 300000,
+    llmConfig: initialState.llmConfig,
+    llmInstance: initialState.llmInstance,
 
     setInputs: (inputs: Record<string, unknown>) => set({ inputs }),
     setName: (name: string) => set({ name }),
@@ -813,6 +825,29 @@ const createTeamStore = (
 
       return newLog;
     },
+
+    addWorkflowLog: (log: WorkflowLog) =>
+      set((state) => ({
+        workflowLogs: [...state.workflowLogs, log],
+      })),
+
+    // Orchestration Actions
+    setAvailableTasks: (tasks: Task[]) => set({ availableTasks: tasks }),
+    addAvailableTask: (task: Task) =>
+      set((state) => ({
+        availableTasks: [...(state.availableTasks || []), task],
+      })),
+    removeAvailableTask: (taskId: string) =>
+      set((state) => ({
+        availableTasks: (state.availableTasks || []).filter(
+          (task) => task.id !== taskId
+        ),
+      })),
+    updateOrchestrationMode: (
+      mode: 'conservative' | 'adaptive' | 'innovative' | 'learning'
+    ) => set({ mode }),
+    updateOrchestrationStrategy: (strategy: string) =>
+      set({ orchestrationStrategy: strategy }),
   });
 
   const subscribeWithSelectorFn =

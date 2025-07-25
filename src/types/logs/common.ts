@@ -61,7 +61,11 @@ export interface WorkflowResult {
 export interface BaseWorkflowLog {
   timestamp: number;
   logDescription: string;
-  logType: 'WorkflowStatusUpdate' | 'AgentStatusUpdate' | 'TaskStatusUpdate';
+  logType:
+    | 'WorkflowStatusUpdate'
+    | 'AgentStatusUpdate'
+    | 'TaskStatusUpdate'
+    | 'OrchestrationStatusUpdate';
 }
 
 export type WorkflowLogMetadata = WorkflowBaseMetadata;
