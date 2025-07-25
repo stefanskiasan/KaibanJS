@@ -41,9 +41,11 @@ If you've used tools like Trello, Jira, or ClickUp, you'll be familiar with how 
 **With KaibanJS, you can:**
 
 - 🔨 Create, visualize, and manage AI agents, tasks, tools, and teams
+- 🤖 **Enable intelligent orchestration** with AI-powered task management
 - 🎯 Orchestrate AI workflows seamlessly
 - 📊 Visualize workflows in real-time
 - 🔍 Track progress as tasks move through different stages
+- 🧠 **Let AI analyze gaps** and select optimal tasks automatically
 - 🤝 Collaborate more effectively on AI projects
 
 ## Try It Out
@@ -165,6 +167,46 @@ The Team coordinates the agents and their tasks. It starts with an initial input
 Watch this video to learn more about the concepts: [KaibanJS Concepts](https://youtu.be/VxfOIZLvBug?si=550uEiB3nriZ6trQ)
 
 ## Key Features
+
+  <details style="margin-bottom:10px;">
+  <summary><b style="color:black;">🤖 Intelligent Orchestration</b></summary>
+
+<p style="margin-top:10px;">
+Revolutionary AI-powered task management that goes beyond traditional workflows. Let AI analyze your project goals, identify gaps, and automatically select or generate the optimal tasks for your team.
+
+> Transform from manual task planning to intelligent, adaptive workflows.
+
+With the `enableOrchestration` flag, AI takes over task planning by analyzing existing work, identifying missing capabilities, and selecting complementary tasks from your repository. It adapts to changing requirements and ensures optimal resource distribution across your agents.
+
+</p>
+
+```js
+import { Agent, Task, Team } from 'kaibanjs';
+
+const team = new Team({
+  name: 'AI-Orchestrated Team',
+  agents: [developer, designer, tester],
+  tasks: existingTasks,
+  enableOrchestration: true, // 🤖 Enable AI orchestration
+  availableTasks: taskRepository,
+  allowTaskGeneration: true,
+  orchestrationStrategy: `
+    Build a modern web application with excellent UX,
+    focusing on performance and maintainability.
+  `,
+  mode: 'adaptive'
+});
+
+// AI analyzes gaps and selects optimal tasks
+const optimizedTasks = await team.activateOrchestration(
+  'Create a production-ready application',
+  true // Build upon existing work
+);
+```
+
+_Learn more about intelligent orchestration in our [Orchestration Playground](./playground/ORCHESTRATION_PLAYGROUND.md)._
+
+</details>
 
   <details style="margin-bottom:10px;">
   <summary><b style="color:black;">The Kaiban Board</b></summary>
