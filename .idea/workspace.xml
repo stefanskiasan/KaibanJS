@@ -4,48 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="fix: Enhance null safety and add orchestration validation tests">
-      <change afterPath="$PROJECT_DIR$/.idea/prettier.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/ORCHESTRATION_TEST_REPORT.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/basicorchestration.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/orchestration-benchmark.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/team.kban.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-adaptation-level-fix.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-all-examples-systematically.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-all-modes-optimized.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-key-examples-fast.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-orchestration-execution.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-orchestration-fixes.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-orchestration-null-fixes.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-orchestration-summary.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-performance-optimizations.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-preflight-checks.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/test-workflow-validator.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/utils/workflowValidator.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/ContinuousOrchestrationToggle.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/ContinuousOrchestrationToggle.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/EnhancedTaskBoard.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/EnhancedTaskBoard.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/OrchestrationModeSelector.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/OrchestrationModeSelector.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/OrchestrationMonitor.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/OrchestrationMonitor.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/OrchestratorDecisionPanel.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/OrchestratorDecisionPanel.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/TemplateRepositoryViewer.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/components/TemplateRepositoryViewer.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/playground/react/src/stories/EnhancedOrchestrationDemo.stories.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/01-basic-orchestration.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/01-basic-orchestration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/02-conservative-mode.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/02-conservative-mode.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/03-innovative-mode.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/03-innovative-mode.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/stores/taskStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/taskStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/subscribers/taskSubscriber.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/subscribers/taskSubscriber.ts" afterDir="false" />
-    </list>
+    <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="fix: Enhance null safety and add orchestration validation tests" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -129,7 +88,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1753640734318</updated>
-      <workItem from="1753640735894" duration="1066000" />
+      <workItem from="1753640735894" duration="1771000" />
     </task>
     <servers />
   </component>
