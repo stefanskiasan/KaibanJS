@@ -28,6 +28,10 @@ const {
   writeUnitTestsTask,
   implementCrudApiTask,
 } = require('./utils/tasks');
+const {
+  validateWorkflowResult,
+  printValidationReport,
+} = require('./utils/workflowValidator');
 
 async function runBasicOrchestrationExample() {
   console.log('🚀 KaibanJS Basic Orchestration Example\n');
@@ -201,17 +205,45 @@ async function runBasicOrchestrationExample() {
     // Step 5: Start the workflow
     console.log('▶️  Starting workflow execution...\n');
 
-    // In a real application, this would execute the tasks
-    // For the example, we'll just show what would happen
-    console.log(
-      'ℹ️  Note: In a real scenario, team.start() would execute these tasks.'
-    );
-    console.log(
-      'The agents would work on their assigned tasks based on the orchestration.\n'
-    );
+    // Execute the orchestrated tasks
+    console.log('🚀 Executing orchestrated workflow...');
+    const startTime = Date.now();
 
-    // Uncomment the following line to actually run the workflow:
-    // const result = await team.start();
+    try {
+      const workflowResult = await team.start();
+      const executionTime = Date.now() - startTime;
+
+      console.log(
+        `✅ Workflow completed successfully in ${executionTime}ms!\n`
+      );
+
+      // Comprehensive workflow validation using our utility
+      const validation = validateWorkflowResult(workflowResult, team, {
+        mode: 'adaptive',
+        expectedMinTasks: 3,
+        expectedSuccessRate: 70,
+        logLevel: 'detailed',
+      });
+
+      // Print detailed validation report
+      printValidationReport(validation, {
+        logLevel: 'detailed',
+        includeTaskDetails: true,
+      });
+    } catch (error) {
+      const executionTime = Date.now() - startTime;
+      console.error(
+        `❌ Workflow execution failed after ${executionTime}ms:`,
+        error.message
+      );
+
+      // Show current task states for debugging
+      const teamState = team.store.getState();
+      console.log('\n🔍 Current Task States:');
+      teamState.tasks.forEach((task, index) => {
+        console.log(`${index + 1}. ${task.status}: ${task.description}`);
+      });
+    }
 
     // Step 6: Demonstrate task repository management
     console.log('📝 Task Repository Management:\n');
@@ -257,6 +289,15 @@ async function runBasicOrchestrationExample() {
     console.log(
       '3. Verify that availableTemplateTasks contains template tasks'
     );
+    console.log('4. Check network connection and API service status');
+
+    // Show current configuration for debugging
+    console.log('\nCurrent Configuration:');
+    console.log(`- Enable Orchestration: ${team.enableOrchestration}`);
+    console.log(
+      `- Available Tasks: ${team.availableTemplateTasks?.length || 0}`
+    );
+    console.log(`- LLM Configured: ${!!team.llmInstance}`);
   }
 
   // Summary
@@ -273,9 +314,16 @@ async function runBasicOrchestrationExample() {
     '5. Use activateOrchestration() to let AI select and arrange tasks'
   );
   console.log(
-    '6. The orchestrator considers project goals, agent skills, and constraints'
+    '6. Call team.start() to actually execute the orchestrated workflow'
   );
-  console.log('7. You can dynamically update the task repository and strategy');
+  console.log(
+    '7. The orchestrator considers project goals, agent skills, and constraints'
+  );
+  console.log('8. You can dynamically update the task repository and strategy');
+  console.log(
+    '9. Monitor WorkflowResult for execution status and task completion'
+  );
+  console.log('10. Validate task results and handle errors appropriately');
 }
 
 // Run the example

@@ -1,0 +1,374 @@
+.template-repository-viewer {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #dee2e6;
+}
+
+.repository-header {
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 15px;
+}
+
+.repository-header h3 {
+  margin: 0 0 5px 0;
+  color: #339af0;
+  font-size: 1.4em;
+}
+
+.repository-subtitle {
+  color: #6c757d;
+  margin: 0;
+  font-size: 0.9em;
+}
+
+/* Controls Section */
+.repository-controls {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-section {
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #339af0;
+  box-shadow: 0 0 0 2px rgba(51, 154, 240, 0.2);
+}
+
+.filter-section {
+  display: flex;
+  gap: 10px;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #339af0;
+}
+
+/* Results Summary */
+.results-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #e7f5ff;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.results-count {
+  font-weight: 500;
+  color: #1971c2;
+}
+
+.clear-filters-btn {
+  padding: 5px 10px;
+  background: #339af0;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clear-filters-btn:hover {
+  background: #228be6;
+}
+
+/* Template Tasks List */
+.template-tasks-list {
+  space-y: 15px;
+}
+
+.template-task-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  transition: all 0.2s ease;
+}
+
+.template-task-card:hover {
+  border-color: #339af0;
+  box-shadow: 0 2px 8px rgba(51, 154, 240, 0.1);
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.task-title-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-title {
+  margin: 0;
+  color: #212529;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+.task-category {
+  background: #6c757d;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.task-metadata {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.complexity-badge {
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.expand-indicator {
+  color: #6c757d;
+  font-size: 0.9em;
+  transition: transform 0.2s;
+}
+
+/* Task Details */
+.task-details {
+  padding: 0 15px 15px 15px;
+  border-top: 1px solid #f1f3f4;
+  background: #fafbfc;
+}
+
+.detail-section {
+  margin-bottom: 12px;
+}
+
+.detail-section strong {
+  display: block;
+  color: #495057;
+  font-size: 0.9em;
+  margin-bottom: 4px;
+}
+
+.detail-section p {
+  margin: 0;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+.agent-name {
+  color: #339af0;
+  font-weight: 500;
+}
+
+/* Skills and Dependencies */
+.skills-container,
+.dependencies-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.skill-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+.dependency-badge {
+  background: #fff3e0;
+  color: #f57c00;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+.adaptable-status {
+  font-weight: 500;
+}
+
+.adaptable-status.adaptable {
+  color: #51cf66;
+}
+
+.adaptable-status.fixed {
+  color: #ff6b6b;
+}
+
+.orchestration-rules {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  border-left: 3px solid #339af0;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.85em;
+  color: #495057;
+  white-space: pre-wrap;
+  margin-top: 4px;
+}
+
+/* Task Actions */
+.task-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #e9ecef;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.select-btn {
+  background: #e7f5ff;
+  color: #339af0;
+}
+
+.select-btn:hover {
+  background: #339af0;
+  color: white;
+}
+
+.add-btn {
+  background: #d3f9d8;
+  color: #51cf66;
+}
+
+.add-btn:hover {
+  background: #51cf66;
+  color: white;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.empty-hint {
+  font-size: 0.9em;
+  margin-top: 10px;
+  color: #868e96;
+}
+
+/* Repository Statistics */
+.repository-stats {
+  margin-top: 25px;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.repository-stats h4 {
+  margin: 0 0 15px 0;
+  color: #339af0;
+  font-size: 1.1em;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  color: #6c757d;
+  font-size: 0.9em;
+}
+
+.stat-value {
+  color: #339af0;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .repository-controls {
+    flex-direction: column;
+  }
+
+  .filter-section {
+    flex-wrap: wrap;
+  }
+
+  .task-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .task-metadata {
+    align-self: flex-end;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

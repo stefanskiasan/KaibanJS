@@ -1,0 +1,405 @@
+.orchestrator-panel {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+}
+
+.orchestrator-panel.disabled {
+  opacity: 0.7;
+}
+
+.orchestrator-panel.expanded {
+  background: white;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.orchestrator-panel.expanded .panel-header {
+  border-bottom-color: #e9ecef;
+  background: #f8f9fa;
+}
+
+.panel-header:hover {
+  background: #f1f3f4;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  color: #339af0;
+  font-size: 1.2em;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: #d3f9d8;
+  color: #2b8a3e;
+}
+
+.status-badge.inactive {
+  background: #ffe0e0;
+  color: #c92a2a;
+}
+
+.status-badge.disabled {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+.decisions-count {
+  background: #e7f5ff;
+  color: #1971c2;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.expand-toggle {
+  color: #6c757d;
+  font-size: 1.1em;
+  transition: transform 0.2s ease;
+}
+
+.disabled-message {
+  color: #6c757d;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Panel Content */
+.panel-content {
+  padding: 20px;
+}
+
+.panel-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.filter-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-section label {
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9em;
+}
+
+.filter-select {
+  padding: 6px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.9em;
+  min-width: 150px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #339af0;
+  box-shadow: 0 0 0 2px rgba(51, 154, 240, 0.2);
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.control-btn {
+  padding: 6px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  border-color: #339af0;
+  background: #e7f5ff;
+}
+
+.control-btn.active {
+  background: #339af0;
+  color: white;
+  border-color: #339af0;
+}
+
+/* Decisions Container */
+.decisions-container {
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  background: white;
+}
+
+.empty-decisions {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.empty-hint {
+  font-size: 0.9em;
+  margin-top: 10px;
+  color: #868e96;
+}
+
+/* Decision Items */
+.decision-item {
+  border-bottom: 1px solid #f1f3f4;
+  padding: 15px;
+  transition: background-color 0.2s ease;
+}
+
+.decision-item:last-child {
+  border-bottom: none;
+}
+
+.decision-item:hover {
+  background: #fafbfc;
+}
+
+.decision-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.decision-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.type-icon {
+  font-size: 1.1em;
+}
+
+.type-label {
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9em;
+}
+
+.decision-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timestamp {
+  color: #6c757d;
+  font-size: 0.8em;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.confidence-badge {
+  color: white;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 0.75em;
+  font-weight: 600;
+}
+
+/* Decision Content */
+.decision-content {
+  margin-left: 20px;
+}
+
+.decision-title {
+  margin: 0 0 5px 0;
+  color: #212529;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.decision-description {
+  margin: 0 0 12px 0;
+  color: #6c757d;
+  line-height: 1.4;
+  font-size: 0.9em;
+}
+
+.decision-context {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 3px solid #339af0;
+}
+
+.context-item {
+  margin-bottom: 8px;
+  font-size: 0.85em;
+}
+
+.context-item:last-child {
+  margin-bottom: 0;
+}
+
+.context-item strong {
+  color: #495057;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.context-item span {
+  color: #6c757d;
+}
+
+.agent-name {
+  color: #339af0 !important;
+  font-weight: 500 !important;
+}
+
+.dependencies-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.dependency-tag {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+.impact-badge {
+  color: white !important;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 0.75em;
+  font-weight: 600;
+}
+
+/* Panel Statistics */
+.panel-stats {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-label {
+  display: block;
+  color: #6c757d;
+  font-size: 0.8em;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  display: block;
+  color: #339af0;
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+/* Scrollbar Styling */
+.decisions-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.decisions-container::-webkit-scrollbar-track {
+  background: #f1f3f4;
+}
+
+.decisions-container::-webkit-scrollbar-thumb {
+  background: #ced4da;
+  border-radius: 3px;
+}
+
+.decisions-container::-webkit-scrollbar-thumb:hover {
+  background: #adb5bd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .panel-controls {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .control-buttons {
+    justify-content: center;
+  }
+
+  .decision-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .decision-meta {
+    align-self: flex-end;
+  }
+
+  .stats-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .decisions-container {
+    max-height: 300px;
+  }
+}

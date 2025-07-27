@@ -68,7 +68,7 @@ ${
 }
 
 ## AVAILABLE TASKS IN REPOSITORY
-${availableTasks
+${(availableTasks || [])
   .map(
     (task, index) => `
 ### Task ${index + 1}: ${task.description}
@@ -614,8 +614,8 @@ ${
 - **Resource Availability**: ${context.resourceAvailability}
 
 ## REMAINING TASKS IN PIPELINE
-${context.existingTasks
-  .filter((task) => task.status !== 'DONE')
+${(context.existingTasks || [])
+  .filter((task) => task && task.status !== 'DONE')
   .map(
     (task, index) => `
 ### Pending Task ${index + 1}: ${task.description}

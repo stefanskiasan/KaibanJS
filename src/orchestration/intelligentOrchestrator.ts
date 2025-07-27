@@ -93,6 +93,11 @@ export class IntelligentOrchestrator {
   private splitStrategyPreference: 'conservative' | 'moderate' | 'aggressive' =
     'moderate';
 
+  // Performance optimization fields
+  private llmCache: Map<string, { response: any; timestamp: number }>;
+  private cacheTimeout: number;
+  private adaptationTimeout: number;
+
   constructor(team: Team) {
     this.team = team;
     this.availableTasks = team.availableTemplateTasks || [];
@@ -104,10 +109,18 @@ export class IntelligentOrchestrator {
     this.taskAdaptationHistory = [];
     this.taskPerformanceHistory = new Map();
 
+    // Performance optimization: LLM response cache
+    this.llmCache = new Map();
+    this.cacheTimeout = 5 * 60 * 1000; // 5 minutes cache
+    this.adaptationTimeout = 30 * 1000; // 30 seconds per adaptation
+
     // Initialize performance tracking
     this.initializePerformanceTracking();
     // Start performance metrics logging interval (every 5 minutes)
     this.startPerformanceMetricsLogging();
+
+    // Performance optimization: Clean cache every 10 minutes
+    setInterval(() => this.cleanExpiredCache(), 10 * 60 * 1000);
   }
 
   /**
@@ -187,9 +200,9 @@ export class IntelligentOrchestrator {
 
     try {
       // Fallback 1: Use simple task selection logic
-      if (this.availableTasks.length > 0) {
+      if (this.availableTasks && this.availableTasks.length > 0) {
         const fallbackTasks = this.availableTasks
-          .filter((task) => task.template && task.adaptable)
+          .filter((task) => task && task.template && task.adaptable)
           .slice(0, 3); // Take first 3 adaptable template tasks
 
         logger.info(
@@ -724,7 +737,8 @@ export class IntelligentOrchestrator {
               existingTasksPreserved: context.existingTasks.length,
               newTasksAdded: newTasks.length,
               tasksGenerated: generatedTasks.length,
-              tasksAdapted: newTasks.filter((task) => task.adaptable).length,
+              tasksAdapted: newTasks.filter((task) => task && task.adaptable)
+                .length,
               totalTasks: allTasks.length,
             },
             finalWorkloadDistribution:
@@ -756,7 +770,8 @@ export class IntelligentOrchestrator {
               existingTasksPreserved: 0,
               newTasksAdded: newTasks.length,
               tasksGenerated: generatedTasks.length,
-              tasksAdapted: newTasks.filter((task) => task.adaptable).length,
+              tasksAdapted: newTasks.filter((task) => task && task.adaptable)
+                .length,
               totalTasks: newTasks.length,
             },
             finalWorkloadDistribution:
@@ -836,12 +851,16 @@ export class IntelligentOrchestrator {
     const teamState = this.team.store.getState();
 
     return {
-      activeTasks: teamState.tasks.filter((task) => task.status === 'DOING'),
-      availableAgents: teamState.agents.filter(
-        (agent) => agent.status !== 'BUSY'
+      activeTasks: (teamState.tasks || []).filter(
+        (task) => task && task.status === 'DOING'
+      ),
+      availableAgents: (teamState.agents || []).filter(
+        (agent) => agent && agent.status !== 'BUSY'
       ),
       projectProgress: this.calculateProjectProgress(),
-      blockedTasks: teamState.tasks.filter((task) => task.status === 'BLOCKED'),
+      blockedTasks: (teamState.tasks || []).filter(
+        (task) => task && task.status === 'BLOCKED'
+      ),
       codeCoverage: 75, // Mock value - would be calculated from project metrics
       performanceScore: 85, // Mock value - would be calculated from project metrics
       workload: this.calculateCurrentWorkload(),
@@ -850,7 +869,7 @@ export class IntelligentOrchestrator {
       resourceAvailability: this.assessResourceAvailability(),
       timeConstraints: this.assessTimeConstraints(),
       qualityRequirements: this.assessQualityRequirements(),
-      existingTasks: teamState.tasks, // All existing tasks in the team
+      existingTasks: teamState.tasks || [], // All existing tasks in the team
     };
   }
 
@@ -912,6 +931,7 @@ export class IntelligentOrchestrator {
         .filter(
           (selection: any) =>
             selection.taskIndex >= 0 &&
+            this.availableTasks &&
             selection.taskIndex < this.availableTasks.length
         )
         .map((selection: any) => {
@@ -922,7 +942,9 @@ export class IntelligentOrchestrator {
           }
           return task;
         })
-        .filter((task: Task) => this.validateTaskAgainstRules(task, context));
+        .filter(
+          (task: Task) => task && this.validateTaskAgainstRules(task, context)
+        );
 
       // Apply performance-based learning if in learning mode
       if (this.mode === 'learning' || this.team.mode === 'learning') {
@@ -1169,6 +1191,54 @@ export class IntelligentOrchestrator {
   }
 
   /**
+   * Performance optimization: Batch adapt multiple tasks
+   */
+  private async batchAdaptTasks(tasks: Task[]): Promise<Task[]> {
+    if (tasks.length === 0) return tasks;
+
+    // Separate adaptable and non-adaptable tasks
+    const adaptableTasks = tasks.filter((task) => task && task.adaptable);
+    const nonAdaptableTasks = tasks.filter((task) => task && !task.adaptable);
+
+    if (adaptableTasks.length === 0) {
+      return tasks; // Return original if no adaptable tasks
+    }
+
+    // Performance: If only 1-2 tasks, use individual adaptation
+    if (adaptableTasks.length <= 2) {
+      const adaptedTasks = await Promise.all(
+        adaptableTasks.map((task) => this.adaptTask(task))
+      );
+      return [...adaptedTasks, ...nonAdaptableTasks];
+    }
+
+    // For larger batches, use batch processing
+    const batchSize = Math.min(adaptableTasks.length, 5); // Max 5 at once
+    const batches: Task[][] = [];
+
+    for (let i = 0; i < adaptableTasks.length; i += batchSize) {
+      batches.push(adaptableTasks.slice(i, i + batchSize));
+    }
+
+    const allAdaptedTasks: Task[] = [];
+
+    // Process batches sequentially to avoid overwhelming LLM
+    for (const batch of batches) {
+      const batchResults = await Promise.all(
+        batch.map((task) => this.adaptTask(task))
+      );
+      allAdaptedTasks.push(...batchResults);
+
+      // Small delay between batches to prevent rate limiting
+      if (batches.length > 1) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
+    return [...allAdaptedTasks, ...nonAdaptableTasks];
+  }
+
+  /**
    * Adapt a single task based on current context
    */
   private async adaptTask(task: Task): Promise<Task> {
@@ -1181,8 +1251,17 @@ export class IntelligentOrchestrator {
     }
 
     try {
+      // Validate task before adaptation
+      if (!task || !task.id) {
+        throw new Error('Invalid task: task object or ID is missing');
+      }
+
       // Build context for adaptation
       const context = this.buildOrchestrationContext();
+      if (!context) {
+        throw new Error('Failed to build orchestration context');
+      }
+
       const adaptationPrompt =
         OrchestrationPromptFactory.createTaskAdaptationPrompt(
           task,
@@ -1190,13 +1269,27 @@ export class IntelligentOrchestrator {
           this.team.orchestrationStrategy || ''
         );
 
-      // Call LLM for adaptation recommendations
-      const response = await this.callLLM(adaptationPrompt);
+      // Call LLM for adaptation recommendations with timeout
+      const adaptationPromise = this.callLLM(adaptationPrompt);
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(
+          () => reject(new Error('Task adaptation timeout')),
+          this.adaptationTimeout
+        );
+      });
+
+      const response = await Promise.race([adaptationPromise, timeoutPromise]);
+      if (!response) {
+        throw new Error('No response received from LLM');
+      }
+
       const adaptationResult = this.parseAdaptationResponse(response);
 
       if (!adaptationResult || !adaptationResult.adaptedTask) {
         this.log('warn', 'No valid adaptation recommendations received', {
           taskId: task.id,
+          hasResponse: !!response,
+          hasAdaptationResult: !!adaptationResult,
         });
         return task;
       }
@@ -1232,7 +1325,7 @@ export class IntelligentOrchestrator {
       // Log adaptation
       this.log('info', 'Task adapted successfully', {
         taskId: task.id,
-        adaptationLevel: adaptationResult.adaptationLevel,
+        adaptationLevel: adaptationResult.adaptedTask?.adaptationLevel,
         changes: adaptationResult.adaptationReasoning,
         splitRecommended: adaptationResult.splitRecommendation?.shouldSplit,
         mergeRecommended: adaptationResult.mergeRecommendation?.shouldMerge,
@@ -1242,7 +1335,7 @@ export class IntelligentOrchestrator {
       this.taskAdaptationHistory.push({
         taskId: task.id,
         timestamp: Date.now(),
-        adaptationLevel: adaptationResult.adaptationLevel,
+        adaptationLevel: adaptationResult.adaptedTask?.adaptationLevel,
         reasoning: adaptationResult.adaptationReasoning,
       });
 
@@ -1251,25 +1344,46 @@ export class IntelligentOrchestrator {
 
       return adaptedTask;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.log('error', 'Task adaptation failed', {
-        taskId: task.id,
-        error: error instanceof Error ? error.message : String(error),
+        taskId: task?.id || 'unknown',
+        error: errorMessage,
+        taskTitle: task?.title || 'unknown',
+        availableTasksCount: this.availableTasks?.length || 0,
+        hasTeam: !!this.team,
+        hasContext: !!this.buildOrchestrationContext,
       });
+
+      // Log to console for debugging
+      console.log('Task adaptation failed', {
+        taskId: task?.id || 'unknown',
+        error: errorMessage,
+      });
+
       // Return original task if adaptation fails
-      return task;
+      return task || null;
     }
   }
 
   private parseAdaptationResponse(response: string): any {
     try {
+      // Validate input
+      if (!response || typeof response !== 'string') {
+        throw new Error('Invalid response: must be a non-empty string');
+      }
+
       // Extract JSON from LLM response
       const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/);
-      if (!jsonMatch) {
+      if (!jsonMatch || !jsonMatch[1]) {
         throw new Error('No JSON found in adaptation response');
       }
       return JSON.parse(jsonMatch[1]);
     } catch (error) {
-      this.log('error', 'Failed to parse adaptation response', { error });
+      this.log('error', 'Failed to parse adaptation response', {
+        error: error instanceof Error ? error.message : String(error),
+        response: response ? response.substring(0, 200) + '...' : 'null',
+      });
       return null;
     }
   }
@@ -1285,7 +1399,7 @@ export class IntelligentOrchestrator {
       return true; // No rules to validate against
     }
 
-    const rules = task.orchestrationRules.toLowerCase();
+    const rules = (task.orchestrationRules || '').toLowerCase();
 
     // Check phase-specific rules
     if (rules.includes('phase:')) {
@@ -1293,7 +1407,8 @@ export class IntelligentOrchestrator {
       if (phaseMatch) {
         const requiredPhase = phaseMatch[1];
         if (
-          context.projectPhase.toLowerCase() !== requiredPhase.toLowerCase()
+          (context.projectPhase || '').toLowerCase() !==
+          (requiredPhase || '').toLowerCase()
         ) {
           this.log('info', `Task ${task.id} skipped due to phase mismatch`, {
             requiredPhase,
@@ -1313,8 +1428,8 @@ export class IntelligentOrchestrator {
           const reqSatisfied = context.existingTasks.some(
             (t) =>
               t.status === 'DONE' &&
-              (t.description.toLowerCase().includes(reqName) ||
-                t.title.toLowerCase().includes(reqName))
+              ((t.description || '').toLowerCase().includes(reqName) ||
+                (t.title || '').toLowerCase().includes(reqName))
           );
           if (!reqSatisfied) {
             this.log(
@@ -1363,8 +1478,8 @@ export class IntelligentOrchestrator {
 
   private compareWorkload(current: string, max: string): number {
     const levels = ['low', 'medium', 'high', 'critical'];
-    const currentIndex = levels.indexOf(current.toLowerCase());
-    const maxIndex = levels.indexOf(max.toLowerCase());
+    const currentIndex = levels.indexOf((current || '').toLowerCase());
+    const maxIndex = levels.indexOf((max || '').toLowerCase());
     return currentIndex - maxIndex;
   }
 
@@ -1380,7 +1495,7 @@ export class IntelligentOrchestrator {
       // Check if description change is allowed by orchestration rules
       if (
         !originalTask.orchestrationRules ||
-        !originalTask.orchestrationRules
+        !(originalTask.orchestrationRules || '')
           .toLowerCase()
           .includes('fixed description')
       ) {
@@ -1392,7 +1507,9 @@ export class IntelligentOrchestrator {
       // Check if agent reassignment is allowed by orchestration rules
       if (
         !originalTask.orchestrationRules ||
-        !originalTask.orchestrationRules.toLowerCase().includes('fixed agent')
+        !(originalTask.orchestrationRules || '')
+          .toLowerCase()
+          .includes('fixed agent')
       ) {
         // Try to find the suggested agent
         const suggestedAgent = this.team
@@ -1497,9 +1614,9 @@ export class IntelligentOrchestrator {
 
     // Factor 1: Dependencies satisfaction (30 points)
     if (task.dependencies && task.dependencies.length > 0) {
-      const satisfiedDeps = task.dependencies.filter((dep) =>
-        context.existingTasks.some(
-          (t) => t.referenceId === dep && t.status === 'DONE'
+      const satisfiedDeps = (task.dependencies || []).filter((dep) =>
+        (context.existingTasks || []).some(
+          (t) => t && t.referenceId === dep && t.status === 'DONE'
         )
       ).length;
       score += (satisfiedDeps / task.dependencies.length) * 30;
@@ -1517,11 +1634,16 @@ export class IntelligentOrchestrator {
 
     // Factor 3: Skills match (20 points)
     if (task.resourceRequirements?.skillsRequired && task.agent) {
-      const agentSkills = task.agent.role.toLowerCase().split(/[\s,]+/);
+      const agentSkills = (task.agent?.role || '')
+        .toLowerCase()
+        .split(/[\s,]+/);
       const requiredSkills = task.resourceRequirements.skillsRequired;
-      const matchingSkills = requiredSkills.filter((skill) =>
-        agentSkills.some((agentSkill) =>
-          skill.toLowerCase().includes(agentSkill)
+      const matchingSkills = (requiredSkills || []).filter((skill) =>
+        (agentSkills || []).some(
+          (agentSkill) =>
+            skill &&
+            agentSkill &&
+            (skill || '').toLowerCase().includes(agentSkill)
         )
       ).length;
       score += (matchingSkills / requiredSkills.length) * 20;
@@ -1529,15 +1651,17 @@ export class IntelligentOrchestrator {
 
     // Factor 4: Project phase alignment (15 points)
     if (task.orchestrationRules) {
-      const rules = task.orchestrationRules.toLowerCase();
-      if (rules.includes(`phase: ${context.projectPhase.toLowerCase()}`)) {
+      const rules = (task.orchestrationRules || '').toLowerCase();
+      if (
+        rules.includes(`phase: ${(context.projectPhase || '').toLowerCase()}`)
+      ) {
         score += 15;
       }
     }
 
     // Factor 5: Workload balance (15 points)
-    const agentTaskCount = context.activeTasks.filter(
-      (t) => t.agent?.id === task.agent.id
+    const agentTaskCount = (context.activeTasks || []).filter(
+      (t) => t && t.agent?.id === task.agent.id
     ).length;
     if (agentTaskCount === 0) {
       score += 15; // Agent is free
@@ -1546,7 +1670,7 @@ export class IntelligentOrchestrator {
     }
 
     // Bonus: Critical path tasks
-    if (task.orchestrationRules?.toLowerCase().includes('critical')) {
+    if ((task.orchestrationRules || '').toLowerCase().includes('critical')) {
       score += 10;
     }
 
@@ -1636,8 +1760,11 @@ export class IntelligentOrchestrator {
     this.updatePerformanceMetric('task_merges', 1);
 
     // Validate merge compatibility
-    const validMergeTargets = mergeRecommendation.mergeWithTaskIds.filter(
-      (targetId: string) => task.mergeCompatible.includes(targetId)
+    const validMergeTargets = (
+      mergeRecommendation.mergeWithTaskIds || []
+    ).filter(
+      (targetId: string) =>
+        targetId && (task.mergeCompatible || []).includes(targetId)
     );
 
     if (validMergeTargets.length === 0) {
@@ -1709,8 +1836,8 @@ export class IntelligentOrchestrator {
     const existingTaskIds = new Set(teamState.tasks.map((task) => task.id));
 
     // Filter out any tasks that already exist to prevent duplicates
-    const uniqueNewTasks = newTasks.filter(
-      (task) => !existingTaskIds.has(task.id)
+    const uniqueNewTasks = (newTasks || []).filter(
+      (task) => task && task.id && !existingTaskIds.has(task.id)
     );
 
     if (uniqueNewTasks.length > 0) {
@@ -1730,12 +1857,36 @@ export class IntelligentOrchestrator {
     metadata: any
   ): void {
     try {
+      // Validate team and store availability
+      if (!this.team || !this.team.store) {
+        logger.warn(
+          'Cannot log orchestration event: team or store not available'
+        );
+        return;
+      }
+
+      // Safely get team state
+      let teamState = null;
+      let orchestratorId = 'unknown';
+      let availableAgents = 0;
+
+      try {
+        teamState = this.team.store.getState();
+        orchestratorId = teamState?.name || 'unknown';
+        availableAgents = teamState?.agents?.length || 0;
+      } catch (stateError) {
+        logger.warn(
+          'Could not access team state for orchestration logging:',
+          stateError
+        );
+      }
+
       // Enhance metadata with context information
       const enhancedMetadata = {
         ...metadata,
         timestamp: Date.now(),
-        orchestratorId: this.team.store.getState().name,
-        mode: this.team.mode,
+        orchestratorId,
+        mode: this.team.mode || 'unknown',
         performanceMetrics: this.performanceMetrics
           ? {
               llmCalls: this.performanceMetrics.get('llm_calls_total') || 0,
@@ -1747,18 +1898,30 @@ export class IntelligentOrchestrator {
             }
           : undefined,
         contextSnapshot: {
-          totalTasks: this.team.getTasks().length,
-          activeTasks: this.team.getTasks().filter((t) => t.status === 'DOING')
-            .length,
-          completedTasks: this.team
-            .getTasks()
-            .filter((t) => t.status === 'DONE').length,
-          availableAgents: this.team.getStore().getState().agents.length,
+          totalTasks: this.team.getTasks ? this.team.getTasks().length : 0,
+          activeTasks: this.team.getTasks
+            ? (this.team.getTasks() || []).filter(
+                (t) => t && t.status === 'DOING'
+              ).length
+            : 0,
+          completedTasks: this.team.getTasks
+            ? this.team.getTasks().filter((t) => t && t.status === 'DONE')
+                .length
+            : 0,
+          availableAgents,
         },
       };
 
       const log = createOrchestrationLog(event, message, enhancedMetadata);
-      this.team.store.getState().addWorkflowLog(log);
+
+      // Safely add workflow log
+      if (teamState && typeof teamState.addWorkflowLog === 'function') {
+        teamState.addWorkflowLog(log);
+      } else {
+        logger.warn(
+          'Cannot add workflow log: addWorkflowLog method not available'
+        );
+      }
 
       // Also log important events to console with appropriate levels
       this.logToConsoleWithLevel(event, message, metadata);
@@ -1999,9 +2162,9 @@ export class IntelligentOrchestrator {
     // Check for missing validation tasks
     const hasValidation = selectedTasks.some(
       (task) =>
-        task.description.toLowerCase().includes('test') ||
-        task.description.toLowerCase().includes('validate') ||
-        task.description.toLowerCase().includes('review')
+        (task.description || '').toLowerCase().includes('test') ||
+        (task.description || '').toLowerCase().includes('validate') ||
+        (task.description || '').toLowerCase().includes('review')
     );
 
     if (!hasValidation && selectedTasks.length > 2) {
@@ -2020,8 +2183,8 @@ export class IntelligentOrchestrator {
     // Check for missing documentation tasks
     const hasDocumentation = selectedTasks.some(
       (task) =>
-        task.description.toLowerCase().includes('document') ||
-        task.description.toLowerCase().includes('readme')
+        (task.description || '').toLowerCase().includes('document') ||
+        (task.description || '').toLowerCase().includes('readme')
     );
 
     if (!hasDocumentation && context.projectProgress > 50) {
@@ -2040,8 +2203,8 @@ export class IntelligentOrchestrator {
     // Check for missing deployment/release tasks
     const hasDeployment = selectedTasks.some(
       (task) =>
-        task.description.toLowerCase().includes('deploy') ||
-        task.description.toLowerCase().includes('release')
+        (task.description || '').toLowerCase().includes('deploy') ||
+        (task.description || '').toLowerCase().includes('release')
     );
 
     if (!hasDeployment && context.projectProgress > 80) {
@@ -2098,8 +2261,8 @@ export class IntelligentOrchestrator {
     // Check for security review
     const hasSecurityReview = selectedTasks.some(
       (task) =>
-        task.description.toLowerCase().includes('security') ||
-        task.description.toLowerCase().includes('audit')
+        (task.description || '').toLowerCase().includes('security') ||
+        (task.description || '').toLowerCase().includes('audit')
     );
 
     if (!hasSecurityReview && context.projectPhase === 'production') {
@@ -2267,7 +2430,7 @@ export class IntelligentOrchestrator {
    */
   private inferAgentSkills(agent: Agent): string[] {
     const skills: string[] = [];
-    const roleLower = agent.role.toLowerCase();
+    const roleLower = (agent.role || '').toLowerCase();
 
     // Infer skills based on role
     if (roleLower.includes('developer') || roleLower.includes('engineer')) {
@@ -2296,8 +2459,9 @@ export class IntelligentOrchestrator {
    * Parse estimated time string to hours
    */
   private parseEstimatedTime(timeStr: string): number {
-    const hourMatch = timeStr.match(/(\d+)\s*(hours?|hrs?)/i);
-    const minMatch = timeStr.match(/(\d+)\s*(minutes?|mins?)/i);
+    const safeTimeStr = timeStr || '';
+    const hourMatch = safeTimeStr.match(/(\d+)\s*(hours?|hrs?)/i);
+    const minMatch = safeTimeStr.match(/(\d+)\s*(minutes?|mins?)/i);
 
     let hours = 0;
     if (hourMatch) {
@@ -2445,8 +2609,12 @@ export class IntelligentOrchestrator {
       const tempAgent =
         context.availableAgents.find(
           (agent) =>
-            agent.role.toLowerCase().includes(taskData.agent.toLowerCase()) ||
-            agent.name.toLowerCase().includes(taskData.agent.toLowerCase())
+            (agent.role || '')
+              .toLowerCase()
+              .includes((taskData.agent || '').toLowerCase()) ||
+            (agent.name || '')
+              .toLowerCase()
+              .includes((taskData.agent || '').toLowerCase())
         ) ||
         context.availableAgents[0] ||
         this.team.store.getState().agents[0];
@@ -2508,9 +2676,9 @@ export class IntelligentOrchestrator {
   }
 
   private calculateCurrentWorkload(): string {
-    const activeTasks = this.team.store
-      .getState()
-      .tasks.filter((task) => task.status === 'DOING');
+    const activeTasks = (this.team.store.getState().tasks || []).filter(
+      (task) => task && task.status === 'DOING'
+    );
     const totalAgents = this.team.store.getState().agents.length;
 
     if (totalAgents === 0) return 'unknown';
@@ -2541,14 +2709,14 @@ export class IntelligentOrchestrator {
     let score = 100; // Start with perfect score
 
     // Factor 1: Current task count (-20 points per active task)
-    const activeTasks = context.activeTasks.filter(
-      (t) => t.agent?.id === agent.id
+    const activeTasks = (context.activeTasks || []).filter(
+      (t) => t && t.agent?.id === agent.id
     ).length;
     score -= activeTasks * 20;
 
     // Factor 2: Blocked tasks (-15 points per blocked task)
-    const blockedTasks = context.blockedTasks.filter(
-      (t) => t.agent?.id === agent.id
+    const blockedTasks = (context.blockedTasks || []).filter(
+      (t) => t && t.agent?.id === agent.id
     ).length;
     score -= blockedTasks * 15;
 
@@ -2589,10 +2757,15 @@ export class IntelligentOrchestrator {
     const partialMatches = requiredSkills.filter(
       (skill) =>
         !agentSkills.some(
-          (agentSkill) => agentSkill.toLowerCase() === skill.toLowerCase()
+          (agentSkill) =>
+            (agentSkill || '').toLowerCase() === (skill || '').toLowerCase()
         ) &&
-        (agent.role.toLowerCase().includes(skill.toLowerCase()) ||
-          agent.background.toLowerCase().includes(skill.toLowerCase()))
+        ((agent.role || '')
+          .toLowerCase()
+          .includes((skill || '').toLowerCase()) ||
+          (agent.background || '')
+            .toLowerCase()
+            .includes((skill || '').toLowerCase()))
     ).length;
 
     const totalRequired = requiredSkills.length;
@@ -2609,12 +2782,12 @@ export class IntelligentOrchestrator {
     const skills: string[] = [];
 
     // Extract from role (split by common delimiters)
-    const roleSkills = agent.role.toLowerCase().split(/[\s,&/]+/);
+    const roleSkills = (agent.role || '').toLowerCase().split(/[\s,&/]+/);
     skills.push(...roleSkills);
 
     // Extract key technical terms from background
     const technicalTerms =
-      agent.background.match(
+      (agent.background || '').match(
         /\b(javascript|typescript|python|react|vue|angular|node|database|api|frontend|backend|fullstack|devops|security|testing|qa)\b/gi
       ) || [];
     skills.push(...technicalTerms.map((t) => t.toLowerCase()));
@@ -2709,8 +2882,8 @@ export class IntelligentOrchestrator {
    */
   private calculateAgentAffinityScore(agent: Agent, task: Task): number {
     // Simple affinity based on role matching task description
-    const roleKeywords = agent.role.toLowerCase().split(/[\s,]+/);
-    const taskKeywords = task.description.toLowerCase().split(/[\s,]+/);
+    const roleKeywords = (agent.role || '').toLowerCase().split(/[\s,]+/);
+    const taskKeywords = (task.description || '').toLowerCase().split(/[\s,]+/);
 
     const matchingKeywords = roleKeywords.filter(
       (keyword) => taskKeywords.includes(keyword) && keyword.length > 3
@@ -3364,8 +3537,8 @@ export class IntelligentOrchestrator {
     }
 
     // Check if agent role matches task requirements
-    const taskDescription = task.description.toLowerCase();
-    const agentRole = agent.role.toLowerCase();
+    const taskDescription = (task.description || '').toLowerCase();
+    const agentRole = (agent.role || '').toLowerCase();
 
     // Basic role matching
     if (taskDescription.includes('frontend') && !agentRole.includes('frontend'))
@@ -4406,16 +4579,18 @@ export class IntelligentOrchestrator {
     }
 
     // Check available tasks
-    if (this.availableTasks.length === 0) {
+    if (!this.availableTasks || this.availableTasks.length === 0) {
       warnings.push(
         'No template tasks available - orchestrator cannot select tasks'
       );
     }
 
     // Check adaptable tasks ratio
-    const adaptableTasks = this.availableTasks.filter((task) => task.adaptable);
+    const adaptableTasks = (this.availableTasks || []).filter(
+      (task) => task && task.adaptable
+    );
     const adaptableRatio =
-      this.availableTasks.length > 0
+      this.availableTasks && this.availableTasks.length > 0
         ? (adaptableTasks.length / this.availableTasks.length) * 100
         : 0;
 
@@ -4505,7 +4680,7 @@ export class IntelligentOrchestrator {
     context: OrchestrationContext,
     optimizationGoal: string
   ): Promise<Task[]> {
-    if (this.availableTasks.length === 0) {
+    if (!this.availableTasks || this.availableTasks.length === 0) {
       logger.info(
         'No tasks available in repository for continuous optimization'
       );
@@ -4948,18 +5123,21 @@ export class IntelligentOrchestrator {
    */
   private buildOrchestrationContext(): any {
     const state = this.team.getStore().getState();
-    const tasks = this.team.getTasks();
-    const agents = state.agents;
+    const tasks = this.team.getTasks() || [];
+    const agents = state.agents || [];
 
     const completedTasks = tasks.filter(
-      (t) => t.status === TASK_STATUS_enum.DONE
+      (t) => t && t.status === TASK_STATUS_enum.DONE
     );
     const activeTasks = tasks.filter(
       (t) =>
-        t.status === TASK_STATUS_enum.DOING ||
-        t.status === TASK_STATUS_enum.BLOCKED
+        t &&
+        (t.status === TASK_STATUS_enum.DOING ||
+          t.status === TASK_STATUS_enum.BLOCKED)
     );
-    const todoTasks = tasks.filter((t) => t.status === TASK_STATUS_enum.TODO);
+    const todoTasks = tasks.filter(
+      (t) => t && t.status === TASK_STATUS_enum.TODO
+    );
 
     return {
       teamName: this.team.getStore().getState().name,
@@ -4980,7 +5158,11 @@ export class IntelligentOrchestrator {
         status: agent.status,
         skills: agent.background,
         currentTasks: tasks.filter(
-          (t) => t.agent.id === agent.id && t.status === TASK_STATUS_enum.DOING
+          (t) =>
+            t &&
+            t.agent &&
+            t.agent.id === agent.id &&
+            t.status === TASK_STATUS_enum.DOING
         ).length,
       })),
       workflowStatus: state.teamWorkflowStatus,
@@ -5007,6 +5189,14 @@ export class IntelligentOrchestrator {
       throw new Error('LLM not initialized');
     }
 
+    // Performance optimization: Check cache first
+    const promptHash = this.hashPrompt(prompt);
+    const cached = this.llmCache.get(promptHash);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      logger.info('🚀 Using cached LLM response');
+      return cached.response;
+    }
+
     const maxRetries = 3;
     let lastError: any;
 
@@ -5027,9 +5217,18 @@ export class IntelligentOrchestrator {
         ]);
 
         if (response && response.content) {
-          return typeof response.content === 'string'
-            ? response.content
-            : JSON.stringify(response.content);
+          const result =
+            typeof response.content === 'string'
+              ? response.content
+              : JSON.stringify(response.content);
+
+          // Cache the response for future use
+          this.llmCache.set(promptHash, {
+            response: result,
+            timestamp: Date.now(),
+          });
+
+          return result;
         }
 
         throw new Error('Empty response from LLM');
@@ -5053,5 +5252,31 @@ export class IntelligentOrchestrator {
         lastError?.message || 'Unknown error'
       }`
     );
+  }
+
+  /**
+   * Performance optimization: Generate hash for prompt caching
+   */
+  private hashPrompt(prompt: string): string {
+    // Simple hash function for prompt caching
+    let hash = 0;
+    for (let i = 0; i < prompt.length; i++) {
+      const char = prompt.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(36);
+  }
+
+  /**
+   * Performance optimization: Clean expired cache entries
+   */
+  private cleanExpiredCache(): void {
+    const now = Date.now();
+    for (const [key, value] of this.llmCache.entries()) {
+      if (now - value.timestamp > this.cacheTimeout) {
+        this.llmCache.delete(key);
+      }
+    }
   }
 }

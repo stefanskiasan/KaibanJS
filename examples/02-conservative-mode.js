@@ -32,6 +32,10 @@ const {
   setupMonitoringTask,
   dockerizeApplicationTask,
 } = require('./utils/tasks');
+const {
+  validateWorkflowResult,
+  printValidationReport,
+} = require('./utils/workflowValidator');
 
 async function runConservativeOrchestrationExample() {
   console.log('🛡️  KaibanJS Conservative Mode Orchestration Example\n');
@@ -268,8 +272,141 @@ async function runConservativeOrchestrationExample() {
     console.log('4. Static prioritization provides predictable execution');
     console.log('5. No surprises - everything follows the plan\n');
 
+    // Execute the production deployment workflow
+    console.log('🚀 PRODUCTION DEPLOYMENT: Starting Conservative Workflow\n');
+    console.log('⚠️  Production deployment requires careful execution...');
+
+    const deploymentStartTime = Date.now();
+
+    try {
+      // Execute with production-level monitoring
+      const productionResult = await productionTeam.start();
+      const deploymentTime = Date.now() - deploymentStartTime;
+
+      console.log(
+        `✅ PRODUCTION DEPLOYMENT COMPLETED in ${deploymentTime}ms!\n`
+      );
+
+      // Conservative mode comprehensive validation
+      const validation = validateWorkflowResult(
+        productionResult,
+        productionTeam,
+        {
+          mode: 'conservative',
+          expectedMinTasks: 3,
+          expectedSuccessRate: 90, // Conservative mode expects high success rate
+          logLevel: 'detailed',
+        }
+      );
+
+      // Print production-level validation report
+      printValidationReport(validation, {
+        logLevel: 'detailed',
+        includeTaskDetails: true,
+      });
+
+      // Conservative mode compliance validation
+      const teamState = productionTeam.store.getState();
+      const completedTasks = teamState.tasks.filter((t) => t.status === 'DONE');
+      const blockedTasks = teamState.tasks.filter(
+        (t) => t.status === 'BLOCKED'
+      );
+      const failedTasks = teamState.tasks.filter((t) => t.status === 'ERROR');
+
+      console.log('\n🔒 PRODUCTION TASK COMPLIANCE REPORT:');
+
+      if (completedTasks.length > 0) {
+        console.log(
+          `✅ Successfully Deployed Tasks (${completedTasks.length}):`
+        );
+        completedTasks.forEach((task, index) => {
+          const complianceStatus = task.adaptable
+            ? 'ADAPTABLE'
+            : 'CRITICAL-LOCKED';
+          console.log(`   ${index + 1}. ${task.description}`);
+          console.log(
+            `      Agent: ${task.agent.name} | Status: ${complianceStatus}`
+          );
+          console.log(
+            `      Result: ${task.result ? 'VALIDATED' : 'NO_RESULT'}`
+          );
+        });
+      }
+
+      if (blockedTasks.length > 0) {
+        console.log(`\n🚧 BLOCKED PRODUCTION TASKS (${blockedTasks.length}):`);
+        blockedTasks.forEach((task, index) => {
+          console.log(
+            `   ${index + 1}. ${task.description} (Agent: ${task.agent.name})`
+          );
+          console.log(`      ⚠️  REQUIRES MANUAL INTERVENTION`);
+        });
+      }
+
+      if (failedTasks.length > 0) {
+        console.log(
+          `\n🚨 CRITICAL PRODUCTION FAILURES (${failedTasks.length}):`
+        );
+        failedTasks.forEach((task, index) => {
+          console.log(
+            `   ${index + 1}. ${task.description} (Agent: ${task.agent.name})`
+          );
+          console.log(`      ❌ IMMEDIATE ROLLBACK REQUIRED`);
+        });
+      }
+
+      // Production quality gates
+      const successRate =
+        (completedTasks.length / (completedTasks.length + failedTasks.length)) *
+        100;
+      console.log(`\n📊 PRODUCTION QUALITY METRICS:`);
+      console.log(`- Success Rate: ${successRate.toFixed(1)}%`);
+      console.log(
+        `- Critical Task Compliance: ${
+          completedTasks.filter((t) => !t.adaptable).length
+        } locked tasks executed`
+      );
+      console.log(
+        `- Security Tasks: ${
+          completedTasks.filter((t) => t.agent.role?.includes('Security'))
+            .length
+        } completed`
+      );
+      console.log(
+        `- Deployment SLA: ${
+          deploymentTime < 300000 ? 'MET' : 'EXCEEDED'
+        } (target: <5min)`
+      );
+    } catch (error) {
+      const deploymentTime = Date.now() - deploymentStartTime;
+      console.error(
+        `🚨 CRITICAL PRODUCTION FAILURE after ${deploymentTime}ms:`,
+        error.message
+      );
+
+      // Conservative mode requires immediate incident response
+      console.log('\n🚨 PRODUCTION INCIDENT RESPONSE ACTIVATED:');
+      console.log('1. Automatic rollback initiated');
+      console.log('2. Operations team alerted');
+      console.log('3. Incident logged for compliance audit');
+      console.log('4. Root cause analysis required');
+
+      // Show production task states for incident analysis
+      const teamState = productionTeam.store.getState();
+      console.log('\n🔍 PRODUCTION TASK STATE ANALYSIS:');
+      teamState.tasks.forEach((task, index) => {
+        const criticalMarker = task.adaptable ? '🟡' : '🔴';
+        console.log(
+          `${criticalMarker} ${index + 1}. ${task.status}: ${task.description}`
+        );
+        console.log(
+          `     Agent: ${task.agent.name} | Critical: ${!task.adaptable}`
+        );
+      });
+    }
+
     // Best practices for conservative mode
-    console.log('📚 Best Practices for Conservative Mode:\n');
+    console.log('\n📚 Best Practices for Conservative Mode:\n');
     console.log(
       '1. Thoroughly test all template tasks before adding to repository'
     );
@@ -279,6 +416,11 @@ async function runConservativeOrchestrationExample() {
     console.log('5. Disable task generation for production environments');
     console.log('6. Implement comprehensive logging for audit trails');
     console.log('7. Use static prioritization for predictable workflows');
+    console.log(
+      '8. Execute full workflow with team.start() for production deployment'
+    );
+    console.log('9. Monitor all quality gates and compliance requirements');
+    console.log('10. Implement automatic rollback for critical failures');
   } catch (error) {
     console.error('❌ Conservative orchestration error:', error.message);
 
@@ -288,6 +430,18 @@ async function runConservativeOrchestrationExample() {
     console.log('2. Trigger alerts to operations team');
     console.log('3. Initiate rollback procedures if needed');
     console.log('4. Document incident for compliance');
+
+    // Enhanced debugging for production issues
+    console.log('\n🔍 Production Diagnostics:');
+    console.log(`- Team Mode: ${productionTeam.mode}`);
+    console.log(
+      `- Task Generation Enabled: ${productionTeam.allowTaskGeneration}`
+    );
+    console.log(
+      `- Available Tasks: ${productionTeam.availableTemplateTasks?.length || 0}`
+    );
+    console.log(`- LLM Temperature: ${orchestrationLLM.temperature}`);
+    console.log(`- Error Timestamp: ${new Date().toISOString()}`);
   }
 
   // Summary of conservative mode benefits

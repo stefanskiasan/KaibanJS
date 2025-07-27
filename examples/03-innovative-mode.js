@@ -32,6 +32,10 @@ const {
   researchNewTechnologyTask,
   createProofOfConceptTask,
 } = require('./utils/tasks');
+const {
+  validateWorkflowResult,
+  printValidationReport,
+} = require('./utils/workflowValidator');
 
 async function runInnovativeOrchestrationExample() {
   console.log('🚀 KaibanJS Innovative Mode Orchestration Example\n');
@@ -313,8 +317,198 @@ async function runInnovativeOrchestrationExample() {
     console.log('   - AI-driven prioritization finds optimal paths');
     console.log('   - Skills-based distribution maximizes expertise\n');
 
+    // Execute the innovative R&D workflow
+    console.log('🚀 INNOVATION LAB: Starting Creative Workflow Execution\n');
+    console.log('🧪 Executing cutting-edge experiments and prototypes...');
+
+    const innovationStartTime = Date.now();
+
+    try {
+      // Execute with full innovation tracking
+      const innovationResult = await innovationTeam.start();
+      const experimentTime = Date.now() - innovationStartTime;
+
+      console.log(
+        `✨ INNOVATION EXPERIMENT COMPLETED in ${experimentTime}ms!\n`
+      );
+
+      // Innovation mode comprehensive validation
+      const validation = validateWorkflowResult(
+        innovationResult,
+        innovationTeam,
+        {
+          mode: 'innovative',
+          expectedMinTasks: 3,
+          expectedSuccessRate: 50, // Innovative mode tolerates lower success rates
+          logLevel: 'detailed',
+        }
+      );
+
+      // Print innovation-focused validation report
+      printValidationReport(validation, {
+        logLevel: 'detailed',
+        includeTaskDetails: true,
+      });
+
+      // Innovation mode celebrates both success and "intelligent failures"
+      const teamState = innovationTeam.store.getState();
+      const completedTasks = teamState.tasks.filter((t) => t.status === 'DONE');
+      const failedTasks = teamState.tasks.filter((t) => t.status === 'ERROR');
+      const inProgressTasks = teamState.tasks.filter(
+        (t) => t.status === 'DOING'
+      );
+
+      console.log('\n🎯 INNOVATION BREAKTHROUGH ANALYSIS:');
+
+      if (completedTasks.length > 0) {
+        console.log(`✨ Successful Innovations (${completedTasks.length}):`);
+        completedTasks.forEach((task, index) => {
+          const innovationType = task.adaptable
+            ? 'EXPERIMENTAL'
+            : 'FOUNDATIONAL';
+          const aiGenerated = !innovationTaskRepository.find(
+            (t) => t.description === task.description
+          )
+            ? '🆕 AI-GENERATED'
+            : '📋 FROM-TEMPLATE';
+          console.log(`   ${index + 1}. ${task.description}`);
+          console.log(
+            `      Innovator: ${task.agent.name} | Type: ${innovationType}`
+          );
+          console.log(`      Origin: ${aiGenerated}`);
+          console.log(
+            `      Innovation: ${task.result ? 'BREAKTHROUGH' : 'PROTOTYPE'}`
+          );
+        });
+      }
+
+      if (failedTasks.length > 0) {
+        console.log(
+          `\n💡 Learning from Failed Experiments (${failedTasks.length}):`
+        );
+        failedTasks.forEach((task, index) => {
+          console.log(
+            `   ${index + 1}. ${task.description} (Innovator: ${
+              task.agent.name
+            })`
+          );
+          console.log(
+            `      💭 Insight: Valuable learning for future iterations`
+          );
+        });
+      }
+
+      if (inProgressTasks.length > 0) {
+        console.log(`\n🔄 Ongoing Experiments (${inProgressTasks.length}):`);
+        inProgressTasks.forEach((task, index) => {
+          console.log(
+            `   ${index + 1}. ${task.description} (${task.agent.name})`
+          );
+        });
+      }
+
+      // Innovation metrics and impact analysis
+      const totalTasks = completedTasks.length + failedTasks.length;
+      const successRate =
+        totalTasks > 0 ? (completedTasks.length / totalTasks) * 100 : 0;
+      const aiGeneratedCount = completedTasks.filter(
+        (t) =>
+          !innovationTaskRepository.find(
+            (template) => template.description === t.description
+          )
+      ).length;
+
+      console.log(`\n📊 INNOVATION IMPACT METRICS:`);
+      console.log(
+        `- Innovation Success Rate: ${successRate.toFixed(
+          1
+        )}% (high failure rate = high innovation)`
+      );
+      console.log(
+        `- AI-Generated Breakthroughs: ${aiGeneratedCount}/${completedTasks.length} tasks`
+      );
+      console.log(
+        `- Cross-Technology Integration: ${
+          completedTasks.filter(
+            (t) =>
+              t.description.toLowerCase().includes('blockchain') ||
+              t.description.toLowerCase().includes('ai')
+          ).length
+        } tasks`
+      );
+      console.log(
+        `- Rapid Prototyping Speed: ${(
+          experimentTime / completedTasks.length
+        ).toFixed(0)}ms per innovation`
+      );
+      console.log(
+        `- Innovation Velocity: ${
+          completedTasks.length > 3
+            ? 'HIGH'
+            : completedTasks.length > 1
+            ? 'MODERATE'
+            : 'FOCUSED'
+        }`
+      );
+
+      // Analyze innovation patterns
+      console.log(`\n🔮 INNOVATION PATTERN ANALYSIS:`);
+      const technologies = [
+        'AI/ML',
+        'Blockchain/Web3',
+        'UI/UX',
+        'AR/VR',
+        'IoT',
+      ];
+      technologies.forEach((tech) => {
+        const techTasks = completedTasks.filter((t) =>
+          t.description.toLowerCase().includes(tech.toLowerCase().split('/')[0])
+        );
+        if (techTasks.length > 0) {
+          console.log(
+            `- ${tech}: ${techTasks.length} breakthrough${
+              techTasks.length > 1 ? 's' : ''
+            }`
+          );
+        }
+      });
+    } catch (error) {
+      const experimentTime = Date.now() - innovationStartTime;
+      console.error(
+        `💥 INNOVATION EXPERIMENT INTERRUPTED after ${experimentTime}ms:`,
+        error.message
+      );
+
+      // Innovation mode treats failures as learning opportunities
+      console.log('\n🧠 INNOVATION LEARNING FROM FAILURE:');
+      console.log('1. Document experimental approach and findings');
+      console.log('2. Identify breakthrough insights from partial results');
+      console.log('3. Adjust innovation strategy based on learnings');
+      console.log('4. Preserve valuable prototypes and concepts');
+
+      // Show experimental states for learning analysis
+      const teamState = innovationTeam.store.getState();
+      console.log('\n🔬 EXPERIMENTAL STATE ANALYSIS:');
+      teamState.tasks.forEach((task, index) => {
+        const innovationMarker = task.adaptable ? '🧪' : '🏗️';
+        const originMarker = !innovationTaskRepository.find(
+          (t) => t.description === task.description
+        )
+          ? '🆕'
+          : '📋';
+        console.log(
+          `${innovationMarker}${originMarker} ${index + 1}. ${task.status}: ${
+            task.description
+          }`
+        );
+        console.log(
+          `     Innovator: ${task.agent.name} | Experimental: ${task.adaptable}`
+        );
+      });
+    }
+
     // Best practices for innovative mode
-    console.log('📚 Best Practices for Innovative Mode:\n');
+    console.log('\n📚 Best Practices for Innovative Mode:\n');
     console.log('1. Start with a bold, open-ended goal');
     console.log('2. Keep initial task repository minimal - let AI expand');
     console.log('3. Use powerful LLM models (gpt-4o or better)');
@@ -323,6 +517,12 @@ async function runInnovativeOrchestrationExample() {
     console.log('6. Shorter adaptation intervals for rapid iteration');
     console.log('7. Document all experiments and learnings');
     console.log('8. Be prepared for unexpected directions');
+    console.log('9. Execute full innovation workflow with team.start()');
+    console.log('10. Celebrate intelligent failures as learning opportunities');
+    console.log('11. Track AI-generated vs template-based innovations');
+    console.log(
+      '12. Measure innovation velocity and cross-technology integration'
+    );
   } catch (error) {
     console.error('❌ Innovation orchestration error:', error.message);
 
@@ -331,6 +531,25 @@ async function runInnovativeOrchestrationExample() {
     console.log('- Failed experiments provide valuable insights');
     console.log('- Adjust strategy based on discoveries');
     console.log('- Keep iterating and exploring');
+
+    // Innovation-specific debugging
+    console.log('\n🔬 Innovation Debug Info:');
+    console.log(`- Team Mode: ${innovationTeam.mode}`);
+    console.log(
+      `- Task Generation: ${
+        innovationTeam.allowTaskGeneration ? 'Enabled' : 'Disabled'
+      }`
+    );
+    console.log(
+      `- Continuous Orchestration: ${innovationTeam.continuousOrchestration}`
+    );
+    console.log(
+      `- Available Tasks: ${innovationTeam.availableTemplateTasks?.length || 0}`
+    );
+    console.log(`- LLM Model: ${orchestrationLLM.modelName}`);
+    console.log(
+      `- LLM Temperature: ${orchestrationLLM.temperature} (creative)`
+    );
   }
 
   // Innovation mode benefits

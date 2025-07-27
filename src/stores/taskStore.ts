@@ -114,7 +114,7 @@ export const useTaskStore: StateCreator<
       task.status !== TASK_STATUS_enum.VALIDATED
     ) {
       task.status = TASK_STATUS_enum.AWAITING_VALIDATION;
-      const modelCode = task.agent.llmConfig.model;
+      const modelCode = task.agent?.llmConfig?.model || 'unknown';
       const costDetails = calculateTaskCost(modelCode, stats.llmUsageStats);
 
       const taskLog =
@@ -150,7 +150,7 @@ export const useTaskStore: StateCreator<
 
       get().handleWorkflowBlocked(task, new Error('Task awaiting validation'));
     } else {
-      const modelCode = task.agent.llmConfig.model;
+      const modelCode = task.agent?.llmConfig?.model || 'unknown';
       const costDetails = calculateTaskCost(modelCode, stats.llmUsageStats);
 
       const taskLog = get().prepareTaskStatusUpdateLog<TaskCompletionLog>({
@@ -201,7 +201,7 @@ export const useTaskStore: StateCreator<
   handleTaskError: ({ task, error }) => {
     const stats = get().getTaskStats(task);
     task.status = TASK_STATUS_enum.BLOCKED;
-    const modelCode = task.agent.llmConfig.model;
+    const modelCode = task.agent?.llmConfig?.model || 'unknown';
     const costDetails = calculateTaskCost(modelCode, stats.llmUsageStats);
     const updatedFeedbackHistory = task.feedbackHistory.map((f) =>
       f.status === FEEDBACK_STATUS_enum.PENDING
@@ -254,7 +254,7 @@ export const useTaskStore: StateCreator<
   handleTaskBlocked: ({ task, error }) => {
     const stats = get().getTaskStats(task);
     task.status = TASK_STATUS_enum.BLOCKED;
-    const modelCode = task.agent.llmConfig.model;
+    const modelCode = task.agent?.llmConfig?.model || 'unknown';
     const costDetails = calculateTaskCost(modelCode, stats.llmUsageStats);
 
     const updatedFeedbackHistory = task.feedbackHistory.map((f) =>
@@ -309,7 +309,7 @@ export const useTaskStore: StateCreator<
 
   handleTaskAborted: ({ task, error }) => {
     const stats = get().getTaskStats(task);
-    const modelCode = task.agent.llmConfig.model;
+    const modelCode = task.agent?.llmConfig?.model || 'unknown';
     const costDetails = calculateTaskCost(modelCode, stats.llmUsageStats);
 
     const taskLog = get().prepareTaskStatusUpdateLog<TaskAbortedLog>({
@@ -346,7 +346,7 @@ export const useTaskStore: StateCreator<
 
   handleTaskPaused: ({ task }) => {
     const stats = get().getTaskStats(task);
-    const modelCode = task.agent.llmConfig.model;
+    const modelCode = task.agent?.llmConfig?.model || 'unknown';
     const costDetails = calculateTaskCost(modelCode, stats.llmUsageStats);
 
     const updatedFeedbackHistory = task.feedbackHistory.map((f) =>

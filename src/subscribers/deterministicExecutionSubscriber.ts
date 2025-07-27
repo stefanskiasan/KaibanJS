@@ -339,13 +339,32 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
     decisions: any,
     state: CombinedStoresState
   ): Promise<void> => {
-    // Implement decision application logic
-    if (decisions.modifyTasks && decisions.modifyTasks.length > 0) {
-      for (const modification of decisions.modifyTasks) {
+    // Validate decisions object
+    if (!decisions || typeof decisions !== 'object') {
+      console.warn(
+        'Invalid orchestration decisions object received:',
+        decisions
+      );
+      return;
+    }
+
+    // Handle task modifications - check both possible structures
+    const taskModifications =
+      decisions.modifyTasks ||
+      decisions.recommendations?.taskModifications ||
+      [];
+
+    if (Array.isArray(taskModifications) && taskModifications.length > 0) {
+      for (const modification of taskModifications) {
+        if (!modification || !modification.taskId) {
+          console.warn('Invalid task modification object:', modification);
+          continue;
+        }
+
         const targetTask = state.tasks.find(
-          (t) => t.id === modification.taskId
+          (t) => t && t.id === modification.taskId
         );
-        if (targetTask) {
+        if (targetTask && modification.changes) {
           // Apply task modifications
           Object.assign(targetTask, modification.changes);
         }

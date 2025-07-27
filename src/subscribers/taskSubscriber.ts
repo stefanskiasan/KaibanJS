@@ -49,7 +49,7 @@ const subscribeTaskStatusUpdates = (useStore: TeamStore): void => {
                 iterationCount: taskCompletionLog.metadata?.iterationCount,
                 duration: taskCompletionLog.metadata?.duration,
                 agentName: agent?.name,
-                agentModel: agent?.llmConfig.model,
+                agentModel: agent?.llmConfig?.model || 'unknown',
                 taskTitle: getTaskTitleForLogs(taskLog.task),
                 currentTaskNumber,
                 costDetails: taskCompletionLog.metadata?.costDetails,
