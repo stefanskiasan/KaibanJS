@@ -1,26 +1,26 @@
-# KaibanJS Orchestration Properties - Komplette Referenz
+# KaibanJS Orchestration Properties - Complete Reference
 
-Diese Dokumentation erklärt alle neuen Properties für die intelligente Orchestration in KaibanJS im Detail.
+This documentation explains all new properties for intelligent orchestration in KaibanJS in detail.
 
 ## 🏗️ Team Properties (ITeamParams)
 
 ### `enableOrchestration?: boolean`
 
 **Default:** `false`  
-**Typ:** Boolean (optional)
+**Type:** Boolean (optional)
 
-**Beschreibung:**
-Das Master-Control-Flag für alle Orchestration-Features. Wenn `false` (Standard), verhält sich das Team wie normales KaibanJS ohne Orchestration.
+**Description:**
+The master control flag for all orchestration features. When `false` (default), the team behaves like normal KaibanJS without orchestration.
 
-**Effekt:**
+**Effect:**
 
-- `true`: Aktiviert alle intelligenten Orchestration-Features
-- `false`: Deaktiviert komplett alle Orchestration-Features, normale KaibanJS-Funktionalität
+- `true`: Enables all intelligent orchestration features
+- `false`: Completely disables all orchestration features, normal KaibanJS functionality
 
-**Beispiel:**
+**Example:**
 
 ```javascript
-// Normal KaibanJS (bisheriges Verhalten)
+// Normal KaibanJS (previous behavior)
 const normalTeam = new Team({
   name: 'Standard Team',
   agents: [agent1, agent2],
@@ -28,124 +28,124 @@ const normalTeam = new Team({
   // enableOrchestration: false (default)
 });
 
-// Intelligente Orchestration aktiviert
+// Intelligent orchestration enabled
 const smartTeam = new Team({
   name: 'Smart Team',
   agents: [agent1, agent2],
   tasks: [],
-  enableOrchestration: true, // ERFORDERLICH für Orchestration
+  enableOrchestration: true, // REQUIRED for orchestration
   availableTemplateTasks: templateTasks,
 });
 ```
 
-**Wichtig:** Ohne dieses Flag werden alle anderen Orchestration-Properties ignoriert und Orchestration-Methoden zeigen Warnungen oder werfen Fehler.
+**Important:** Without this flag, all other orchestration properties are ignored and orchestration methods show warnings or throw errors.
 
 ---
 
 ### `continuousOrchestration?: boolean`
 
 **Default:** `false`  
-**Typ:** Boolean (optional)
+**Type:** Boolean (optional)
 
-**Beschreibung:**
-Steuert, wann die Orchestration während der Workflow-Ausführung läuft. Bietet granulare Kontrolle über das Timing der Orchestration.
+**Description:**
+Controls when orchestration runs during workflow execution. Provides granular control over orchestration timing.
 
-**Effekt:**
+**Effect:**
 
-- **`false`** (Standard): Orchestration läuft nur einmal am Anfang über `activateOrchestration()`
-- **`true`**: Orchestration läuft am Anfang UND nach jedem Task-Abschluss für kontinuierliche Optimierung
+- **`false`** (default): Orchestration runs only once at the beginning via `activateOrchestration()`
+- **`true`**: Orchestration runs at the beginning AND after each task completion for continuous optimization
 
-**Beispiel:**
+**Example:**
 
 ```javascript
-// Nur einmalige Orchestration am Anfang
+// Initial-only orchestration
 const initialOnlyTeam = new Team({
   enableOrchestration: true,
-  continuousOrchestration: false, // Standard
+  continuousOrchestration: false, // Default
   availableTemplateTasks: [...],
-  // ... andere Konfiguration
+  // ... other configuration
 });
 
-// Kontinuierliche Orchestration nach jedem Task
+// Continuous orchestration after each task
 const continuousTeam = new Team({
   enableOrchestration: true,
-  continuousOrchestration: true, // Aktiviert kontinuierliche Orchestration
+  continuousOrchestration: true, // Enables continuous orchestration
   availableTemplateTasks: [...],
-  // ... andere Konfiguration
+  // ... other configuration
 });
 
-// Runtime-Konfiguration möglich
-team.setContinuousOrchestration(true); // Aktiviert kontinuierliche Orchestration
-team.setContinuousOrchestration(false); // Deaktiviert zu nur anfänglicher Orchestration
+// Runtime configuration possible
+team.setContinuousOrchestration(true); // Enables continuous orchestration
+team.setContinuousOrchestration(false); // Disables to initial-only orchestration
 ```
 
-**Hinweise:**
+**Notes:**
 
-- Erfordert `enableOrchestration: true` um zu funktionieren
-- Bei `false`: Orchestrator analysiert nur zu Beginn und optimiert den gesamten Workflow einmalig
-- Bei `true`: Orchestrator analysiert nach jedem Task-Abschluss und kann dynamisch Tasks modifizieren, hinzufügen oder entfernen
-- Kann zur Laufzeit über `team.setContinuousOrchestration(enabled)` geändert werden
+- Requires `enableOrchestration: true` to function
+- When `false`: Orchestrator analyzes only at the beginning and optimizes the entire workflow once
+- When `true`: Orchestrator analyzes after each task completion and can dynamically modify, add or remove tasks
+- Can be changed at runtime via `team.setContinuousOrchestration(enabled)`
 
-#### **🎯 Use Cases und Best Practices**
+#### **🎯 Use Cases and Best Practices**
 
-**Wann `continuousOrchestration: false` verwenden:**
+**When to use `continuousOrchestration: false`:**
 
-- **Statische Workflows**: Bekannte, unveränderliche Task-Sequenzen
-- **Performance-kritische Anwendungen**: Minimale LLM-Aufrufe für optimale Geschwindigkeit
-- **Batch-Verarbeitung**: Große Mengen ähnlicher Tasks ohne Anpassungsbedarf
-- **Kostenoptimierung**: Reduzierte LLM-Token-Nutzung für Budget-bewusste Projekte
-- **Deterministische Workflows**: Wenn Vorhersagbarkeit wichtiger ist als Flexibilität
+- **Static workflows**: Known, unchangeable task sequences
+- **Performance-critical applications**: Minimal LLM calls for optimal speed
+- **Batch processing**: Large amounts of similar tasks without adaptation needs
+- **Cost optimization**: Reduced LLM token usage for budget-conscious projects
+- **Deterministic workflows**: When predictability is more important than flexibility
 
-**Wann `continuousOrchestration: true` verwenden:**
+**When to use `continuousOrchestration: true`:**
 
-- **Dynamische Projekte**: Evolvierende Anforderungen und unbekannte Komplexität
-- **Explorative Entwicklung**: Forschungsprojekte mit sich ändernden Zielen
-- **Adaptive Workflows**: Tasks hängen stark von vorherigen Ergebnissen ab
-- **Qualitätskritische Projekte**: Kontinuierliche Optimierung ist wichtiger als Geschwindigkeit
-- **Lernende Systeme**: Workflows sollen sich basierend auf Erfahrungen verbessern
+- **Dynamic projects**: Evolving requirements and unknown complexity
+- **Exploratory development**: Research projects with changing goals
+- **Adaptive workflows**: Tasks heavily depend on previous results
+- **Quality-critical projects**: Continuous optimization is more important than speed
+- **Learning systems**: Workflows should improve based on experience
 
-**Performance-Überlegungen:**
+**Performance considerations:**
 
-- **Token-Verbrauch**: Continuous mode verwendet ~40-60% mehr LLM-Token
-- **Ausführungszeit**: +15-25% längere Workflows durch Analyse-Overhead
-- **Qualitätsgewinn**: ~30-50% bessere Task-Optimierung und Anpassung
-- **Kosten-Nutzen**: Höhere LLM-Kosten vs. bessere Projektergebnisse
+- **Token consumption**: Continuous mode uses ~40-60% more LLM tokens
+- **Execution time**: +15-25% longer workflows due to analysis overhead
+- **Quality gain**: ~30-50% better task optimization and adaptation
+- **Cost-benefit**: Higher LLM costs vs. better project outcomes
 
 ---
 
 ### `availableTemplateTasks?: Task[]`
 
 **Default:** `[]`  
-**Typ:** Array von Task-Objekten (optional)
+**Type:** Array of Task objects (optional)
 
-**Beschreibung:**
-Repository von Template-Tasks, die der Orchestrator auswählen, anpassen und instanziieren kann.
+**Description:**
+Repository of template tasks that the orchestrator can select, adapt and instantiate.
 
-**Effekt:**
+**Effect:**
 
-- Bietet dem Orchestrator eine Bibliothek von verfügbaren Tasks
-- Tasks mit `template: true` sind ideal für dieses Repository
-- Orchestrator kann diese Tasks basierend auf Projektzielen auswählen
+- Provides the orchestrator with a library of available tasks
+- Tasks with `template: true` are ideal for this repository
+- Orchestrator can select these tasks based on project goals
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const templateTasks = [
   new Task({
-    description: 'Implementiere Benutzerauthentifizierung',
-    expectedOutput: 'Vollständiges Auth-System',
+    description: 'Implement user authentication',
+    expectedOutput: 'Complete auth system',
     agent: developer,
     adaptable: true,
     template: true,
     resourceRequirements: {
-      estimatedTime: '4-6 Stunden',
+      estimatedTime: '4-6 hours',
       skillsRequired: ['backend', 'security'],
       dependencies: ['database_setup'],
     },
   }),
   new Task({
-    description: 'Erstelle responsive UI-Komponenten',
-    expectedOutput: 'Mobile-first UI-Komponenten',
+    description: 'Create responsive UI components',
+    expectedOutput: 'Mobile-first UI components',
     agent: designer,
     adaptable: true,
     template: true,
@@ -157,28 +157,28 @@ const team = new Team({
   agents: [developer, designer],
   tasks: [],
   enableOrchestration: true,
-  availableTemplateTasks: templateTasks, // Task-Repository
+  availableTemplateTasks: templateTasks, // Task repository
 });
 ```
 
-**Best Practice:** Erstelle wiederverwendbare Template-Tasks mit klaren Beschreibungen und Ressourcenanforderungen.
+**Best Practice:** Create reusable template tasks with clear descriptions and resource requirements.
 
 ---
 
 ### `allowTaskGeneration?: boolean`
 
 **Default:** `false`  
-**Typ:** Boolean (optional)
+**Type:** Boolean (optional)
 
-**Beschreibung:**
-Erlaubt dem Orchestrator, neue Tasks autonom zu erstellen, wenn Lücken im Workflow identifiziert werden.
+**Description:**
+Allows the orchestrator to autonomously create new tasks when gaps in the workflow are identified.
 
-**Effekt:**
+**Effect:**
 
-- `true`: Orchestrator kann neue Tasks generieren basierend auf Projektzielen
-- `false`: Orchestrator kann nur aus `availableTemplateTasks` auswählen
+- `true`: Orchestrator can generate new tasks based on project goals
+- `false`: Orchestrator can only select from `availableTemplateTasks`
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const team = new Team({
@@ -187,40 +187,40 @@ const team = new Team({
   tasks: [],
   enableOrchestration: true,
   availableTemplateTasks: basicTasks,
-  allowTaskGeneration: true, // Erlaubt autonome Task-Erstellung
-  orchestrationStrategy: 'Baue eine sichere Webanwendung mit modernem UI',
+  allowTaskGeneration: true, // Allows autonomous task creation
+  orchestrationStrategy: 'Build a secure web application with modern UI',
 });
 
-// Der Orchestrator könnte automatisch neue Tasks erstellen wie:
-// - "Implementiere API Rate Limiting" (Sicherheitslücke erkannt)
-// - "Erstelle E2E Tests" (Testlücke identifiziert)
+// The orchestrator could automatically create new tasks like:
+// - "Implement API Rate Limiting" (security gap detected)
+// - "Create E2E Tests" (testing gap identified)
 ```
 
-**Anwendungsfälle:**
+**Use cases:**
 
-- Explorative Projekte mit unklaren Anforderungen
-- Adaptive Workflows, die sich entwickeln sollen
-- Teams mit hoher LLM-Kompetenz
+- Exploratory projects with unclear requirements
+- Adaptive workflows that should evolve
+- Teams with high LLM competency
 
-**Vorsicht:** Kann zu unerwarteten Tasks führen. Verwende klare `orchestrationStrategy`.
+**Caution:** Can lead to unexpected tasks. Use clear `orchestrationStrategy`.
 
 ---
 
 ### `orchestrationStrategy?: string`
 
 **Default:** `undefined`  
-**Typ:** String (optional)
+**Type:** String (optional)
 
-**Beschreibung:**
-Detaillierte Anweisungen für den LLM-basierten Orchestrator über Prioritäten, Arbeitsweise und Ziele.
+**Description:**
+Detailed instructions for the LLM-based orchestrator about priorities, working methods and goals.
 
-**Effekt:**
+**Effect:**
 
-- Leitet Entscheidungen des Orchestrators bei Task-Auswahl und -Anpassung
-- Beeinflusst Task-Generierung und Priorisierung
-- Wird in allen LLM-Prompts als Kontext verwendet
+- Guides orchestrator decisions in task selection and adaptation
+- Influences task generation and prioritization
+- Used as context in all LLM prompts
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const team = new Team({
@@ -231,77 +231,77 @@ const team = new Team({
   availableTemplateTasks: ecommerceTasks,
   allowTaskGeneration: true,
   orchestrationStrategy: `
-    Du bist ein intelligenter Orchestrator für ein E-Commerce-Entwicklungsteam.
+    You are an intelligent orchestrator for an e-commerce development team.
     
-    PRIORITÄTEN:
-    1. Liefere qualitativ hochwertige Software termingerecht
-    2. Halte Code-Qualität >85%
-    3. Implementiere Mobile-First Design
-    4. Priorisiere Sicherheit und Performance
+    PRIORITIES:
+    1. Deliver high-quality software on time
+    2. Maintain code quality >85%
+    3. Implement mobile-first design
+    4. Prioritize security and performance
     
-    ARBEITSWEISE:
-    - Bevorzuge bewährte Technologien
-    - Implementiere umfassende Tests
-    - Optimiere für SEO und Conversion
+    WORKING METHOD:
+    - Prefer proven technologies
+    - Implement comprehensive tests
+    - Optimize for SEO and conversion
     
-    EINSCHRÄNKUNGEN:
-    - Keine experimentellen Frameworks
-    - Budget: max 200 Entwicklerstunden
-    - Deadline: 6 Wochen
+    CONSTRAINTS:
+    - No experimental frameworks
+    - Budget: max 200 developer hours
+    - Deadline: 6 weeks
   `,
 });
 ```
 
-**Best Practice:** Sei spezifisch über Ziele, Einschränkungen und Prioritäten.
+**Best Practice:** Be specific about goals, constraints and priorities.
 
 ---
 
 ### `mode?: 'conservative' | 'adaptive' | 'innovative' | 'learning'`
 
 **Default:** `'adaptive'`  
-**Typ:** Enum (optional)
+**Type:** Enum (optional)
 
-**Beschreibung:**
-Definiert das Verhalten und die Risikobereitschaft des Orchestrators.
+**Description:**
+Defines the behavior and risk tolerance of the orchestrator.
 
-**Modi im Detail:**
+**Modes in detail:**
 
 #### `'conservative'`
 
-- **Charakteristik:** Vorsichtige Task-Auswahl, strenge Einhaltung von Templates
-- **Risikobereitschaft:** Minimal
-- **Task-Anpassung:** Begrenzt, nur sicherheitskritische Änderungen
-- **Generierung:** Sehr zurückhaltend bei neuen Tasks
-- **Ideal für:** Produktionsumgebungen, kritische Systeme, regulierte Branchen
+- **Characteristic:** Cautious task selection, strict template adherence
+- **Risk tolerance:** Minimal
+- **Task adaptation:** Limited, only safety-critical changes
+- **Generation:** Very conservative with new tasks
+- **Ideal for:** Production environments, critical systems, regulated industries
 
 #### `'adaptive'`
 
-- **Charakteristik:** Ausgewogener Ansatz, moderate Task-Anpassung
-- **Risikobereitschaft:** Mittel
-- **Task-Anpassung:** Responsive auf Kontextänderungen
-- **Generierung:** Maßvolle neue Task-Erstellung
-- **Ideal für:** Meiste Entwicklungsprojekte, etablierte Teams
+- **Characteristic:** Balanced approach, moderate task adaptation
+- **Risk tolerance:** Medium
+- **Task adaptation:** Responsive to context changes
+- **Generation:** Moderate new task creation
+- **Ideal for:** Most development projects, established teams
 
 #### `'innovative'`
 
-- **Charakteristik:** Kreative Task-Generierung, experimentelle Ansätze
-- **Risikobereitschaft:** Hoch
-- **Task-Anpassung:** Extensive Anpassungen basierend auf Zielen
-- **Generierung:** Proaktive neue Task-Erstellung
-- **Ideal für:** Forschung & Entwicklung, Startups, neue Technologien
+- **Characteristic:** Creative task generation, experimental approaches
+- **Risk tolerance:** High
+- **Task adaptation:** Extensive adaptations based on goals
+- **Generation:** Proactive new task creation
+- **Ideal for:** Research & development, startups, new technologies
 
 #### `'learning'`
 
-- **Charakteristik:** Kontinuierliche Verbesserung, Lernen aus Ergebnissen
-- **Risikobereitschaft:** Hoch
-- **Task-Anpassung:** Evolvierende Strategien basierend auf Outcomes
-- **Generierung:** Experimentelle Tasks für Lernzwecke
-- **Ideal für:** Prototyping, Skill-Entwicklung, Innovationsprojekte
+- **Characteristic:** Continuous improvement, learning from results
+- **Risk tolerance:** High
+- **Task adaptation:** Evolving strategies based on outcomes
+- **Generation:** Experimental tasks for learning purposes
+- **Ideal for:** Prototyping, skill development, innovation projects
 
-**Beispiel:**
+**Example:**
 
 ```javascript
-// Konservatives Team für kritische Infrastruktur
+// Conservative team for critical infrastructure
 const criticalTeam = new Team({
   name: 'Infrastructure Team',
   agents: [sysAdmin, securityExpert],
@@ -311,7 +311,7 @@ const criticalTeam = new Team({
   availableTemplateTasks: securityTasks,
 });
 
-// Innovatives Team für neue Features
+// Innovative team for new features
 const innovationTeam = new Team({
   name: 'Innovation Lab',
   agents: [researcher, prototyper],
@@ -327,77 +327,77 @@ const innovationTeam = new Team({
 ### `maxActiveTasks?: number`
 
 **Default:** `5`  
-**Typ:** Number (optional)
+**Type:** Number (optional)
 
-**Beschreibung:**
-Begrenzt die maximale Anzahl von Tasks, die gleichzeitig aktiv sein können.
+**Description:**
+Limits the maximum number of tasks that can be active simultaneously.
 
-**Effekt:**
+**Effect:**
 
-- Verhindert Überlastung des Teams
-- Steuert Parallelität des Workflows
-- Beeinflusst Task-Auswahl des Orchestrators
+- Prevents team overload
+- Controls workflow parallelism
+- Influences orchestrator task selection
 
-**Beispiel:**
+**Example:**
 
 ```javascript
-// Kleines Team mit begrenzter Kapazität
+// Small team with limited capacity
 const smallTeam = new Team({
   name: 'Startup Team',
   agents: [fullStackDev],
   tasks: [],
   enableOrchestration: true,
-  maxActiveTasks: 2, // Nur 2 Tasks gleichzeitig
+  maxActiveTasks: 2, // Only 2 tasks simultaneously
   availableTemplateTasks: startupTasks,
 });
 
-// Großes Team mit hoher Parallelität
+// Large team with high parallelism
 const enterpriseTeam = new Team({
   name: 'Enterprise Team',
   agents: [dev1, dev2, dev3, tester1, tester2],
   tasks: [],
   enableOrchestration: true,
-  maxActiveTasks: 8, // Bis zu 8 parallele Tasks
+  maxActiveTasks: 8, // Up to 8 parallel tasks
   availableTemplateTasks: enterpriseTasks,
 });
 ```
 
-**Empfehlung:**
+**Recommendation:**
 
-- 1-2 Tasks pro Agent als Richtwert
-- Berücksichtige Task-Komplexität und Abhängigkeiten
+- 1-2 tasks per agent as guideline
+- Consider task complexity and dependencies
 
 ---
 
 ### `taskPrioritization?: 'static' | 'dynamic' | 'ai-driven'`
 
 **Default:** `'dynamic'`  
-**Typ:** Enum (optional)
+**Type:** Enum (optional)
 
-**Beschreibung:**
-Bestimmt wie Tasks priorisiert werden.
+**Description:**
+Determines how tasks are prioritized.
 
-**Strategien im Detail:**
+**Strategies in detail:**
 
 #### `'static'`
 
-- **Verhalten:** Feste Prioritätsreihenfolge basierend auf Abhängigkeiten
-- **Anpassung:** Keine Änderung während der Ausführung
-- **Ideal für:** Vorhersagbare Workflows, feste Pläne
+- **Behavior:** Fixed priority order based on dependencies
+- **Adaptation:** No changes during execution
+- **Ideal for:** Predictable workflows, fixed plans
 
 #### `'dynamic'`
 
-- **Verhalten:** Prioritätsanpassung basierend auf Projektphase und Kontext
-- **Anpassung:** Moderate Anpassungen basierend auf Projektfortschritt
-- **Ideal für:** Meiste Entwicklungsprojekte
+- **Behavior:** Priority adjustments based on project phase and context
+- **Adaptation:** Moderate adjustments based on project progress
+- **Ideal for:** Most development projects
 
 #### `'ai-driven'`
 
-- **Verhalten:** LLM-basierte Prioritätsoptimierung basierend auf Projektzielen
-- **Anpassung:** Kontinuierliche Neubewertung durch KI
-- **Ideal für:** Komplexe Projekte, adaptive Workflows
+- **Behavior:** LLM-based priority optimization based on project goals
+- **Adaptation:** Continuous re-evaluation by AI
+- **Ideal for:** Complex projects, adaptive workflows
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const team = new Team({
@@ -405,8 +405,8 @@ const team = new Team({
   agents: [developer, designer, tester],
   tasks: [],
   enableOrchestration: true,
-  taskPrioritization: 'ai-driven', // KI entscheidet Prioritäten
-  orchestrationStrategy: 'Optimiere für Time-to-Market und Qualität',
+  taskPrioritization: 'ai-driven', // AI decides priorities
+  orchestrationStrategy: 'Optimize for time-to-market and quality',
   llmConfig: {
     provider: 'openai',
     model: 'gpt-4o',
@@ -419,46 +419,46 @@ const team = new Team({
 ### `workloadDistribution?: 'balanced' | 'skills-based' | 'availability'`
 
 **Default:** `'balanced'`  
-**Typ:** Enum (optional)
+**Type:** Enum (optional)
 
-**Beschreibung:**
-Steuert wie Tasks auf verfügbare Agents verteilt werden.
+**Description:**
+Controls how tasks are distributed among available agents.
 
-**Verteilungsstrategien:**
+**Distribution strategies:**
 
 #### `'balanced'`
 
-- **Verhalten:** Gleichmäßige Verteilung über alle verfügbaren Agents
-- **Ziel:** Ausgewogene Arbeitsbelastung
-- **Ideal für:** Teams mit ähnlichen Fähigkeiten
+- **Behavior:** Even distribution across all available agents
+- **Goal:** Balanced workload
+- **Ideal for:** Teams with similar skills
 
 #### `'skills-based'`
 
-- **Verhalten:** Optimale Zuordnung von Tasks zu Agent-Fähigkeiten
-- **Ziel:** Maximale Effizienz durch Expertise-Matching
-- **Ideal für:** Spezialisierte Teams, komplexe Projekte
+- **Behavior:** Optimal assignment of tasks to agent skills
+- **Goal:** Maximum efficiency through expertise matching
+- **Ideal for:** Specialized teams, complex projects
 
 #### `'availability'`
 
-- **Verhalten:** Priorität für Agents mit geringerer aktueller Arbeitsbelastung
-- **Ziel:** Schnelle Task-Bearbeitung
-- **Ideal für:** Zeitkritische Projekte
+- **Behavior:** Priority for agents with lower current workload
+- **Goal:** Fast task processing
+- **Ideal for:** Time-critical projects
 
-**Beispiel:**
+**Example:**
 
 ```javascript
-// Skills-basierte Verteilung für spezialisiertes Team
+// Skills-based distribution for specialized team
 const specializedTeam = new Team({
   name: 'Specialized Development Team',
   agents: [
-    frontendExpert, // Spezialist für UI/UX
-    backendExpert, // Spezialist für APIs/Datenbank
-    securityExpert, // Spezialist für Sicherheit
-    devopsExpert, // Spezialist für Deployment
+    frontendExpert, // UI/UX specialist
+    backendExpert, // APIs/Database specialist
+    securityExpert, // Security specialist
+    devopsExpert, // Deployment specialist
   ],
   tasks: [],
   enableOrchestration: true,
-  workloadDistribution: 'skills-based', // Matching nach Expertise
+  workloadDistribution: 'skills-based', // Matching by expertise
   availableTemplateTasks: specializedTasks,
 });
 ```
@@ -467,74 +467,74 @@ const specializedTeam = new Team({
 
 ### `adaptationInterval?: number`
 
-**Default:** `300000` (5 Minuten)  
-**Typ:** Number in Millisekunden (optional)
+**Default:** `300000` (5 minutes)  
+**Type:** Number in milliseconds (optional)
 
-**Beschreibung:**
-Definiert wie oft der Orchestrator die Workflow-Performance überprüft und Optimierungen vornimmt.
+**Description:**
+Defines how often the orchestrator checks workflow performance and makes optimizations.
 
-**Effekt:**
+**Effect:**
 
-- Häufigere Intervalle = Responsivere Anpassungen, höhere LLM-Kosten
-- Längere Intervalle = Stabilere Ausführung, niedrigere Kosten
+- More frequent intervals = More responsive adaptations, higher LLM costs
+- Longer intervals = More stable execution, lower costs
 
-**Beispiel:**
+**Example:**
 
 ```javascript
-// Hochfrequente Optimierung für kritische Projekte
+// High-frequency optimization for critical projects
 const criticalProject = new Team({
   name: 'Critical Launch Team',
   agents: [developer, tester, manager],
   tasks: [],
   enableOrchestration: true,
-  adaptationInterval: 60000, // Jede Minute (60 Sekunden)
+  adaptationInterval: 60000, // Every minute (60 seconds)
   availableTemplateTasks: criticalTasks,
 });
 
-// Seltene Optimierung für stabile Projekte
+// Infrequent optimization for stable projects
 const stableProject = new Team({
   name: 'Maintenance Team',
   agents: [developer],
   tasks: [],
   enableOrchestration: true,
-  adaptationInterval: 1800000, // Alle 30 Minuten
+  adaptationInterval: 1800000, // Every 30 minutes
   availableTemplateTasks: maintenanceTasks,
 });
 ```
 
-**Empfehlung:**
+**Recommendation:**
 
-- Entwicklung: 5-15 Minuten
-- Produktion: 30-60 Minuten
-- Kritische Systeme: 1-5 Minuten
+- Development: 5-15 minutes
+- Production: 30-60 minutes
+- Critical systems: 1-5 minutes
 
 ---
 
 ### `llmConfig?: LLMConfig`
 
 **Default:** `undefined`  
-**Typ:** LLMConfig-Objekt (optional)
+**Type:** LLMConfig object (optional)
 
-**Beschreibung:**
-Team-spezifische LLM-Konfiguration für Orchestration-Entscheidungen.
+**Description:**
+Team-specific LLM configuration for orchestration decisions.
 
-**Effekt:**
+**Effect:**
 
-- Ermöglicht separates LLM für Orchestration (unabhängig von Agent-LLMs)
-- Unterstützt alle KaibanJS-LLM-Provider
+- Enables separate LLM for orchestration (independent of agent LLMs)
+- Supports all KaibanJS LLM providers
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const team = new Team({
   name: 'AI-Powered Team',
-  agents: [developer, tester], // Können andere LLMs verwenden
+  agents: [developer, tester], // Can use other LLMs
   tasks: [],
   enableOrchestration: true,
   llmConfig: {
     provider: 'openai',
-    model: 'gpt-4o', // Leistungsstarkes Modell für Orchestration
-    temperature: 0.2, // Niedrige Temperatur für konsistente Entscheidungen
+    model: 'gpt-4o', // Powerful model for orchestration
+    temperature: 0.2, // Low temperature for consistent decisions
     maxRetries: 3,
   },
   availableTemplateTasks: complexTasks,
@@ -546,12 +546,12 @@ const team = new Team({
 ### `llmInstance?: LangChainChatModel`
 
 **Default:** `undefined`  
-**Typ:** LangChain ChatModel (optional)
+**Type:** LangChain ChatModel (optional)
 
-**Beschreibung:**
-Vorkonfigurierte LLM-Instanz für erweiterte Kontrolle über Orchestration-LLM.
+**Description:**
+Pre-configured LLM instance for advanced control over orchestration LLM.
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 import { ChatOpenAI } from 'langchain/chat_models/openai';
@@ -560,7 +560,7 @@ const customLLM = new ChatOpenAI({
   modelName: 'gpt-4o',
   temperature: 0.1,
   maxTokens: 2000,
-  // Erweiterte Konfiguration...
+  // Advanced configuration...
 });
 
 const team = new Team({
@@ -568,7 +568,7 @@ const team = new Team({
   agents: [developer],
   tasks: [],
   enableOrchestration: true,
-  llmInstance: customLLM, // Vorkonfigurierte Instanz
+  llmInstance: customLLM, // Pre-configured instance
   availableTemplateTasks: tasks,
 });
 ```
@@ -580,35 +580,35 @@ const team = new Team({
 ### `adaptable?: boolean`
 
 **Default:** `false`  
-**Typ:** Boolean (optional)
+**Type:** Boolean (optional)
 
-**Beschreibung:**
-Erlaubt dem Orchestrator, diesen Task zur Laufzeit zu modifizieren.
+**Description:**
+Allows the orchestrator to modify this task at runtime.
 
-**Effekt:**
+**Effect:**
 
-- `true`: Task kann angepasst werden (Beschreibung, Agent, Umfang)
-- `false`: Task ist unveränderlich
+- `true`: Task can be adapted (description, agent, scope)
+- `false`: Task is immutable
 
-**Beispiel:**
+**Example:**
 
 ```javascript
-// Anpassbarer Task für flexible Anforderungen
+// Adaptable task for flexible requirements
 const flexibleTask = new Task({
-  description: 'Implementiere Benutzerauthentifizierung',
-  expectedOutput: 'Auth-System',
+  description: 'Implement user authentication',
+  expectedOutput: 'Auth system',
   agent: developer,
-  adaptable: true, // Kann angepasst werden
-  orchestrationRules: 'Kann für OAuth, JWT oder Session-based angepasst werden',
+  adaptable: true, // Can be adapted
+  orchestrationRules: 'Can be adapted for OAuth, JWT or session-based',
 });
 
-// Kritischer unveränderlicher Task
+// Critical immutable task
 const criticalTask = new Task({
-  description: 'Sicherheitsaudit durchführen',
-  expectedOutput: 'Auditbericht',
+  description: 'Perform security audit',
+  expectedOutput: 'Audit report',
   agent: securityExpert,
-  adaptable: false, // NICHT veränderbar
-  orchestrationRules: 'KRITISCH - Keine Modifikationen erlaubt',
+  adaptable: false, // NOT changeable
+  orchestrationRules: 'CRITICAL - No modifications allowed',
 });
 ```
 
@@ -617,33 +617,33 @@ const criticalTask = new Task({
 ### `orchestrationRules?: string`
 
 **Default:** `undefined`  
-**Typ:** String (optional)
+**Type:** String (optional)
 
-**Beschreibung:**
-Spezifische Regeln und Einschränkungen für diesen Task, die der Orchestrator beachten muss.
+**Description:**
+Specific rules and constraints for this task that the orchestrator must observe.
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const task = new Task({
-  description: 'Implementiere Zahlungssystem',
-  expectedOutput: 'Sicheres Zahlungssystem',
+  description: 'Implement payment system',
+  expectedOutput: 'Secure payment system',
   agent: developer,
   adaptable: true,
   orchestrationRules: `
-    SICHERHEITSREGELN:
-    - PCI DSS Compliance erforderlich
-    - Keine Kreditkartendaten lokal speichern
-    - End-to-End Verschlüsselung obligatorisch
+    SECURITY RULES:
+    - PCI DSS compliance required
+    - No credit card data stored locally
+    - End-to-end encryption mandatory
     
-    ANPASSUNGSOPTIONEN:
-    - Provider kann gewählt werden (Stripe, PayPal)
-    - Währungsunterstützung anpassbar
-    - Mobile Payment optional
+    ADAPTATION OPTIONS:
+    - Provider can be chosen (Stripe, PayPal)
+    - Currency support adaptable
+    - Mobile payment optional
     
-    EINSCHRÄNKUNGEN:
-    - Keine experimentellen Payment-APIs
-    - Audit durch Security-Team erforderlich
+    CONSTRAINTS:
+    - No experimental payment APIs
+    - Security team audit required
   `,
 });
 ```
@@ -653,20 +653,20 @@ const task = new Task({
 ### `dynamicPriority?: boolean`
 
 **Default:** `false`  
-**Typ:** Boolean (optional)
+**Type:** Boolean (optional)
 
-**Beschreibung:**
-Erlaubt dem Orchestrator, die Priorität dieses Tasks dynamisch anzupassen.
+**Description:**
+Allows the orchestrator to dynamically adjust the priority of this task.
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const adaptiveTask = new Task({
-  description: 'Optimiere Datenbankperformance',
-  expectedOutput: 'Verbesserte DB-Performance',
+  description: 'Optimize database performance',
+  expectedOutput: 'Improved DB performance',
   agent: dba,
-  dynamicPriority: true, // Priorität kann sich ändern
-  orchestrationRules: 'Priorität steigt wenn Performance-Probleme auftreten',
+  dynamicPriority: true, // Priority can change
+  orchestrationRules: 'Priority increases when performance issues occur',
 });
 ```
 
@@ -675,26 +675,26 @@ const adaptiveTask = new Task({
 ### `splitStrategy?: 'none' | 'manual' | 'auto'`
 
 **Default:** `'none'`  
-**Typ:** Enum (optional)
+**Type:** Enum (optional)
 
-**Beschreibung:**
-Definiert ob und wie ein Task in kleinere Tasks aufgeteilt werden kann.
+**Description:**
+Defines whether and how a task can be split into smaller tasks.
 
-**Strategien:**
+**Strategies:**
 
-- `'none'`: Task bleibt ungeteilt
-- `'manual'`: Aufteilung nur bei expliziter Anfrage
-- `'auto'`: Orchestrator kann automatisch aufteilen
+- `'none'`: Task remains unsplit
+- `'manual'`: Splitting only on explicit request
+- `'auto'`: Orchestrator can automatically split
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const complexTask = new Task({
-  description: 'Erstelle vollständige E-Commerce Plattform',
-  expectedOutput: 'Funktionsfähige E-Commerce Website',
+  description: 'Create complete e-commerce platform',
+  expectedOutput: 'Functional e-commerce website',
   agent: developer,
-  splitStrategy: 'auto', // Kann automatisch aufgeteilt werden
-  orchestrationRules: 'Aufteilen in: Frontend, Backend, Payment, Admin-Panel',
+  splitStrategy: 'auto', // Can be automatically split
+  orchestrationRules: 'Split into: Frontend, Backend, Payment, Admin Panel',
 });
 ```
 
@@ -703,19 +703,19 @@ const complexTask = new Task({
 ### `mergeCompatible?: string[]`
 
 **Default:** `[]`  
-**Typ:** Array von Task-IDs (optional)
+**Type:** Array of task IDs (optional)
 
-**Beschreibung:**
-Liste von Task-IDs, mit denen dieser Task zusammengeführt werden kann.
+**Description:**
+List of task IDs that this task can be merged with.
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const uiTask = new Task({
-  description: 'Erstelle Login-UI',
-  expectedOutput: 'Login-Interface',
+  description: 'Create login UI',
+  expectedOutput: 'Login interface',
   agent: frontendDev,
-  mergeCompatible: ['register-ui-task', 'profile-ui-task'], // Kompatible UI-Tasks
+  mergeCompatible: ['register-ui-task', 'profile-ui-task'], // Compatible UI tasks
 });
 ```
 
@@ -724,30 +724,30 @@ const uiTask = new Task({
 ### `resourceRequirements?: object`
 
 **Default:** `undefined`  
-**Typ:** Objekt (optional)
+**Type:** Object (optional)
 
-**Beschreibung:**
-Detaillierte Informationen über benötigte Ressourcen für diesen Task.
+**Description:**
+Detailed information about required resources for this task.
 
-**Struktur:**
+**Structure:**
 
 ```typescript
 {
-  estimatedTime?: string;      // Geschätzte Bearbeitungszeit
-  skillsRequired?: string[];   // Erforderliche Fähigkeiten
-  dependencies?: string[];     // Task-Abhängigkeiten
+  estimatedTime?: string;      // Estimated processing time
+  skillsRequired?: string[];   // Required skills
+  dependencies?: string[];     // Task dependencies
 }
 ```
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const complexTask = new Task({
-  description: 'Implementiere Microservice-Architektur',
-  expectedOutput: 'Microservice-System',
+  description: 'Implement microservice architecture',
+  expectedOutput: 'Microservice system',
   agent: architect,
   resourceRequirements: {
-    estimatedTime: '2-3 Wochen',
+    estimatedTime: '2-3 weeks',
     skillsRequired: [
       'microservices',
       'docker',
@@ -769,22 +769,22 @@ const complexTask = new Task({
 ### `template?: boolean`
 
 **Default:** `false`  
-**Typ:** Boolean (optional)
+**Type:** Boolean (optional)
 
-**Beschreibung:**
-Markiert den Task als wiederverwendbare Vorlage für das `availableTemplateTasks` Repository.
+**Description:**
+Marks the task as a reusable template for the `availableTemplateTasks` repository.
 
-**Beispiel:**
+**Example:**
 
 ```javascript
 const templateTask = new Task({
-  description: 'Implementiere CRUD-Operations für {entity}',
-  expectedOutput: 'Vollständige CRUD-API für {entity}',
+  description: 'Implement CRUD operations for {entity}',
+  expectedOutput: 'Complete CRUD API for {entity}',
   agent: backendDev,
-  template: true, // Wiederverwendbare Vorlage
-  adaptable: true, // Kann für verschiedene Entities angepasst werden
+  template: true, // Reusable template
+  adaptable: true, // Can be adapted for different entities
   resourceRequirements: {
-    estimatedTime: '1-2 Tage',
+    estimatedTime: '1-2 days',
     skillsRequired: ['backend', 'database', 'api_design'],
   },
 });
@@ -792,11 +792,11 @@ const templateTask = new Task({
 
 ---
 
-## 💡 Property-Interaktionen und Best Practices
+## 💡 Property Interactions and Best Practices
 
-### Empfohlene Kombinationen
+### Recommended Combinations
 
-#### Konservatives Setup
+#### Conservative Setup
 
 ```javascript
 const conservativeTeam = new Team({
@@ -812,7 +812,7 @@ const conservativeTeam = new Team({
 });
 ```
 
-#### Innovatives Setup
+#### Innovative Setup
 
 ```javascript
 const innovativeTeam = new Team({
@@ -829,103 +829,103 @@ const innovativeTeam = new Team({
 });
 ```
 
-### Häufige Anwendungsfälle
+### Common Use Cases
 
-1. **Agile Entwicklung:** `mode: 'adaptive'`, `taskPrioritization: 'dynamic'`
-2. **Kritische Systeme:** `mode: 'conservative'`, `allowTaskGeneration: false`
-3. **Forschung:** `mode: 'learning'`, `allowTaskGeneration: true`
-4. **Wartung:** Längere `adaptationInterval`, `mode: 'conservative'`
+1. **Agile Development:** `mode: 'adaptive'`, `taskPrioritization: 'dynamic'`
+2. **Critical Systems:** `mode: 'conservative'`, `allowTaskGeneration: false`
+3. **Research:** `mode: 'learning'`, `allowTaskGeneration: true`
+4. **Maintenance:** Longer `adaptationInterval`, `mode: 'conservative'`
 
 ### Troubleshooting
 
-**Problem:** Orchestration funktioniert nicht  
-**Lösung:** Prüfe ob `enableOrchestration: true` gesetzt ist
+**Problem:** Orchestration not working  
+**Solution:** Check if `enableOrchestration: true` is set
 
-**Problem:** Zu viele Tasks generiert  
-**Lösung:** Setze `allowTaskGeneration: false` oder präzisiere `orchestrationStrategy`
+**Problem:** Too many tasks generated  
+**Solution:** Set `allowTaskGeneration: false` or clarify `orchestrationStrategy`
 
-**Problem:** Schlechte Task-Zuordnung  
-**Lösung:** Wechsle zu `workloadDistribution: 'skills-based'`
+**Problem:** Poor task assignment  
+**Solution:** Switch to `workloadDistribution: 'skills-based'`
 
-**Problem:** Hohe LLM-Kosten  
-**Lösung:** Setze `continuousOrchestration: false` und verwende `mode: 'conservative'`
+**Problem:** High LLM costs  
+**Solution:** Set `continuousOrchestration: false` and use `mode: 'conservative'`
 
-**Problem:** Workflow zu langsam  
-**Lösung:** Setze `continuousOrchestration: false` für statische Task-Sequenzen
+**Problem:** Workflow too slow  
+**Solution:** Set `continuousOrchestration: false` for static task sequences
 
-**Problem:** Tasks werden nicht optimal angepasst  
-**Lösung:** Aktiviere `continuousOrchestration: true` für dynamische Optimierung
+**Problem:** Tasks not optimally adapted  
+**Solution:** Enable `continuousOrchestration: true` for dynamic optimization
 
 ## 🚀 Migration Guide
 
-### Von Version 0.21.x zu 0.22.x
+### From Version 0.21.x to 0.22.x
 
 #### Minimal Breaking Changes
 
 ```javascript
-// Alte Version (funktioniert weiterhin)
+// Old version (still works)
 const team = new Team({
   enableOrchestration: true,
   availableTasks: templateTasks, // ⚠️ Deprecated
 });
 
-// Neue Version (Empfohlen)
+// New version (Recommended)
 const team = new Team({
   enableOrchestration: true,
-  continuousOrchestration: false, // Neuer Parameter (optional)
-  availableTemplateTasks: templateTasks, // Umbenannt für Klarheit
+  continuousOrchestration: false, // New parameter (optional)
+  availableTemplateTasks: templateTasks, // Renamed for clarity
 });
 ```
 
-#### Schrittweise Migration
+#### Step-by-step Migration
 
-1. **Schritt 1**: Bestehenden Code unverändert lassen (backward compatible)
-2. **Schritt 2**: `availableTasks` → `availableTemplateTasks` umbennen
-3. **Schritt 3**: Explizit `continuousOrchestration: false` setzen (match bisheriges Verhalten)
-4. **Schritt 4**: Testen mit `continuousOrchestration: true` für bessere Optimierung
+1. **Step 1**: Leave existing code unchanged (backward compatible)
+2. **Step 2**: Rename `availableTasks` → `availableTemplateTasks`
+3. **Step 3**: Explicitly set `continuousOrchestration: false` (match previous behavior)
+4. **Step 4**: Test with `continuousOrchestration: true` for better optimization
 
-#### Performance Vergleich
+#### Performance Comparison
 
-| Feature             | Initial-Only | Continuous      |
-| ------------------- | ------------ | --------------- |
-| LLM-Token           | Baseline     | +40-60%         |
-| Ausführungszeit     | Baseline     | +15-25%         |
-| Task-Optimierung    | Einmalig     | Nach jedem Task |
-| Anpassungsfähigkeit | Statisch     | Dynamisch       |
-| Kosten              | Niedrig      | Medium-Hoch     |
-| Qualität            | Gut          | Sehr gut        |
+| Feature            | Initial-Only | Continuous      |
+| ------------------ | ------------ | --------------- |
+| LLM tokens         | Baseline     | +40-60%         |
+| Execution time     | Baseline     | +15-25%         |
+| Task optimization  | One-time     | After each task |
+| Adaptability       | Static       | Dynamic         |
+| Cost               | Low          | Medium-High     |
+| Quality            | Good         | Very good       |
 
-## 📊 Best Practices Zusammenfassung
+## 📊 Best Practices Summary
 
-### Für Einsteiger
+### For Beginners
 
 ```javascript
-// Einfacher Start - nur anfängliche Orchestrierung
+// Simple start - initial orchestration only
 const beginnerTeam = new Team({
   enableOrchestration: true,
-  continuousOrchestration: false, // Einfacher und günstiger
+  continuousOrchestration: false, // Simpler and cheaper
   mode: 'conservative',
   availableTemplateTasks: basicTasks,
 });
 ```
 
-### Für Fortgeschrittene
+### For Advanced Users
 
 ```javascript
-// Ausbalancierter Ansatz - adaptive Orchestrierung
+// Balanced approach - adaptive orchestration
 const advancedTeam = new Team({
   enableOrchestration: true,
-  continuousOrchestration: true, // Bessere Optimierung
+  continuousOrchestration: true, // Better optimization
   mode: 'adaptive',
   taskPrioritization: 'ai-driven',
   availableTemplateTasks: complexTasks,
 });
 ```
 
-### Für Experten
+### For Experts
 
 ```javascript
-// Vollständige Kontrolle - maximale Flexibilität
+// Full control - maximum flexibility
 const expertTeam = new Team({
   enableOrchestration: true,
   continuousOrchestration: true,
@@ -933,11 +933,11 @@ const expertTeam = new Team({
   allowTaskGeneration: true,
   taskPrioritization: 'ai-driven',
   workloadDistribution: 'skills-based',
-  adaptationInterval: 60000, // Häufige Optimierung
+  adaptationInterval: 60000, // Frequent optimization
   availableTemplateTasks: expertTasks,
 });
 
-// Runtime-Anpassung je nach Projektphase
+// Runtime adjustment based on project phase
 if (projectPhase === 'exploration') {
   expertTeam.setContinuousOrchestration(true);
 } else if (projectPhase === 'production') {
