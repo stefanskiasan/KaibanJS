@@ -153,6 +153,11 @@ async function runClassicalOrchestrationExample() {
 
     // Provide LLM instance for orchestration
     llmInstance: orchestrationLLM,
+
+    // Ensure environment variables are properly set for agents
+    env: {
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    },
   });
 
   console.log('✅ Team created with classical orchestration enabled\n');
@@ -188,7 +193,11 @@ async function runClassicalOrchestrationExample() {
     const startTime = Date.now();
 
     try {
-      const workflowResult = await team.start();
+      // Use automatic orchestration with projectGoal - this will trigger orchestration automatically
+      const projectGoal =
+        'Build a secure web application with user authentication and modern UI';
+      const workflowResult = await team.start({}, { projectGoal });
+
       const executionTime = Date.now() - startTime;
 
       console.log(

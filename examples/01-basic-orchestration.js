@@ -5,7 +5,7 @@
  * It shows how to:
  * - Enable orchestration with enableOrchestration: true
  * - Set up a task repository with availableTemplateTasks
- * - Use activateOrchestration() to let AI select and arrange tasks
+ * - Use team.start() with projectGoal to let AI select and arrange tasks automatically
  *
  * Requirements:
  * - OpenAI API key in .env file
@@ -162,55 +162,26 @@ async function runBasicOrchestrationExample() {
   );
 
   try {
-    // Step 3: Activate orchestration
-    // The orchestrator will analyze the project goal and select appropriate tasks
-    console.log('🎯 Activating orchestration...\n');
-
-    const projectGoal =
-      'Build a secure web application with user authentication and modern UI';
-    const orchestratedTasks = await team.activateOrchestration(
-      projectGoal,
-      true // preserveExistingTasks (not relevant here since we start with no tasks)
-    );
-
+    // Step 3: Start the workflow with automatic orchestration
+    // The orchestrator will analyze the project goal and select appropriate tasks automatically
+    console.log('🎯 Starting workflow with automatic orchestration...\n');
     console.log(
-      `\n✨ Orchestrator selected ${orchestratedTasks.length} tasks:\n`
+      'The orchestrator will automatically:\n' +
+        '1. Analyze the project strategy and goals\n' +
+        '2. Select optimal tasks from the repository\n' +
+        '3. Arrange tasks based on dependencies and priorities\n' +
+        '4. Execute the workflow with the selected agents\n'
     );
-
-    orchestratedTasks.forEach((task, index) => {
-      console.log(`${index + 1}. ${task.description}`);
-      console.log(`   Agent: ${task.agent.name}`);
-      console.log(
-        `   Estimated Time: ${
-          task.resourceRequirements?.estimatedTime || 'Not specified'
-        }`
-      );
-      console.log(
-        `   Skills Required: ${
-          task.resourceRequirements?.skillsRequired?.join(', ') ||
-          'Not specified'
-        }`
-      );
-      console.log('');
-    });
-
-    // Step 4: Show the orchestration decisions
-    console.log('📊 Orchestration Analysis:');
-    console.log('The orchestrator analyzed the project goal and:');
-    console.log('1. Identified the need for project setup first');
-    console.log('2. Prioritized authentication as a security-critical feature');
-    console.log('3. Included UI components for user interaction');
-    console.log('4. Added testing to ensure code quality\n');
-
-    // Step 5: Start the workflow
-    console.log('▶️  Starting workflow execution...\n');
 
     // Execute the orchestrated tasks
     console.log('🚀 Executing orchestrated workflow...');
     const startTime = Date.now();
 
     try {
-      const workflowResult = await team.start();
+      // Use automatic orchestration with projectGoal - this will trigger orchestration automatically
+      const projectGoal =
+        'Build a secure web application with user authentication and modern UI';
+      const workflowResult = await team.start({}, { projectGoal });
       const executionTime = Date.now() - startTime;
 
       console.log(
@@ -311,10 +282,10 @@ async function runBasicOrchestrationExample() {
   console.log('3. Provide a task repository with availableTemplateTasks');
   console.log('4. Define a clear orchestrationStrategy to guide the AI');
   console.log(
-    '5. Use activateOrchestration() to let AI select and arrange tasks'
+    '5. Use team.start() with projectGoal to let AI select and arrange tasks automatically'
   );
   console.log(
-    '6. Call team.start() to actually execute the orchestrated workflow'
+    '6. The orchestrator automatically selects tasks during team.start() execution'
   );
   console.log(
     '7. The orchestrator considers project goals, agent skills, and constraints'

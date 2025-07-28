@@ -43,7 +43,8 @@ const _resumeCreationTask = new Task({
 const orchestrationLLM = new ChatOpenAI({
   modelName: 'gpt-4o-mini',
   temperature: 0.3,
-  openAIApiKey: process.env.OPENAI_API_KEY,
+  OPENAI_API_KEY:
+    import.meta.env.VITE_OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY_HERE',
   maxRetries: 2,
 });
 // Create a team

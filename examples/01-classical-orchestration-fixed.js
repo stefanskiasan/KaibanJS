@@ -275,7 +275,10 @@ async function runClassicalOrchestrationExample() {
     const startTime = Date.now();
 
     try {
-      const workflowResult = await team.start();
+      // Use automatic orchestration with projectGoal - this will trigger orchestration automatically
+      const projectGoal =
+        'Build a secure web application with user authentication and modern UI';
+      const workflowResult = await team.start({}, { projectGoal });
       const executionTime = Date.now() - startTime;
 
       console.log(

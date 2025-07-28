@@ -305,8 +305,8 @@ export default team;
  *                                                                *
  * How to use:                                                    *
  *   1. Set your OPENAI_API_KEY in environment                   *
- *   2. Call team.activateOrchestration('Your project goal')     *
- *   3. Run team.start() to execute the orchestrated workflow    *
+ *   2. Call team.start({}, { projectGoal: 'Your project goal' }) *
+ *   3. Orchestration happens automatically during execution     *
  *                                                                *
  * The orchestrator will:                                         *
  *   - Analyze your project goal                                  *
