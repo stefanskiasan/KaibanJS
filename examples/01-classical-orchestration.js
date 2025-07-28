@@ -178,11 +178,16 @@ async function runClassicalOrchestrationExample() {
 
   try {
     // Step 3: Start the classical workflow
-    // The orchestrator will automatically select and execute optimal tasks
+    // Classical orchestration uses orchestrationStrategy from team config
     console.log('🎯 Starting classical orchestration workflow...\n');
     console.log(
-      'The orchestrator will automatically:\n' +
-        '1. Analyze the project strategy and goals\n' +
+      'Classical Orchestration Approach:\n' +
+        '• Uses orchestrationStrategy from team configuration\n' +
+        '• No runtime projectGoal needed (but can override if desired)\n' +
+        '• Predictable, strategy-driven task selection\n' +
+        '• Traditional software development lifecycle\n\n' +
+        'The orchestrator will automatically:\n' +
+        '1. Use the orchestrationStrategy from team config\n' +
         '2. Select optimal tasks from the repository\n' +
         '3. Arrange tasks based on dependencies and priorities\n' +
         '4. Execute the workflow with the selected agents\n'
@@ -193,10 +198,14 @@ async function runClassicalOrchestrationExample() {
     const startTime = Date.now();
 
     try {
-      // Use automatic orchestration with projectGoal - this will trigger orchestration automatically
-      const projectGoal =
-        'Build a secure web application with user authentication and modern UI';
-      const workflowResult = await team.start({}, { projectGoal });
+      // Use automatic orchestration - orchestrationStrategy from team config is used automatically
+      // The detailed orchestrationStrategy defined in team config will guide the orchestrator
+      const workflowResult = await team.start();
+
+      // Alternative: Override with specific projectGoal if needed:
+      // const workflowResult = await team.start({}, {
+      //   projectGoal: 'Build a secure web application with user authentication and modern UI'
+      // });
 
       const executionTime = Date.now() - startTime;
 
@@ -329,17 +338,20 @@ async function runClassicalOrchestrationExample() {
   console.log('3. Provide a task repository with availableTemplateTasks');
   console.log('4. Define a clear orchestrationStrategy to guide the AI');
   console.log(
-    '5. Simply call team.start() - orchestration happens automatically!'
+    '5. Simply call team.start() - uses orchestrationStrategy automatically!'
   );
-  console.log('6. The orchestrator selects optimal tasks during execution');
-  console.log('7. No need for explicit activateOrchestration() calls');
-  console.log('8. Classical approach follows traditional workflow patterns');
   console.log(
-    '9. Monitor WorkflowResult for execution status and task completion'
+    '6. Optional: Override with team.start({}, { projectGoal }) if needed'
   );
-  console.log('10. Validate task results and handle errors appropriately');
+  console.log('7. The orchestrator selects optimal tasks during execution');
+  console.log('8. No need for explicit activateOrchestration() calls');
+  console.log('9. Classical approach follows traditional workflow patterns');
   console.log(
-    '11. You can dynamically update the repository and restart workflows'
+    '10. Monitor WorkflowResult for execution status and task completion'
+  );
+  console.log('11. Validate task results and handle errors appropriately');
+  console.log(
+    '12. You can dynamically update the repository and restart workflows'
   );
 }
 

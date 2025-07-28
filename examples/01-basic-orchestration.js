@@ -163,14 +163,18 @@ async function runBasicOrchestrationExample() {
 
   try {
     // Step 3: Start the workflow with automatic orchestration
-    // The orchestrator will analyze the project goal and select appropriate tasks automatically
+    // KaibanJS supports two orchestration approaches:
     console.log('🎯 Starting workflow with automatic orchestration...\n');
     console.log(
-      'The orchestrator will automatically:\n' +
-        '1. Analyze the project strategy and goals\n' +
-        '2. Select optimal tasks from the repository\n' +
-        '3. Arrange tasks based on dependencies and priorities\n' +
-        '4. Execute the workflow with the selected agents\n'
+      'KaibanJS Orchestration Options:\n' +
+        '1. orchestrationStrategy (team config) - Used when no projectGoal provided\n' +
+        '2. projectGoal (runtime parameter) - Overrides orchestrationStrategy\n' +
+        '3. Fallback logic: projectGoal || orchestrationStrategy\n\n' +
+        'The orchestrator will automatically:\n' +
+        '• Analyze the project strategy/goal\n' +
+        '• Select optimal tasks from the repository\n' +
+        '• Arrange tasks based on dependencies and priorities\n' +
+        '• Execute the workflow with the selected agents\n'
     );
 
     // Execute the orchestrated tasks
@@ -178,10 +182,14 @@ async function runBasicOrchestrationExample() {
     const startTime = Date.now();
 
     try {
-      // Use automatic orchestration with projectGoal - this will trigger orchestration automatically
-      const projectGoal =
-        'Build a secure web application with user authentication and modern UI';
-      const workflowResult = await team.start({}, { projectGoal });
+      // Use automatic orchestration - orchestrationStrategy from team config is used automatically
+      // Since we have orchestrationStrategy defined in team config, no projectGoal needed
+      const workflowResult = await team.start();
+
+      // Alternative: You can also override with a specific projectGoal:
+      // const workflowResult = await team.start({}, {
+      //   projectGoal: 'Build a secure web application with user authentication and modern UI'
+      // });
       const executionTime = Date.now() - startTime;
 
       console.log(
@@ -282,19 +290,22 @@ async function runBasicOrchestrationExample() {
   console.log('3. Provide a task repository with availableTemplateTasks');
   console.log('4. Define a clear orchestrationStrategy to guide the AI');
   console.log(
-    '5. Use team.start() with projectGoal to let AI select and arrange tasks automatically'
+    '5. Call team.start() - uses orchestrationStrategy from config automatically'
   );
   console.log(
-    '6. The orchestrator automatically selects tasks during team.start() execution'
+    '6. Optional: Override with team.start({}, { projectGoal }) for dynamic goals'
   );
   console.log(
-    '7. The orchestrator considers project goals, agent skills, and constraints'
+    '7. The orchestrator automatically selects tasks during execution'
   );
-  console.log('8. You can dynamically update the task repository and strategy');
   console.log(
-    '9. Monitor WorkflowResult for execution status and task completion'
+    '8. The orchestrator considers project goals, agent skills, and constraints'
   );
-  console.log('10. Validate task results and handle errors appropriately');
+  console.log('9. You can dynamically update the task repository and strategy');
+  console.log(
+    '10. Monitor WorkflowResult for execution status and task completion'
+  );
+  console.log('11. Validate task results and handle errors appropriately');
 }
 
 // Run the example

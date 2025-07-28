@@ -6,9 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="fix: Enhance null safety and add orchestration validation tests">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/01-basic-orchestration.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/01-basic-orchestration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/01-classical-orchestration.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/01-classical-orchestration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/team.kban.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/team.kban.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,7 +90,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1753640734318</updated>
-      <workItem from="1753640735894" duration="7318000" />
+      <workItem from="1753640735894" duration="8507000" />
     </task>
     <servers />
   </component>
