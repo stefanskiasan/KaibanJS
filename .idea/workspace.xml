@@ -4,63 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="fix: Enhance null safety and add orchestration validation tests">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/CHANGELOG.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ConecptMultiAgent" beforeDir="false" afterPath="$PROJECT_DIR$/ConecptMultiAgent" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ORCHESTRATION_PROPERTIES.md" beforeDir="false" afterPath="$PROJECT_DIR$/ORCHESTRATION_PROPERTIES.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/01-basic-orchestration.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/01-basic-orchestration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/01-classical-orchestration-fixed.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/01-classical-orchestration-fixed.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/01-classical-orchestration.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/01-classical-orchestration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/02-conservative-mode.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/02-conservative-mode.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/03-innovative-mode.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/03-innovative-mode.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/04-learning-mode.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/04-learning-mode.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/05-skills-based-distribution.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/05-skills-based-distribution.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/06-ai-driven-prioritization.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/06-ai-driven-prioritization.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/07-task-adaptation.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/07-task-adaptation.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/08-continuous-optimization.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/08-continuous-optimization.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/09-task-generation.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/09-task-generation.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/10-enterprise-setup.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/10-enterprise-setup.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/11-e-commerce-project.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/11-e-commerce-project.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/12-microservices-architecture.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/12-microservices-architecture.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/13-continuous-orchestration-basic.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/13-continuous-orchestration-basic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/14-continuous-vs-initial-comparison.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/14-continuous-vs-initial-comparison.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/15-runtime-orchestration-control.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/15-runtime-orchestration-control.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ORCHESTRATION_TEST_REPORT.md" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ORCHESTRATION_TEST_REPORT.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/examples/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basicorchestration.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/basicorchestration.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/orchestration-benchmark.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/orchestration-benchmark.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/orchestration-demo.kban.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/orchestration-demo.kban.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/team.kban.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/team.kban.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-adaptation-level-fix.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-adaptation-level-fix.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-all-modes-optimized.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-all-modes-optimized.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-execution.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-orchestration-execution.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-fixes.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-orchestration-fixes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-null-fixes.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-orchestration-null-fixes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-performance-optimizations.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-performance-optimizations.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-preflight-checks.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-preflight-checks.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/utils/tasks.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/utils/tasks.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/ORCHESTRATION_PLAYGROUND.md" beforeDir="false" afterPath="$PROJECT_DIR$/playground/ORCHESTRATION_PLAYGROUND.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/nodejs-ts/orchestration-playground.ts" beforeDir="false" afterPath="$PROJECT_DIR$/playground/nodejs-ts/orchestration-playground.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/nodejs/orchestration-demo.js" beforeDir="false" afterPath="$PROJECT_DIR$/playground/nodejs/orchestration-demo.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/react/src/components/EnhancedTaskBoard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/playground/react/src/components/EnhancedTaskBoard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/react/src/components/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/playground/react/src/components/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/react/src/components/TemplateRepositoryViewer.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/react/src/components/TemplateRepositoryViewer.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/react/src/stories/EnhancedOrchestrationDemo.stories.js" beforeDir="false" afterPath="$PROJECT_DIR$/playground/react/src/stories/EnhancedOrchestrationDemo.stories.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/react/src/stories/OrchestrationDemo.stories.js" beforeDir="false" afterPath="$PROJECT_DIR$/playground/react/src/stories/OrchestrationDemo.stories.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/stores/teamStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/teamStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/stores/teamStore.types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/teamStore.types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/subscribers/orchestrationSubscriber.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/subscribers/orchestrationSubscriber.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/logs/orchestrationLogs.types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/logs/orchestrationLogs.types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/unit/orchestration.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/unit/orchestration.test.ts" afterDir="false" />
-    </list>
+    <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="fix: Enhance null safety and add orchestration validation tests" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
