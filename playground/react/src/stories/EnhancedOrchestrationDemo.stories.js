@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Agent, Task, Team } from 'kaibanjs';
 
 // Import all new orchestration components
-import TemplateRepositoryViewer from '../components/TemplateRepositoryViewer';
+import BacklogRepositoryViewer from '../components/BacklogRepositoryViewer';
 import OrchestratorDecisionPanel from '../components/OrchestratorDecisionPanel';
 import OrchestrationModeSelector from '../components/OrchestrationModeSelector';
 import ContinuousOrchestrationToggle from '../components/ContinuousOrchestrationToggle';
@@ -100,7 +100,6 @@ const EnhancedOrchestrationComponent = () => {
         category: 'architecture',
         complexity: 'high',
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '8-12 hours',
           skillsRequired: ['system_design', 'architecture', 'scalability'],
@@ -127,7 +126,6 @@ const EnhancedOrchestrationComponent = () => {
         category: 'development',
         complexity: 'medium',
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '6-8 hours',
           skillsRequired: ['backend', 'security', 'authentication'],
@@ -153,7 +151,6 @@ const EnhancedOrchestrationComponent = () => {
         category: 'design',
         complexity: 'medium',
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '10-12 hours',
           skillsRequired: ['ui_design', 'responsive_design', 'accessibility'],
@@ -169,7 +166,6 @@ const EnhancedOrchestrationComponent = () => {
         category: 'testing',
         complexity: 'high',
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '8-10 hours',
           skillsRequired: ['testing', 'automation', 'quality_assurance'],
@@ -185,7 +181,6 @@ const EnhancedOrchestrationComponent = () => {
         category: 'security',
         complexity: 'high',
         adaptable: false, // Critical security task
-        template: true,
         resourceRequirements: {
           estimatedTime: '12-16 hours',
           skillsRequired: [
@@ -216,7 +211,6 @@ const EnhancedOrchestrationComponent = () => {
         category: 'devops',
         complexity: 'medium',
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '4-6 hours',
           skillsRequired: ['devops', 'ci_cd', 'automation'],
@@ -232,7 +226,6 @@ const EnhancedOrchestrationComponent = () => {
         category: 'performance',
         complexity: 'medium',
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '6-8 hours',
           skillsRequired: ['performance_optimization', 'profiling', 'caching'],
@@ -333,7 +326,7 @@ const EnhancedOrchestrationComponent = () => {
       // Core Orchestration Settings
       enableOrchestration: orchestrationEnabled,
       continuousOrchestration: continuousOrchestration,
-      availableTemplateTasks: taskRepository,
+      backlogTasks: taskRepository,
       allowTaskGeneration: true,
 
       // Orchestration Strategy
@@ -364,7 +357,6 @@ const EnhancedOrchestrationComponent = () => {
       maxActiveTasks: 6,
       taskPrioritization: 'ai-driven',
       workloadDistribution: 'skills-based',
-      adaptationInterval: 300000, // 5 minutes
 
       // LLM Configuration for Orchestrator
       llmConfig: {
@@ -618,7 +610,7 @@ const EnhancedOrchestrationComponent = () => {
             <h2 style={{ color: '#339af0', marginBottom: '20px' }}>
               📚 Template Repository
             </h2>
-            <TemplateRepositoryViewer
+            <BacklogRepositoryViewer
               team={team}
               onTaskSelect={handleTaskSelect}
               onAddToWorkflow={handleAddToWorkflow}

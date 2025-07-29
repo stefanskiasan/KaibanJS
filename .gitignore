@@ -47,3 +47,6 @@ server.js
 
 # Generated files from MoscaFetch
 recordedData.json
+
+# Symlinks to external projects
+kanban-board

@@ -28,7 +28,6 @@ async function testOrchestrationNullFixes() {
     agent: seniorDeveloper,
     adaptable: true,
     priority: 'high',
-    template: true,
     resourceRequirements: {
       estimatedTime: '3 hours',
       skillsRequired: ['development', 'prototyping'],
@@ -41,7 +40,6 @@ async function testOrchestrationNullFixes() {
     agent: frontendDeveloper,
     adaptable: true,
     priority: 'medium',
-    template: true,
     orchestrationRules: 'phase: design',
   });
 
@@ -51,7 +49,6 @@ async function testOrchestrationNullFixes() {
     agent: qaEngineer,
     adaptable: true,
     priority: 'medium',
-    template: true,
   });
 
   // Create team with orchestration enabled AND continuous orchestration
@@ -61,7 +58,7 @@ async function testOrchestrationNullFixes() {
     tasks: [],
     enableOrchestration: true,
     continuousOrchestration: true, // This should trigger the problematic code paths
-    availableTemplateTasks: [adaptableTask1, adaptableTask2, adaptableTask3],
+    backlogTasks: [adaptableTask1, adaptableTask2, adaptableTask3],
     mode: 'adaptive',
     orchestrationStrategy:
       'Focus on rapid prototyping and iterative development',

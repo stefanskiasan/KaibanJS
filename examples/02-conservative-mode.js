@@ -55,7 +55,6 @@ async function runConservativeOrchestrationExample() {
         'Centralized logging system with tamper-proof audit trails',
       agent: devOpsEngineer,
       adaptable: false, // Critical task - no modifications allowed
-      template: true,
       orchestrationRules:
         'CRITICAL: Must comply with regulatory requirements. No modifications.',
       resourceRequirements: {
@@ -71,7 +70,6 @@ async function runConservativeOrchestrationExample() {
       expectedOutput: 'Automated backup system with tested recovery procedures',
       agent: devOpsEngineer,
       adaptable: false, // Critical for data protection
-      template: true,
       orchestrationRules:
         'CRITICAL: Must ensure zero data loss. Follow 3-2-1 backup rule.',
       resourceRequirements: {
@@ -92,7 +90,6 @@ async function runConservativeOrchestrationExample() {
       expectedOutput: 'Health check system monitoring all critical services',
       agent: seniorDeveloper,
       adaptable: true, // Some adaptation allowed
-      template: true,
       orchestrationRules:
         'Must include database, cache, and external service checks',
       resourceRequirements: {
@@ -149,7 +146,7 @@ async function runConservativeOrchestrationExample() {
     continuousOrchestration: false,
 
     // Provide vetted task repository
-    availableTemplateTasks: productionTaskRepository,
+    backlogTasks: productionTaskRepository,
 
     // IMPORTANT: Disable task generation in conservative mode
     allowTaskGeneration: false,
@@ -408,7 +405,7 @@ async function runConservativeOrchestrationExample() {
     // Best practices for conservative mode
     console.log('\n📚 Best Practices for Conservative Mode:\n');
     console.log(
-      '1. Thoroughly test all template tasks before adding to repository'
+      '1. Thoroughly test all backlog tasks before adding to repository'
     );
     console.log('2. Mark security and compliance tasks as non-adaptable');
     console.log('3. Use detailed orchestrationRules for each task');
@@ -438,7 +435,7 @@ async function runConservativeOrchestrationExample() {
       `- Task Generation Enabled: ${productionTeam.allowTaskGeneration}`
     );
     console.log(
-      `- Available Tasks: ${productionTeam.availableTemplateTasks?.length || 0}`
+      `- Available Tasks: ${productionTeam.backlogTasks?.length || 0}`
     );
     console.log(`- LLM Temperature: ${orchestrationLLM.temperature}`);
     console.log(`- Error Timestamp: ${new Date().toISOString()}`);

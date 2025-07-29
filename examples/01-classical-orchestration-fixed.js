@@ -4,7 +4,7 @@
  * This example demonstrates the classical KaibanJS workflow with intelligent orchestration.
  * It shows how to:
  * - Enable orchestration with enableOrchestration: true
- * - Set up a task repository with availableTemplateTasks
+ * - Set up a task repository with backlogTasks
  * - Use team.start() for automatic orchestration and execution
  *
  * Key difference from activateOrchestration() approach:
@@ -93,7 +93,7 @@ async function runClassicalOrchestrationExample() {
   });
 
   // Step 1: Create a task repository
-  // These are template tasks that the orchestrator can choose from automatically
+  // These are backlog tasks that the orchestrator can choose from automatically
   const taskRepository = [
     new Task({
       description: 'Set up project structure and dependencies',
@@ -101,7 +101,6 @@ async function runClassicalOrchestrationExample() {
         'Complete project setup with folder structure and npm packages',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '1-2 hours',
         skillsRequired: ['project_setup', 'npm', 'architecture'],
@@ -115,7 +114,6 @@ async function runClassicalOrchestrationExample() {
         'Development environment with linting, formatting, and git hooks',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '1-2 hours',
         skillsRequired: ['devops', 'tooling'],
@@ -129,7 +127,6 @@ async function runClassicalOrchestrationExample() {
         'Complete authentication with JWT tokens, login/logout, and password reset',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '6-8 hours',
         skillsRequired: ['backend', 'security', 'authentication', 'jwt'],
@@ -142,7 +139,6 @@ async function runClassicalOrchestrationExample() {
       expectedOutput: 'Modern, accessible UI components with responsive design',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '8-10 hours',
         skillsRequired: ['ui_design', 'responsive_design', 'accessibility'],
@@ -156,7 +152,6 @@ async function runClassicalOrchestrationExample() {
         'Automated tests with unit, integration, and E2E coverage',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '6-8 hours',
         skillsRequired: ['testing', 'automation', 'ci_cd'],
@@ -166,7 +161,7 @@ async function runClassicalOrchestrationExample() {
   ];
 
   console.log(
-    `📚 Task Repository contains ${taskRepository.length} template tasks\n`
+    `📚 Task Repository contains ${taskRepository.length} backlog tasks\n`
   );
 
   // Create LLM instance for orchestration
@@ -190,7 +185,7 @@ async function runClassicalOrchestrationExample() {
     continuousOrchestration: false,
 
     // Provide the task repository for automatic selection
-    availableTemplateTasks: taskRepository,
+    backlogTasks: taskRepository,
 
     // Don't allow new task generation in this classical example
     allowTaskGeneration: false,
@@ -363,18 +358,14 @@ async function runClassicalOrchestrationExample() {
     console.log('\nTroubleshooting:');
     console.log('1. Ensure OPENAI_API_KEY is set in your .env file');
     console.log('2. Check that enableOrchestration is set to true');
-    console.log(
-      '3. Verify that availableTemplateTasks contains template tasks'
-    );
+    console.log('3. Verify that backlogTasks contains backlog tasks');
     console.log('4. Check network connection and API service status');
     console.log('5. Ensure agents have proper LLM configuration');
 
     // Show current configuration for debugging
     console.log('\nCurrent Configuration:');
     console.log(`- Enable Orchestration: ${team.enableOrchestration}`);
-    console.log(
-      `- Available Tasks: ${team.availableTemplateTasks?.length || 0}`
-    );
+    console.log(`- Available Tasks: ${team.backlogTasks?.length || 0}`);
     console.log(`- LLM Configured: ${!!team.llmInstance}`);
     console.log(`- API Key Available: ${!!process.env.OPENAI_API_KEY}`);
   }
@@ -387,7 +378,7 @@ async function runClassicalOrchestrationExample() {
   console.log(
     '2. Use continuousOrchestration: false for initial-only mode (classical setup)'
   );
-  console.log('3. Provide a task repository with availableTemplateTasks');
+  console.log('3. Provide a task repository with backlogTasks');
   console.log('4. Define a clear orchestrationStrategy to guide the AI');
   console.log(
     '5. Simply call team.start() - orchestration happens automatically!'

@@ -55,7 +55,6 @@ async function runEnterpriseSetupExample() {
         'Complete governance documentation with approval workflows',
       agent: productManager,
       adaptable: false, // Governance must be strict
-      template: true,
       orchestrationRules: `
         COMPLIANCE REQUIREMENTS:
         - SOC 2 Type II compliance
@@ -84,7 +83,6 @@ async function runEnterpriseSetupExample() {
         'Enterprise-grade security infrastructure with zero-trust model',
       agent: securityExpert,
       adaptable: false,
-      template: true,
       orchestrationRules: `
         SECURITY LAYERS:
         - Network segmentation
@@ -115,7 +113,6 @@ async function runEnterpriseSetupExample() {
       expectedOutput: 'Complete microservices blueprint with service mesh',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       splitStrategy: 'manual', // Can be broken into service-specific tasks
       orchestrationRules: `
         ARCHITECTURE COMPONENTS:
@@ -146,7 +143,6 @@ async function runEnterpriseSetupExample() {
         'Unified data platform supporting batch and stream processing',
       agent: dataArchitect,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         DATA PLATFORM FEATURES:
         - Data lake and warehouse
@@ -176,7 +172,6 @@ async function runEnterpriseSetupExample() {
       expectedOutput: 'Global infrastructure with automated failover and DR',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         INFRASTRUCTURE REQUIREMENTS:
         - Multi-cloud strategy (AWS/Azure/GCP)
@@ -205,7 +200,6 @@ async function runEnterpriseSetupExample() {
       expectedOutput: 'Scalable frontend platform supporting multiple teams',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         PLATFORM FEATURES:
         - Micro-frontends architecture
@@ -234,7 +228,6 @@ async function runEnterpriseSetupExample() {
       expectedOutput: 'Comprehensive QA strategy with 95%+ automation',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         QA FRAMEWORK:
         - Test automation strategy
@@ -263,7 +256,6 @@ async function runEnterpriseSetupExample() {
       expectedOutput: 'Enterprise knowledge base with training materials',
       agent: technicalWriter,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         DOCUMENTATION AREAS:
         - Architecture documentation
@@ -292,7 +284,6 @@ async function runEnterpriseSetupExample() {
       expectedOutput: 'Innovation framework with POCs and technology roadmap',
       agent: innovationLead,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         INNOVATION AREAS:
         - AI/ML integration
@@ -349,7 +340,7 @@ async function runEnterpriseSetupExample() {
     tasks: [],
 
     enableOrchestration: true,
-    availableTemplateTasks: enterpriseTaskRepository,
+    backlogTasks: enterpriseTaskRepository,
 
     // Conservative with controlled innovation
     mode: 'conservative',
@@ -428,7 +419,6 @@ async function runEnterpriseSetupExample() {
     taskPrioritization: 'static', // Predictable for enterprise
     workloadDistribution: 'skills-based',
     maxActiveTasks: 8, // Multiple parallel workstreams
-    adaptationInterval: 300000, // 5 minutes - stable
 
     llmInstance: orchestrationLLM,
   });

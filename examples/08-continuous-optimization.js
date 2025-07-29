@@ -10,8 +10,7 @@
  * - Team performance
  *
  * Key features:
- * - startContinuousOptimization()
- * - adaptationInterval configuration
+ * - continuousOrchestration configuration
  * - Real-time performance monitoring
  * - Automatic workflow adjustments
  * - Learning from execution patterns
@@ -45,7 +44,6 @@ async function runContinuousOptimizationExample() {
       expectedOutput: 'High-performance landing page with smooth animations',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         PERFORMANCE TARGETS:
@@ -71,7 +69,6 @@ async function runContinuousOptimizationExample() {
       expectedOutput: 'Real-time dashboard with multiple chart types',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         PERFORMANCE METRICS:
         - Render time: <100ms
@@ -96,7 +93,6 @@ async function runContinuousOptimizationExample() {
       expectedOutput: 'API handling 10K requests/second',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         THROUGHPUT TARGETS:
         - Requests/sec: 10,000
@@ -122,7 +118,6 @@ async function runContinuousOptimizationExample() {
       expectedOutput: 'Optimized database with <10ms query times',
       agent: dataArchitect,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         QUERY PERFORMANCE:
         - Read queries: <10ms
@@ -148,7 +143,6 @@ async function runContinuousOptimizationExample() {
       expectedOutput: 'Automated performance testing and alerting system',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         TEST EFFICIENCY:
         - Test execution: <5 minutes
@@ -174,7 +168,6 @@ async function runContinuousOptimizationExample() {
       expectedOutput: 'Self-optimizing deployment pipeline',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         PIPELINE METRICS:
         - Build time: <5 minutes
@@ -200,7 +193,6 @@ async function runContinuousOptimizationExample() {
       expectedOutput: 'Comprehensive performance improvement plan implemented',
       agent: performanceEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         SYSTEM TARGETS:
         - Overall latency: <100ms
@@ -247,7 +239,7 @@ async function runContinuousOptimizationExample() {
     tasks: [],
 
     enableOrchestration: true,
-    availableTemplateTasks: optimizableTaskRepository,
+    backlogTasks: optimizableTaskRepository,
     allowTaskGeneration: true,
 
     // Enable continuous orchestration for real-time optimization
@@ -316,7 +308,6 @@ async function runContinuousOptimizationExample() {
     `,
 
     maxActiveTasks: 4,
-    adaptationInterval: 30000, // Optimize every 30 seconds
 
     llmInstance: orchestrationLLM,
   });

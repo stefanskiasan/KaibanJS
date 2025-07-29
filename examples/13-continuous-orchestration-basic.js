@@ -37,7 +37,6 @@ async function runContinuousOrchestrationBasicExample() {
         'Complete project setup with proper folder structure and config files',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '1-2 hours',
         skillsRequired: ['setup', 'configuration'],
@@ -50,7 +49,6 @@ async function runContinuousOrchestrationBasicExample() {
         'Secure authentication with JWT tokens and session management',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules:
         'High priority for security. Can be scaled based on complexity.',
@@ -65,7 +63,6 @@ async function runContinuousOrchestrationBasicExample() {
       expectedOutput: 'Mobile-first responsive UI with modern design',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       resourceRequirements: {
         estimatedTime: '6-8 hours',
@@ -78,7 +75,6 @@ async function runContinuousOrchestrationBasicExample() {
       expectedOutput: 'Complete test suite with >90% coverage',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '3-4 hours',
         skillsRequired: ['testing', 'automation'],
@@ -90,7 +86,6 @@ async function runContinuousOrchestrationBasicExample() {
       expectedOutput: 'Interactive API documentation with examples',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '2-3 hours',
         skillsRequired: ['documentation', 'api'],
@@ -109,7 +104,7 @@ async function runContinuousOrchestrationBasicExample() {
     tasks: [], // Start empty - orchestrator will select tasks
     enableOrchestration: true,
     continuousOrchestration: false, // 🔑 Initial-only mode
-    availableTemplateTasks: sharedTaskRepository,
+    backlogTasks: sharedTaskRepository,
     allowTaskGeneration: false,
     orchestrationStrategy:
       'Build a secure web application with good user experience',
@@ -160,7 +155,7 @@ async function runContinuousOrchestrationBasicExample() {
     tasks: [], // Start empty - orchestrator will select tasks
     enableOrchestration: true,
     continuousOrchestration: true, // 🔑 Continuous mode
-    availableTemplateTasks: sharedTaskRepository,
+    backlogTasks: sharedTaskRepository,
     allowTaskGeneration: true, // Allow AI to generate new tasks
     orchestrationStrategy:
       'Build a secure web application with good user experience',

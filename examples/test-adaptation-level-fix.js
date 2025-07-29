@@ -19,7 +19,6 @@ async function testAdaptationLevelFix() {
     agent: seniorDeveloper,
     adaptable: true,
     priority: 'medium',
-    template: true,
     resourceRequirements: {
       estimatedTime: '4 hours',
       skillsRequired: ['research', 'analysis'],
@@ -32,7 +31,6 @@ async function testAdaptationLevelFix() {
     agent: frontendDeveloper,
     adaptable: true,
     priority: 'high',
-    template: true,
     orchestrationRules: 'phase: planning',
   });
 
@@ -42,7 +40,7 @@ async function testAdaptationLevelFix() {
     agents: [seniorDeveloper, frontendDeveloper, qaEngineer],
     tasks: [],
     enableOrchestration: true,
-    availableTemplateTasks: [adaptableTask1, adaptableTask2],
+    backlogTasks: [adaptableTask1, adaptableTask2],
     mode: 'adaptive',
     orchestrationStrategy:
       'Focus on efficient task adaptation and resource optimization',

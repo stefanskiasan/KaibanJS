@@ -17,7 +17,6 @@ const implementAuthenticationTask = new Task({
     'Complete authentication system with JWT tokens, password hashing, and session management',
   agent: agents.backendDeveloper,
   adaptable: true,
-  template: true,
   orchestrationRules: `
     SECURITY REQUIREMENTS:
     - Use bcrypt for password hashing
@@ -43,7 +42,6 @@ const securityAuditTask = new Task({
     'Detailed security report with vulnerabilities identified and remediation recommendations',
   agent: agents.securityExpert,
   adaptable: false, // Critical task - should not be modified
-  template: true,
   orchestrationRules:
     'CRITICAL TASK - No modifications allowed. Must follow OWASP guidelines.',
   resourceRequirements: {
@@ -59,7 +57,6 @@ const implementApiRateLimitingTask = new Task({
     'Rate limiting middleware with configurable limits per endpoint',
   agent: agents.backendDeveloper,
   adaptable: true,
-  template: true,
   orchestrationRules:
     'Can be adapted for different rate limiting strategies (IP-based, user-based, API key-based)',
   resourceRequirements: {
@@ -78,7 +75,6 @@ const createResponsiveUITask = new Task({
     'Mobile-first responsive components following design system guidelines',
   agent: agents.frontendDeveloper,
   adaptable: true,
-  template: true,
   dynamicPriority: true,
   orchestrationRules: `
     DESIGN REQUIREMENTS:
@@ -104,7 +100,6 @@ const implementDashboardTask = new Task({
     'Interactive dashboard with charts, metrics, and real-time data updates',
   agent: agents.frontendDeveloper,
   adaptable: true,
-  template: true,
   splitStrategy: 'auto', // Can be split into smaller components
   orchestrationRules:
     'Can be split into: chart components, data fetching, real-time updates, filters',
@@ -121,7 +116,6 @@ const designSystemTask = new Task({
     'Complete design system with components, tokens, and documentation',
   agent: agents.uxDesigner,
   adaptable: true,
-  template: true,
   orchestrationRules: 'Adapt based on brand guidelines and target audience',
   resourceRequirements: {
     estimatedTime: '10-15 hours',
@@ -139,7 +133,6 @@ const implementCrudApiTask = new Task({
     'RESTful API with Create, Read, Update, Delete operations including validation',
   agent: agents.backendDeveloper,
   adaptable: true,
-  template: true,
   orchestrationRules: `
     PLACEHOLDER: {entity} will be replaced with actual entity name
     
@@ -166,7 +159,6 @@ const implementWebSocketsTask = new Task({
   expectedOutput: 'WebSocket server with room management and event handling',
   agent: agents.backendDeveloper,
   adaptable: true,
-  template: true,
   orchestrationRules:
     'Can adapt to Socket.io, native WebSockets, or other real-time solutions',
   resourceRequirements: {
@@ -182,7 +174,6 @@ const optimizeDatabaseTask = new Task({
     'Optimized database with improved query performance and proper indexing',
   agent: agents.dataArchitect,
   adaptable: true,
-  template: true,
   dynamicPriority: true,
   orchestrationRules:
     'Priority increases if performance issues detected. Adapt based on database type.',
@@ -201,7 +192,6 @@ const writeUnitTestsTask = new Task({
   expectedOutput: 'Unit test suite with >80% code coverage',
   agent: agents.qaEngineer,
   adaptable: true,
-  template: true,
   orchestrationRules: `
     COVERAGE REQUIREMENTS:
     - Minimum 80% code coverage
@@ -225,7 +215,6 @@ const createE2ETestsTask = new Task({
   expectedOutput: 'E2E tests covering critical user journeys',
   agent: agents.qaEngineer,
   adaptable: true,
-  template: true,
   orchestrationRules:
     'Adapt test scenarios based on user stories. Use Playwright, Cypress, or Selenium.',
   resourceRequirements: {
@@ -241,7 +230,6 @@ const performanceTestingTask = new Task({
     'Performance test report with bottlenecks identified and optimization recommendations',
   agent: agents.qaEngineer,
   adaptable: true,
-  template: true,
   dynamicPriority: true,
   orchestrationRules:
     'Priority based on user load. Tools: JMeter, k6, or Gatling.',
@@ -261,7 +249,6 @@ const setupCiCdTask = new Task({
     'Automated CI/CD pipeline with build, test, and deployment stages',
   agent: agents.devOpsEngineer,
   adaptable: true,
-  template: true,
   orchestrationRules: `
     PLATFORMS:
     - GitHub Actions
@@ -288,7 +275,6 @@ const dockerizeApplicationTask = new Task({
     'Optimized Docker images with docker-compose for local development',
   agent: agents.devOpsEngineer,
   adaptable: true,
-  template: true,
   orchestrationRules:
     'Adapt for different application types. Include development and production configurations.',
   resourceRequirements: {
@@ -303,7 +289,6 @@ const setupMonitoringTask = new Task({
   expectedOutput: 'Complete monitoring setup with dashboards and alert rules',
   agent: agents.devOpsEngineer,
   adaptable: true,
-  template: true,
   orchestrationRules:
     'Can use Prometheus/Grafana, ELK stack, or cloud-native solutions',
   resourceRequirements: {
@@ -322,7 +307,6 @@ const writeApiDocumentationTask = new Task({
     'Complete API documentation with examples, schemas, and authentication guides',
   agent: agents.technicalWriter,
   adaptable: true,
-  template: true,
   orchestrationRules:
     'Use OpenAPI/Swagger specification. Include code examples in multiple languages.',
   resourceRequirements: {
@@ -338,7 +322,6 @@ const createUserGuideTask = new Task({
     'User-friendly documentation with step-by-step tutorials and screenshots',
   agent: agents.technicalWriter,
   adaptable: true,
-  template: true,
   orchestrationRules: 'Adapt tone and complexity based on target audience',
   resourceRequirements: {
     estimatedTime: '6-8 hours',
@@ -356,7 +339,6 @@ const implementDataPipelineTask = new Task({
     'Scalable data pipeline with ETL processes and data validation',
   agent: agents.dataArchitect,
   adaptable: true,
-  template: true,
   splitStrategy: 'auto',
   orchestrationRules:
     'Can be split into: data ingestion, transformation, loading, validation',
@@ -373,7 +355,6 @@ const createAnalyticsDashboardTask = new Task({
     'Interactive dashboard with KPIs, trends, and actionable insights',
   agent: agents.frontendDeveloper,
   adaptable: true,
-  template: true,
   mergeCompatible: ['data_visualization_task', 'reporting_task'],
   orchestrationRules:
     'Can merge with other visualization tasks. Use D3.js, Chart.js, or BI tools.',
@@ -393,7 +374,6 @@ const researchNewTechnologyTask = new Task({
     'Technology evaluation report with pros, cons, and implementation recommendations',
   agent: agents.innovationLead,
   adaptable: true,
-  template: true,
   orchestrationRules:
     'PLACEHOLDER: {technology} will be replaced. High adaptability for different tech.',
   resourceRequirements: {
@@ -409,7 +389,6 @@ const createProofOfConceptTask = new Task({
     'Working POC demonstrating feasibility and basic implementation',
   agent: agents.seniorDeveloper,
   adaptable: true,
-  template: true,
   dynamicPriority: true,
   orchestrationRules:
     'PLACEHOLDER: {feature} will be replaced. Priority based on business value.',
@@ -429,7 +408,6 @@ const designMicroserviceTask = new Task({
     'Microservice design with API contracts, data models, and communication patterns',
   agent: agents.seniorDeveloper,
   adaptable: true,
-  template: true,
   splitStrategy: 'manual',
   orchestrationRules: `
     PLACEHOLDER: {domain} will be replaced with business domain
@@ -495,7 +473,6 @@ module.exports = {
     return new Task({
       ...template,
       ...overrides,
-      template: false, // Remove template flag for actual use
     });
   },
 };

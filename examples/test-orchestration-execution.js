@@ -51,7 +51,6 @@ async function testOrchestrationExecution() {
         expectedOutput: 'Basic project structure with folders',
         agent: developer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '30 minutes',
           skillsRequired: ['setup'],
@@ -64,7 +63,6 @@ async function testOrchestrationExecution() {
         expectedOutput: 'Simple UI components for the application',
         agent: designer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '1 hour',
           skillsRequired: ['ui', 'components'],
@@ -77,7 +75,6 @@ async function testOrchestrationExecution() {
         expectedOutput: 'Secure login and registration system',
         agent: developer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '2 hours',
           skillsRequired: ['backend', 'security'],
@@ -97,7 +94,7 @@ async function testOrchestrationExecution() {
       tasks: [],
       enableOrchestration: true,
       continuousOrchestration: false,
-      availableTemplateTasks: taskRepository,
+      backlogTasks: taskRepository,
       allowTaskGeneration: false,
       orchestrationStrategy:
         'Build a simple web application with authentication and UI components.',

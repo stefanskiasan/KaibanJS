@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import './TemplateRepositoryViewer.css';
+import './BacklogRepositoryViewer.css';
 
-const TemplateRepositoryViewer = ({
+const BacklogRepositoryViewer = ({
   team,
   onTaskSelect = null,
   onAddToWorkflow = null,
@@ -11,32 +11,32 @@ const TemplateRepositoryViewer = ({
   const [selectedComplexity, setSelectedComplexity] = useState('all');
   const [expandedTask, setExpandedTask] = useState(null);
 
-  // Get available template tasks from team
-  const templateTasks = team?.availableTemplateTasks || [];
+  // Get available backlog tasks from team
+  const backlogTasks = team?.backlogTasks || [];
 
   // Extract unique categories and complexities
   const categories = useMemo(() => {
     const cats = new Set(['all']);
-    templateTasks.forEach((task) => {
+    backlogTasks.forEach((task) => {
       if (task.category) cats.add(task.category);
     });
     return Array.from(cats);
-  }, [templateTasks]);
+  }, [backlogTasks]);
 
   const complexities = useMemo(() => {
     const complexes = new Set(['all']);
-    templateTasks.forEach((task) => {
+    backlogTasks.forEach((task) => {
       if (task.complexity) complexes.add(task.complexity);
       if (task.resourceRequirements?.complexity) {
         complexes.add(task.resourceRequirements.complexity);
       }
     });
     return Array.from(complexes);
-  }, [templateTasks]);
+  }, [backlogTasks]);
 
-  // Filter template tasks based on search and filters
+  // Filter backlog tasks based on search and filters
   const filteredTasks = useMemo(() => {
-    return templateTasks.filter((task) => {
+    return backlogTasks.filter((task) => {
       const matchesSearch =
         task.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         task.expectedOutput?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -49,7 +49,7 @@ const TemplateRepositoryViewer = ({
 
       return matchesSearch && matchesCategory && matchesComplexity;
     });
-  }, [templateTasks, searchTerm, selectedCategory, selectedComplexity]);
+  }, [backlogTasks, searchTerm, selectedCategory, selectedComplexity]);
 
   const getComplexityColor = (complexity) => {
     switch (complexity?.toLowerCase()) {
@@ -83,11 +83,11 @@ const TemplateRepositoryViewer = ({
   };
 
   return (
-    <div className="template-repository-viewer">
+    <div className="backlog-repository-viewer">
       <div className="repository-header">
-        <h3>📚 Template Repository</h3>
+        <h3>📚 Backlog Repository</h3>
         <p className="repository-subtitle">
-          {templateTasks.length} available template tasks
+          {backlogTasks.length} available backlog tasks
         </p>
       </div>
 
@@ -133,7 +133,7 @@ const TemplateRepositoryViewer = ({
       {/* Results Summary */}
       <div className="results-summary">
         <span className="results-count">
-          {filteredTasks.length} of {templateTasks.length} tasks
+          {filteredTasks.length} of {backlogTasks.length} tasks
         </span>
         {(searchTerm ||
           selectedCategory !== 'all' ||
@@ -151,14 +151,14 @@ const TemplateRepositoryViewer = ({
         )}
       </div>
 
-      {/* Template Tasks List */}
-      <div className="template-tasks-list">
+      {/* Backlog Tasks List */}
+      <div className="backlog-tasks-list">
         {filteredTasks.length === 0 ? (
           <div className="empty-state">
-            <p>No template tasks found matching your criteria.</p>
-            {templateTasks.length === 0 && (
+            <p>No backlog tasks found matching your criteria.</p>
+            {backlogTasks.length === 0 && (
               <p className="empty-hint">
-                Enable orchestration and add template tasks to the team to see
+                Enable orchestration and add backlog tasks to the team to see
                 them here.
               </p>
             )}
@@ -177,7 +177,7 @@ const TemplateRepositoryViewer = ({
             const dependencies = task.resourceRequirements?.dependencies || [];
 
             return (
-              <div key={taskId} className="template-task-card">
+              <div key={taskId} className="backlog-task-card">
                 <div
                   className="task-header"
                   onClick={() => toggleTaskExpansion(taskId)}
@@ -305,8 +305,8 @@ const TemplateRepositoryViewer = ({
         <h4>📊 Repository Statistics</h4>
         <div className="stats-grid">
           <div className="stat-item">
-            <span className="stat-label">Total Templates:</span>
-            <span className="stat-value">{templateTasks.length}</span>
+            <span className="stat-label">Total Backlog Tasks:</span>
+            <span className="stat-value">{backlogTasks.length}</span>
           </div>
           <div className="stat-item">
             <span className="stat-label">Categories:</span>
@@ -319,7 +319,7 @@ const TemplateRepositoryViewer = ({
           <div className="stat-item">
             <span className="stat-label">Adaptable Tasks:</span>
             <span className="stat-value">
-              {templateTasks.filter((t) => t.adaptable).length}
+              {backlogTasks.filter((t) => t.adaptable).length}
             </span>
           </div>
         </div>
@@ -328,4 +328,4 @@ const TemplateRepositoryViewer = ({
   );
 };
 
-export default TemplateRepositoryViewer;
+export default BacklogRepositoryViewer;

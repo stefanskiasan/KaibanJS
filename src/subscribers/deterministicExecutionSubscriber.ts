@@ -301,14 +301,13 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
       // Create temporary team object for orchestrator
       const tempTeam = {
         enableOrchestration: state.enableOrchestration,
-        availableTemplateTasks: state.availableTemplateTasks || [],
+        backlogTasks: state.backlogTasks || [],
         allowTaskGeneration: state.allowTaskGeneration,
         orchestrationStrategy: state.orchestrationStrategy,
         mode: state.mode || 'adaptive',
         maxActiveTasks: state.maxActiveTasks || 5,
         taskPrioritization: state.taskPrioritization || 'dynamic',
         workloadDistribution: state.workloadDistribution || 'balanced',
-        adaptationInterval: state.adaptationInterval || 300000,
         llmConfig: state.llmConfig,
         llmInstance: state.llmInstance,
         getTasks: () => state.tasks,

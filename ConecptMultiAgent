@@ -113,7 +113,6 @@ const taskRepository = [
     estimatedTime: '30-60 minutes',
     requiredSkills: ['code_analysis', 'best_practices'],
     dependencies: ['code_completion'],
-    template: true, // Marked as template for orchestrator
     allowUpdateTaskByOrchestrator: true,
     orchestratorInstructions: `
       ADAPTIVE CODE REVIEW TASK
@@ -147,7 +146,6 @@ const taskRepository = [
     estimatedTime: '2-8 hours',
     requiredSkills: ['programming', 'architecture'],
     dependencies: ['requirements_analysis'],
-    template: true,
     allowUpdateTaskByOrchestrator: true,
     orchestratorInstructions: `
       FLEXIBLE FEATURE IMPLEMENTATION
@@ -176,7 +174,6 @@ const taskRepository = [
     complexity: 'high',
     estimatedTime: '4-6 hours',
     requiredSkills: ['security_audit', 'authentication_systems'],
-    template: true,
     allowUpdateTaskByOrchestrator: false, // Critical task - no modifications allowed
     orchestratorInstructions: `
       CRITICAL SECURITY TASK - NO MODIFICATIONS ALLOWED
@@ -203,7 +200,6 @@ const taskRepository = [
     requiredSkills: ['workflow_management'],
     kanbanSpecific: true,
     workflowImpact: 'blocking',
-    template: true,
     allowUpdateTaskByOrchestrator: true,
     orchestratorInstructions: `
       INTELLIGENT TASK BLOCKING
@@ -235,7 +231,6 @@ const taskRepository = [
     requiredSkills: ['task_decomposition', 'project_planning'],
     kanbanSpecific: true,
     workflowImpact: 'structuring',
-    template: true,
     allowUpdateTaskByOrchestrator: true,
     orchestratorInstructions: `
       INTELLIGENT TASK DECOMPOSITION
@@ -395,7 +390,7 @@ class EnhancedIntelligentOrchestrator {
   }
 
   async selectOptimalTasksWithLLM(context, projectGoal) {
-    const availableTasks = this.taskRepository.filter(task => task.template);
+    const availableTasks = this.taskRepository; // All tasks in repository are available templates
 
     const prompt = this.buildTaskSelectionPrompt(context, projectGoal, availableTasks);
 
@@ -884,7 +879,6 @@ new Task({
   complexity: 'high',
   estimatedTime: '4-6 hours',
   requiredSkills: ['security_audit', 'authentication_systems'],
-  template: true,
 
   // New Task-Level Attributes
   allowUpdateTaskByOrchestrator: false, // Critical task - no changes allowed
@@ -911,7 +905,6 @@ new Task({
   complexity: 'medium',
   estimatedTime: '2-4 hours',
   requiredSkills: ['frontend_development', 'ui_design'],
-  template: true,
 
   allowUpdateTaskByOrchestrator: true, // Full flexibility allowed
   orchestratorInstructions: `

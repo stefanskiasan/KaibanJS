@@ -42,7 +42,6 @@ async function runTaskAdaptationExample() {
       expectedOutput: 'Functional REST API with user endpoints',
       agent: backendDeveloper,
       adaptable: true, // Can be modified
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         ADAPTATION SCENARIOS:
@@ -70,7 +69,6 @@ async function runTaskAdaptationExample() {
       expectedOutput: 'Interactive dashboard showing user metrics',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         ADAPT BASED ON:
         - User testing feedback
@@ -98,7 +96,6 @@ async function runTaskAdaptationExample() {
       expectedOutput: 'Automated pipeline processing user activity data',
       agent: dataArchitect,
       adaptable: true,
-      template: true,
       splitStrategy: 'auto', // Can be split if too complex
       orchestrationRules: `
         SCALING TRIGGERS:
@@ -125,7 +122,6 @@ async function runTaskAdaptationExample() {
       expectedOutput: 'Secure auth system with role-based access',
       agent: securityExpert,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         THREAT LEVEL ADAPTATIONS:
         - Low: Basic JWT authentication
@@ -153,7 +149,6 @@ async function runTaskAdaptationExample() {
       expectedOutput: 'Optimized application with <100ms response times',
       agent: performanceEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         PERFORMANCE ADAPTATIONS:
         - Frontend heavy: Code splitting, lazy loading
@@ -180,7 +175,6 @@ async function runTaskAdaptationExample() {
       expectedOutput: 'Native mobile app with essential functionality',
       agent: mobileAppDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         PLATFORM ADAPTATIONS:
         - iOS only: Swift with native UI
@@ -228,7 +222,7 @@ async function runTaskAdaptationExample() {
     tasks: [],
 
     enableOrchestration: true,
-    availableTemplateTasks: adaptableTaskRepository,
+    backlogTasks: adaptableTaskRepository,
     allowTaskGeneration: false, // Focus on adaptation
 
     // Use continuous orchestration for runtime task adaptation
@@ -288,7 +282,6 @@ async function runTaskAdaptationExample() {
     `,
 
     maxActiveTasks: 3,
-    adaptationInterval: 30000, // Check for adaptations every 30 seconds
 
     llmInstance: orchestrationLLM,
   });

@@ -57,7 +57,6 @@ async function runInnovativeOrchestrationExample() {
         'Report on applicable AI technologies with implementation recommendations',
       agent: aiResearcher,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         EXPLORATION AREAS:
@@ -84,7 +83,6 @@ async function runInnovativeOrchestrationExample() {
       expectedOutput: 'Futuristic UI/UX design incorporating AI interactions',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       splitStrategy: 'auto',
       orchestrationRules: `
         INNOVATION TARGETS:
@@ -109,7 +107,6 @@ async function runInnovativeOrchestrationExample() {
       expectedOutput: 'Working prototype demonstrating blockchain capabilities',
       agent: blockchainDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules:
         'Explore DeFi, NFTs, smart contracts, or other Web3 innovations',
       resourceRequirements: {
@@ -156,7 +153,7 @@ async function runInnovativeOrchestrationExample() {
     continuousOrchestration: true,
 
     // Seed task repository (will be expanded by AI)
-    availableTemplateTasks: innovationTaskRepository,
+    backlogTasks: innovationTaskRepository,
 
     // IMPORTANT: Enable autonomous task generation
     allowTaskGeneration: true,
@@ -205,9 +202,6 @@ async function runInnovativeOrchestrationExample() {
 
     // Allow more concurrent experiments
     maxActiveTasks: 4,
-
-    // Shorter adaptation interval for rapid iteration
-    adaptationInterval: 120000, // 2 minutes
 
     // More powerful LLM for creative tasks
     llmInstance: orchestrationLLM,
@@ -544,7 +538,7 @@ async function runInnovativeOrchestrationExample() {
       `- Continuous Orchestration: ${innovationTeam.continuousOrchestration}`
     );
     console.log(
-      `- Available Tasks: ${innovationTeam.availableTemplateTasks?.length || 0}`
+      `- Available Tasks: ${innovationTeam.backlogTasks?.length || 0}`
     );
     console.log(`- LLM Model: ${orchestrationLLM.modelName}`);
     console.log(

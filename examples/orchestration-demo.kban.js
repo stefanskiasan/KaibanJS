@@ -38,7 +38,7 @@ const qaEngineer = new Agent({
   tools: [],
 });
 
-// Define template tasks for the orchestrator to choose from
+// Define backlog tasks for the orchestrator to choose from
 const taskRepository = [
   // Architecture & Planning
   new Task({
@@ -47,7 +47,6 @@ const taskRepository = [
       'Complete architectural documentation with diagrams and technology stack decisions',
     agent: architect,
     adaptable: true,
-    template: true,
     resourceRequirements: {
       estimatedTime: '4-6 hours',
       skillsRequired: ['system_design', 'architecture', 'documentation'],
@@ -72,7 +71,6 @@ const taskRepository = [
       'Complete authentication with JWT tokens, login/logout, and password reset',
     agent: fullStackDeveloper,
     adaptable: true,
-    template: true,
     resourceRequirements: {
       estimatedTime: '6-8 hours',
       skillsRequired: ['backend', 'security', 'authentication', 'jwt'],
@@ -97,7 +95,6 @@ const taskRepository = [
     expectedOutput: 'Modern, accessible UI components with responsive design',
     agent: uiUxDesigner,
     adaptable: true,
-    template: true,
     resourceRequirements: {
       estimatedTime: '8-10 hours',
       skillsRequired: [
@@ -127,7 +124,6 @@ const taskRepository = [
       'Complete API with CRUD operations, validation, and documentation',
     agent: fullStackDeveloper,
     adaptable: true,
-    template: true,
     resourceRequirements: {
       estimatedTime: '5-7 hours',
       skillsRequired: ['backend', 'api_design', 'validation', 'documentation'],
@@ -142,7 +138,6 @@ const taskRepository = [
       'Complete testing framework with unit, integration, and E2E tests',
     agent: qaEngineer,
     adaptable: true,
-    template: true,
     resourceRequirements: {
       estimatedTime: '6-8 hours',
       skillsRequired: ['testing', 'automation', 'ci_cd'],
@@ -167,7 +162,6 @@ const taskRepository = [
       'Optimized database schema with proper indexing and relationships',
     agent: fullStackDeveloper,
     adaptable: true,
-    template: true,
     resourceRequirements: {
       estimatedTime: '4-5 hours',
       skillsRequired: ['database_design', 'sql', 'migrations'],
@@ -181,7 +175,6 @@ const taskRepository = [
     expectedOutput: 'Performance-optimized application with caching strategies',
     agent: fullStackDeveloper,
     adaptable: true,
-    template: true,
     resourceRequirements: {
       estimatedTime: '3-4 hours',
       skillsRequired: ['performance_optimization', 'caching', 'monitoring'],
@@ -196,7 +189,6 @@ const taskRepository = [
       'Security-hardened application with vulnerability assessment report',
     agent: qaEngineer,
     adaptable: false, // Security tasks should not be modified
-    template: true,
     resourceRequirements: {
       estimatedTime: '4-6 hours',
       skillsRequired: [
@@ -237,7 +229,7 @@ const team = new Team({
   // CORE ORCHESTRATION CONFIGURATION
   enableOrchestration: true,
   continuousOrchestration: true, // Enable continuous optimization
-  availableTemplateTasks: taskRepository,
+  backlogTasks: taskRepository,
   allowTaskGeneration: true, // Allow AI to create new tasks when needed
 
   // ORCHESTRATION STRATEGY
@@ -275,7 +267,6 @@ const team = new Team({
   maxActiveTasks: 3, // Limit concurrent tasks for focused development
   taskPrioritization: 'ai-driven', // Let AI optimize task priorities
   workloadDistribution: 'skills-based', // Match tasks to agent expertise
-  adaptationInterval: 300000, // Review and adapt every 5 minutes
 
   // LLM CONFIGURATION
   llmInstance: orchestrationLLM,
@@ -288,6 +279,7 @@ const team = new Team({
   },
 });
 
+team.start();
 export default team;
 
 /******************************************************************

@@ -37,8 +37,6 @@ const EnhancedTaskBoard = ({ tasks = [], orchestrationEnabled = false }) => {
               return (
                 task.adaptationHistory && task.adaptationHistory.length > 0
               );
-            case 'template':
-              return task.template;
             case 'original':
               return (
                 !task.generated &&
@@ -70,14 +68,6 @@ const EnhancedTaskBoard = ({ tasks = [], orchestrationEnabled = false }) => {
         label: 'Adapted',
         color: '#fd7e14',
         bgColor: '#ffe0b3',
-      };
-    }
-    if (task.template) {
-      return {
-        icon: '📋',
-        label: 'Template',
-        color: '#339af0',
-        bgColor: '#e7f5ff',
       };
     }
     return {
@@ -455,9 +445,9 @@ const EnhancedTaskBoard = ({ tasks = [], orchestrationEnabled = false }) => {
         </div>
         <div className="stat-item">
           <span className="stat-icon">📋</span>
-          <span className="stat-label">Templates:</span>
+          <span className="stat-label">Adaptable:</span>
           <span className="stat-value">
-            {tasks.filter((t) => t.template).length}
+            {tasks.filter((t) => t.adaptable).length}
           </span>
         </div>
         <div className="stat-item">

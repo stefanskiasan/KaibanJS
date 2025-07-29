@@ -23,7 +23,6 @@ import {
   TaskGenerationLog,
   OrchestrationErrorLog,
   WorkflowOptimizationLog,
-  ContinuousOptimizationLog,
   TaskRepositoryLog,
   PerformanceMonitoringLog,
   TaskCompletionAnalysisLog,
@@ -45,7 +44,7 @@ const logPrettyOrchestration = (log: OrchestrationStatusLog): void => {
           `   Goal: ${activatedLog.metadata.projectGoal}\n` +
           `   Mode: ${activatedLog.metadata.mode}\n` +
           `   Existing Tasks: ${activatedLog.metadata.existingTasksCount}\n` +
-          `   Available Tasks: ${activatedLog.metadata.availableTasksCount}\n` +
+          `   Backlog Tasks: ${activatedLog.metadata.availableTasksCount}\n` +
           `   Preserve Existing: ${
             activatedLog.metadata.preserveExistingTasks ? '✅' : '❌'
           }\n` +
@@ -134,21 +133,6 @@ const logPrettyOrchestration = (log: OrchestrationStatusLog): void => {
           )
             .map(([k, v]) => `${k}: ${v}`)
             .join(', ')}`
-      );
-      break;
-    }
-
-    case 'CONTINUOUS_OPTIMIZATION': {
-      const continuousLog = log as ContinuousOptimizationLog;
-      logger.info(
-        `🔄 [${timestamp}] Continuous Optimization\n` +
-          `   Interval: ${continuousLog.metadata.adaptationInterval}ms\n` +
-          `   Optimizations Applied: ${continuousLog.metadata.optimizationsApplied.length}\n` +
-          `   🎯 High Priority: ${
-            continuousLog.metadata.optimizationsApplied.filter(
-              (o) => o.priority === 'high'
-            ).length
-          }`
       );
       break;
     }

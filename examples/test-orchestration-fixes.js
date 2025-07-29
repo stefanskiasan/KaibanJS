@@ -22,7 +22,6 @@ const testTask = new Task({
   expectedOutput: 'Test completion',
   agent: seniorDeveloper,
   adaptable: true,
-  template: true,
 });
 
 async function testOrchestrationFixes() {
@@ -35,7 +34,7 @@ async function testOrchestrationFixes() {
       agents: [seniorDeveloper, frontendDeveloper, qaEngineer],
       tasks: [],
       enableOrchestration: true,
-      availableTemplateTasks: [testTask],
+      backlogTasks: [testTask],
       orchestrationStrategy: 'Test orchestration fixes',
       mode: 'adaptive',
       maxActiveTasks: 1,

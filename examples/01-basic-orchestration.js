@@ -4,7 +4,7 @@
  * This example demonstrates the basic setup of intelligent orchestration in KaibanJS.
  * It shows how to:
  * - Enable orchestration with enableOrchestration: true
- * - Set up a task repository with availableTemplateTasks
+ * - Set up a task repository with backlogTasks
  * - Use team.start() with projectGoal to let AI select and arrange tasks automatically
  *
  * Requirements:
@@ -40,7 +40,7 @@ async function runBasicOrchestrationExample() {
   );
 
   // Step 1: Create a task repository
-  // These are template tasks that the orchestrator can choose from
+  // These are backlog tasks that the orchestrator can choose from
   const taskRepository = [
     // Use predefined tasks from utils
     implementAuthenticationTask,
@@ -55,7 +55,6 @@ async function runBasicOrchestrationExample() {
         'Complete project setup with folder structure and npm packages',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '1-2 hours',
         skillsRequired: ['project_setup', 'npm', 'architecture'],
@@ -69,7 +68,6 @@ async function runBasicOrchestrationExample() {
         'Development environment with linting, formatting, and git hooks',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '1-2 hours',
         skillsRequired: ['devops', 'tooling'],
@@ -79,7 +77,7 @@ async function runBasicOrchestrationExample() {
   ];
 
   console.log(
-    `📚 Task Repository contains ${taskRepository.length} template tasks\n`
+    `📚 Task Repository contains ${taskRepository.length} backlog tasks\n`
   );
 
   // Create LLM instance for orchestration
@@ -103,7 +101,7 @@ async function runBasicOrchestrationExample() {
     continuousOrchestration: false,
 
     // Provide the task repository
-    availableTemplateTasks: taskRepository,
+    backlogTasks: taskRepository,
 
     // Don't allow new task generation in this basic example
     allowTaskGeneration: false,
@@ -233,7 +231,6 @@ async function runBasicOrchestrationExample() {
       expectedOutput: 'User profile CRUD operations with avatar upload',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '3-4 hours',
         skillsRequired: ['frontend', 'file_upload'],
@@ -241,13 +238,11 @@ async function runBasicOrchestrationExample() {
       },
     });
 
-    team.addAvailableTemplateTasks([newTask]);
+    team.addBacklogTasks([newTask]);
     console.log(
       '✅ Added new task to repository: "Implement user profile management"'
     );
-    console.log(
-      `Repository now contains ${team.availableTemplateTasks.length} tasks\n`
-    );
+    console.log(`Repository now contains ${team.backlogTasks.length} tasks\n`);
 
     // Update orchestration strategy
     const updatedStrategy =
@@ -265,17 +260,13 @@ async function runBasicOrchestrationExample() {
     console.log('\nTroubleshooting:');
     console.log('1. Ensure OPENAI_API_KEY is set in your .env file');
     console.log('2. Check that enableOrchestration is set to true');
-    console.log(
-      '3. Verify that availableTemplateTasks contains template tasks'
-    );
+    console.log('3. Verify that backlogTasks contains backlog tasks');
     console.log('4. Check network connection and API service status');
 
     // Show current configuration for debugging
     console.log('\nCurrent Configuration:');
     console.log(`- Enable Orchestration: ${team.enableOrchestration}`);
-    console.log(
-      `- Available Tasks: ${team.availableTemplateTasks?.length || 0}`
-    );
+    console.log(`- Available Tasks: ${team.backlogTasks?.length || 0}`);
     console.log(`- LLM Configured: ${!!team.llmInstance}`);
   }
 
@@ -287,7 +278,7 @@ async function runBasicOrchestrationExample() {
   console.log(
     '2. Use continuousOrchestration: false for initial-only mode (basic setup)'
   );
-  console.log('3. Provide a task repository with availableTemplateTasks');
+  console.log('3. Provide a task repository with backlogTasks');
   console.log('4. Define a clear orchestrationStrategy to guide the AI');
   console.log(
     '5. Call team.start() - uses orchestrationStrategy from config automatically'

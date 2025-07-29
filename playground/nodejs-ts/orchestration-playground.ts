@@ -128,7 +128,6 @@ const runOrchestrationDemo = async () => {
         expectedOutput: 'Secure user login and registration with JWT',
         agent: developer,
         adaptable: true,
-        template: true,
         orchestrationRules:
           'Can be adapted based on security requirements and complexity',
         resourceRequirements: {
@@ -142,7 +141,6 @@ const runOrchestrationDemo = async () => {
         expectedOutput: 'Reusable UI components with Storybook documentation',
         agent: designer,
         adaptable: true,
-        template: true,
         orchestrationRules:
           'Component complexity can be adjusted based on timeline',
         resourceRequirements: {
@@ -161,7 +159,6 @@ const runOrchestrationDemo = async () => {
         expectedOutput: 'Well-documented API with proper error handling',
         agent: developer,
         adaptable: true,
-        template: true,
         orchestrationRules:
           'Endpoint complexity can be scaled based on requirements',
         resourceRequirements: {
@@ -180,7 +177,6 @@ const runOrchestrationDemo = async () => {
         expectedOutput: 'Automated tests with >80% code coverage',
         agent: tester,
         adaptable: true,
-        template: true,
         orchestrationRules:
           'Test coverage can be adjusted based on timeline constraints',
         resourceRequirements: {
@@ -194,7 +190,6 @@ const runOrchestrationDemo = async () => {
         expectedOutput: 'Production monitoring with alerts and dashboards',
         agent: devops,
         adaptable: true,
-        template: true,
         orchestrationRules:
           'Monitoring complexity can be scaled based on project size',
         resourceRequirements: {
@@ -213,7 +208,6 @@ const runOrchestrationDemo = async () => {
         expectedOutput: 'Interactive charts and analytics dashboard',
         agent: developer,
         adaptable: true,
-        template: true,
         orchestrationRules:
           'Chart complexity can be adjusted based on data requirements',
         resourceRequirements: {
@@ -232,7 +226,6 @@ const runOrchestrationDemo = async () => {
         expectedOutput: 'Performance-optimized application with monitoring',
         agent: developer,
         adaptable: true,
-        template: true,
         orchestrationRules:
           'Optimization level can be adjusted based on performance targets',
         resourceRequirements: {
@@ -246,7 +239,6 @@ const runOrchestrationDemo = async () => {
         expectedOutput: 'Mobile-optimized user interface',
         agent: designer,
         adaptable: true,
-        template: true,
         orchestrationRules:
           'Mobile complexity can be scaled based on target devices',
         resourceRequirements: {
@@ -261,7 +253,7 @@ const runOrchestrationDemo = async () => {
       }),
     ];
 
-    console.log('✅ Task repository created with 8 template tasks\n');
+    console.log('✅ Task repository created with 8 backlog tasks\n');
 
     // ╔═══════════════════════════════════════════════════════════╗
     // ║              DEMO 1: TRADITIONAL KAIBANJS                ║
@@ -287,7 +279,7 @@ const runOrchestrationDemo = async () => {
       `   - Task count: ${traditionalTeam.getTasks().length} (fixed)`
     );
     console.log(
-      `   - Available templates: ${traditionalTeam.availableTasks.length}`
+      `   - Available backlog tasks: ${traditionalTeam.backlogTasks.length}`
     );
     console.log('');
 
@@ -346,7 +338,7 @@ const runOrchestrationDemo = async () => {
     );
     console.log(`   - Initial tasks: ${orchestratedTeam.getTasks().length}`);
     console.log(
-      `   - Available templates: ${orchestratedTeam.availableTasks.length}`
+      `   - Available backlog tasks: ${orchestratedTeam.backlogTasks.length}`
     );
     console.log(
       `   - Task generation: ${
@@ -423,7 +415,6 @@ const runOrchestrationDemo = async () => {
       expectedOutput: 'Real-time notification system with WebSocket support',
       agent: developer,
       adaptable: true,
-      template: true,
       orchestrationRules:
         'Notification complexity can be adjusted based on user requirements',
       resourceRequirements: {
@@ -465,7 +456,7 @@ const runOrchestrationDemo = async () => {
       tasks: existingTasks, // We have existing tasks but will replace them
       enableOrchestration: true,
       availableTasks: taskRepository,
-      allowTaskGeneration: false, // Only use template tasks
+      allowTaskGeneration: false, // Only use backlog tasks
       orchestrationStrategy: `
         Build a minimal viable product (MVP) for a task management application.
         Focus on core features and rapid deployment.

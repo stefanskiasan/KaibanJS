@@ -91,7 +91,6 @@ async function runOrchestrationComparisonExample() {
       expectedOutput: 'Complete DevOps setup with automated deployment',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '4-6 hours',
         skillsRequired: ['devops', 'cicd', 'infrastructure'],
@@ -103,7 +102,6 @@ async function runOrchestrationComparisonExample() {
       expectedOutput: 'Secure auth with JWT, OAuth, and role-based access',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       resourceRequirements: {
         estimatedTime: '6-8 hours',
@@ -116,7 +114,6 @@ async function runOrchestrationComparisonExample() {
       expectedOutput: 'Complete product management system with search',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '8-10 hours',
         skillsRequired: ['backend', 'database', 'api'],
@@ -128,7 +125,6 @@ async function runOrchestrationComparisonExample() {
       expectedOutput: 'Modern, mobile-first e-commerce interface',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       resourceRequirements: {
         estimatedTime: '10-12 hours',
@@ -141,7 +137,6 @@ async function runOrchestrationComparisonExample() {
       expectedOutput: 'Secure payment system with order tracking',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '6-8 hours',
         skillsRequired: ['backend', 'payments', 'security'],
@@ -153,7 +148,6 @@ async function runOrchestrationComparisonExample() {
       expectedOutput: 'Automated testing with >95% coverage',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '6-8 hours',
         skillsRequired: ['testing', 'automation', 'qa'],
@@ -165,7 +159,6 @@ async function runOrchestrationComparisonExample() {
       expectedOutput: 'Complete admin interface with business metrics',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '8-10 hours',
         skillsRequired: ['frontend', 'data-visualization', 'admin'],
@@ -188,7 +181,7 @@ async function runOrchestrationComparisonExample() {
     ],
     tasks: [],
     enableOrchestration: true,
-    availableTemplateTasks: ecommerceTaskRepository,
+    backlogTasks: ecommerceTaskRepository,
     allowTaskGeneration: true,
     orchestrationStrategy:
       'Focus on scalability, security, and user experience',

@@ -110,20 +110,6 @@ export interface WorkflowOptimizationLog extends BaseWorkflowLog {
   };
 }
 
-export interface ContinuousOptimizationLog extends BaseWorkflowLog {
-  logType: 'OrchestrationStatusUpdate';
-  orchestrationEvent: 'CONTINUOUS_OPTIMIZATION';
-  metadata: {
-    message: string;
-    adaptationInterval: number;
-    optimizationsApplied: Array<{
-      type: string;
-      priority: 'high' | 'medium' | 'low';
-      expectedImpact: string;
-    }>;
-  };
-}
-
 // Orchestration completion logs
 export interface OrchestrationCompletedLog extends BaseWorkflowLog {
   logType: 'OrchestrationStatusUpdate';
@@ -235,7 +221,6 @@ export type OrchestrationStatusLog =
   | TaskAdaptationLog
   | TaskGenerationLog
   | WorkflowOptimizationLog
-  | ContinuousOptimizationLog
   | OrchestrationCompletedLog
   | OrchestrationErrorLog
   | TaskRepositoryLog

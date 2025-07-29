@@ -47,7 +47,6 @@ async function runRuntimeOrchestrationControlExample() {
         'Feature concept validation and technical feasibility report',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: 'Exploration phase - high adaptability needed',
       resourceRequirements: {
@@ -63,7 +62,6 @@ async function runRuntimeOrchestrationControlExample() {
       expectedOutput: 'Complete UX design with user journey mapping',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: 'Creative phase - allow AI to explore alternatives',
       resourceRequirements: {
         estimatedTime: '4-6 hours',
@@ -79,7 +77,6 @@ async function runRuntimeOrchestrationControlExample() {
       expectedOutput: 'Robust, scalable application foundation',
       agent: backendDeveloper,
       adaptable: false, // Less adaptable in production phase
-      template: true,
       orchestrationRules:
         'Production phase - prioritize stability and efficiency',
       resourceRequirements: {
@@ -95,7 +92,6 @@ async function runRuntimeOrchestrationControlExample() {
       expectedOutput: 'Production-ready UI components with testing',
       agent: frontendDeveloper,
       adaptable: false,
-      template: true,
       resourceRequirements: {
         estimatedTime: '6-8 hours',
         skillsRequired: ['frontend', 'responsive_design', 'components'],
@@ -110,7 +106,6 @@ async function runRuntimeOrchestrationControlExample() {
       expectedOutput: 'Complete testing framework with >95% coverage',
       agent: qaEngineer,
       adaptable: false,
-      template: true,
       resourceRequirements: {
         estimatedTime: '4-6 hours',
         skillsRequired: ['testing', 'quality_assurance', 'automation'],
@@ -125,7 +120,6 @@ async function runRuntimeOrchestrationControlExample() {
       expectedOutput: 'Production-ready deployment with monitoring',
       agent: seniorDeveloper,
       adaptable: false,
-      template: true,
       resourceRequirements: {
         estimatedTime: '2-4 hours',
         skillsRequired: ['deployment', 'monitoring', 'production'],
@@ -186,7 +180,7 @@ async function runRuntimeOrchestrationControlExample() {
     // Initial configuration (Exploration phase)
     enableOrchestration: true,
     continuousOrchestration: true,
-    availableTemplateTasks: projectTaskRepository,
+    backlogTasks: projectTaskRepository,
     allowTaskGeneration: true,
     mode: 'innovative',
     maxActiveTasks: 2,

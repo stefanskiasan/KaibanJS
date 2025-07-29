@@ -25,7 +25,6 @@ const createSimpleTask = (description, agent) =>
     expectedOutput: 'Task completed successfully',
     agent,
     adaptable: true,
-    template: true,
   });
 
 async function testOrchestrationMode(modeName, mode, tasks, strategy) {
@@ -40,7 +39,7 @@ async function testOrchestrationMode(modeName, mode, tasks, strategy) {
       agents: [seniorDeveloper, frontendDeveloper, qaEngineer],
       tasks: [],
       enableOrchestration: true,
-      availableTemplateTasks: tasks,
+      backlogTasks: tasks,
       orchestrationStrategy: strategy,
       mode: mode,
       maxActiveTasks: 2,

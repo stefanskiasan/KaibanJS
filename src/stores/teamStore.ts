@@ -75,7 +75,8 @@ const td = initializeTelemetry();
 // ─────────────────────────────────────────────────────────────────────
 
 const createTeamStore = (
-  initialState: Partial<TeamStoreState> = {}
+  initialState: Partial<TeamStoreState> = {},
+  teamInstance?: any // Team instance reference to avoid circular dependency
 ): TeamStore => {
   // Define the store with centralized state management and actions
   if (initialState.logLevel) {
@@ -109,16 +110,16 @@ const createTeamStore = (
     // Orchestration Extensions
     enableOrchestration: initialState.enableOrchestration || false,
     continuousOrchestration: initialState.continuousOrchestration || false,
-    availableTemplateTasks: initialState.availableTemplateTasks || [],
+    backlogTasks: initialState.backlogTasks || [],
     allowTaskGeneration: initialState.allowTaskGeneration || false,
     orchestrationStrategy: initialState.orchestrationStrategy,
     mode: initialState.mode || 'adaptive',
     maxActiveTasks: initialState.maxActiveTasks || 5,
     taskPrioritization: initialState.taskPrioritization || 'dynamic',
     workloadDistribution: initialState.workloadDistribution || 'balanced',
-    adaptationInterval: initialState.adaptationInterval || 300000,
     llmConfig: initialState.llmConfig,
     llmInstance: initialState.llmInstance,
+    teamInstance: teamInstance,
 
     setInputs: (inputs: Record<string, unknown>) => set({ inputs }),
     setName: (name: string) => set({ name }),
@@ -162,7 +163,10 @@ const createTeamStore = (
       set({ workflowExecutionStrategy: strategy });
     },
 
-    startWorkflow: async (inputs?: Record<string, unknown>) => {
+    startWorkflow: async (
+      inputs?: Record<string, unknown>,
+      skipTeamStart?: boolean
+    ) => {
       logger.info(`🚀 Team *${get().name}* is starting to work.`);
       td.signal('workflow_started');
       get().resetWorkflowStateAction();
@@ -187,6 +191,28 @@ const createTeamStore = (
         workflowLogs: [...state.workflowLogs, initialLog],
         teamWorkflowStatus: WORKFLOW_STATUS_enum.RUNNING,
       }));
+
+      // CRITICAL FIX: Call the actual Team instance's start() method
+      // This will trigger orchestration if enabled
+      // Skip if called from Team.start() to avoid recursion
+      if (!skipTeamStart) {
+        const { teamInstance } = get();
+        if (teamInstance && typeof teamInstance.start === 'function') {
+          try {
+            logger.info(
+              '🤖 Calling Team instance start() method for orchestration activation'
+            );
+            await teamInstance.start(inputs || {});
+          } catch (error) {
+            logger.error('Failed to start Team instance:', error);
+            get().handleWorkflowError(error as Error);
+          }
+        } else {
+          logger.warn(
+            'No Team instance reference found - orchestration may not activate'
+          );
+        }
+      }
     },
 
     resetWorkflowStateAction: () => {
@@ -202,11 +228,16 @@ const createTeamStore = (
 
         const resetAgents = [...state.agents];
 
+        // Preserve orchestration logs but remove agent/task logs
+        const preservedLogs = state.workflowLogs.filter(
+          (log) => log.logType === 'OrchestrationStatusUpdate'
+        );
+
         return {
           ...state,
           tasks: resetTasks,
           agents: resetAgents,
-          workflowLogs: [],
+          workflowLogs: preservedLogs, // Keep orchestration logs
           workflowContext: '',
           workflowResult: null,
           teamWorkflowStatus: WORKFLOW_STATUS_enum.INITIAL,
@@ -833,15 +864,14 @@ const createTeamStore = (
       })),
 
     // Orchestration Actions
-    setAvailableTemplateTasks: (tasks: Task[]) =>
-      set({ availableTemplateTasks: tasks }),
-    addAvailableTemplateTask: (task: Task) =>
+    setBacklogTasks: (tasks: Task[]) => set({ backlogTasks: tasks }),
+    addBacklogTask: (task: Task) =>
       set((state) => ({
-        availableTemplateTasks: [...(state.availableTemplateTasks || []), task],
+        backlogTasks: [...(state.backlogTasks || []), task],
       })),
-    removeAvailableTemplateTask: (taskId: string) =>
+    removeBacklogTask: (taskId: string) =>
       set((state) => ({
-        availableTemplateTasks: (state.availableTemplateTasks || []).filter(
+        backlogTasks: (state.backlogTasks || []).filter(
           (task) => task.id !== taskId
         ),
       })),

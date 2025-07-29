@@ -44,7 +44,6 @@ async function runLearningModeExample() {
       expectedOutput: 'API response times under 200ms with performance metrics',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         LEARNING OBJECTIVES:
@@ -71,7 +70,6 @@ async function runLearningModeExample() {
       expectedOutput: 'Test suite with >90% coverage and quality dashboard',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         LEARNING AREAS:
         - Test effectiveness vs coverage
@@ -92,7 +90,6 @@ async function runLearningModeExample() {
       expectedOutput: 'Interactive dashboard with user behavior tracking',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         FEEDBACK LOOPS:
         - User interaction patterns
@@ -119,7 +116,6 @@ async function runLearningModeExample() {
       expectedOutput: 'Self-improving documentation with FAQ generation',
       agent: technicalWriter,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         LEARNING METRICS:
         - Most searched topics
@@ -141,7 +137,6 @@ async function runLearningModeExample() {
         'Adaptive data pipeline that learns optimal configurations',
       agent: dataArchitect,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         OPTIMIZATION TARGETS:
         - Processing speed
@@ -196,7 +191,7 @@ async function runLearningModeExample() {
     // Enable continuous orchestration for learning from each task completion
     continuousOrchestration: true,
 
-    availableTemplateTasks: learningTaskRepository,
+    backlogTasks: learningTaskRepository,
     allowTaskGeneration: true,
 
     // Detailed learning strategy
@@ -245,7 +240,6 @@ async function runLearningModeExample() {
     maxActiveTasks: 3,
 
     // Faster adaptation for learning
-    adaptationInterval: 60000, // 1 minute - more frequent learning cycles
 
     llmInstance: orchestrationLLM,
   });

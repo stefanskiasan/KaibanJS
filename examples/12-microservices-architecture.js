@@ -45,7 +45,6 @@ async function runMicroservicesArchitectureExample() {
         'Well-defined service boundaries with clear responsibilities',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         SERVICE BOUNDARIES:
         - User Service: Authentication, profiles, preferences
@@ -82,7 +81,6 @@ async function runMicroservicesArchitectureExample() {
         'Production-ready API Gateway handling all client requests',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         GATEWAY FEATURES:
         - Request routing
@@ -114,7 +112,6 @@ async function runMicroservicesArchitectureExample() {
       expectedOutput: 'Dynamic service discovery with automatic failover',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         DISCOVERY PATTERNS:
         - Service registry (Consul/Eureka)
@@ -143,7 +140,6 @@ async function runMicroservicesArchitectureExample() {
       expectedOutput: 'Scalable event bus with guaranteed message delivery',
       agent: dataArchitect,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         EVENT INFRASTRUCTURE:
         - Message broker (Kafka/RabbitMQ)
@@ -177,7 +173,6 @@ async function runMicroservicesArchitectureExample() {
       expectedOutput: 'Reliable transaction management across services',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         TRANSACTION PATTERNS:
         - Saga pattern (choreography/orchestration)
@@ -211,7 +206,6 @@ async function runMicroservicesArchitectureExample() {
       expectedOutput: 'Fault-tolerant services with graceful degradation',
       agent: performanceEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         RESILIENCE PATTERNS:
         - Circuit breakers (Hystrix/Resilience4j)
@@ -245,7 +239,6 @@ async function runMicroservicesArchitectureExample() {
       expectedOutput: 'Complete observability across all microservices',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         OBSERVABILITY STACK:
         - Distributed tracing (Jaeger/Zipkin)
@@ -278,7 +271,6 @@ async function runMicroservicesArchitectureExample() {
       expectedOutput: 'Production-ready Kubernetes cluster with all services',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         KUBERNETES SETUP:
         - Service deployments
@@ -309,7 +301,6 @@ async function runMicroservicesArchitectureExample() {
         'Comprehensive security across all service communications',
       agent: securityExpert,
       adaptable: false,
-      template: true,
       orchestrationRules: `
         SECURITY LAYERS:
         - mTLS between services
@@ -340,7 +331,6 @@ async function runMicroservicesArchitectureExample() {
         'Complete test suite including contract and integration tests',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         TEST TYPES:
         - Unit tests per service
@@ -392,7 +382,7 @@ async function runMicroservicesArchitectureExample() {
     tasks: [],
 
     enableOrchestration: true,
-    availableTemplateTasks: microservicesTaskRepository,
+    backlogTasks: microservicesTaskRepository,
     allowTaskGeneration: true,
 
     // Enable continuous orchestration for dynamic architecture adaptation
@@ -475,7 +465,6 @@ async function runMicroservicesArchitectureExample() {
     `,
 
     maxActiveTasks: 4,
-    adaptationInterval: 180000, // 3 minutes
 
     llmInstance: orchestrationLLM,
   });

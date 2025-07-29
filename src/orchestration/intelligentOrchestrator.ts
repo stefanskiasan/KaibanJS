@@ -16,6 +16,31 @@ import { createOrchestrationLog } from '../subscribers/orchestrationSubscriber';
 import { OrchestrationPromptFactory } from './promptTemplates';
 import { TASK_STATUS_enum } from '../utils/enums';
 
+// Static imports for LLM providers (browser-compatible)
+let ChatOpenAI: any;
+let ChatAnthropic: any;
+let ChatGoogleGenerativeAI: any;
+
+// Dynamic imports for browser compatibility
+const loadLLMProviders = async () => {
+  try {
+    if (!ChatOpenAI) {
+      const openai = await import('@langchain/openai');
+      ChatOpenAI = openai.ChatOpenAI;
+    }
+    if (!ChatAnthropic) {
+      const anthropic = await import('@langchain/anthropic');
+      ChatAnthropic = anthropic.ChatAnthropic;
+    }
+    if (!ChatGoogleGenerativeAI) {
+      const google = await import('@langchain/google-genai');
+      ChatGoogleGenerativeAI = google.ChatGoogleGenerativeAI;
+    }
+  } catch (error) {
+    logger.warn('Some LLM providers could not be loaded:', error);
+  }
+};
+
 /**
  * Context information for orchestrator decision-making
  */
@@ -100,10 +125,10 @@ export class IntelligentOrchestrator {
 
   constructor(team: Team) {
     this.team = team;
-    this.availableTasks = team.availableTemplateTasks || [];
+    this.availableTasks = team.backlogTasks || [];
     this.orchestrationStrategy = team.orchestrationStrategy || '';
     this.mode = team.mode || 'adaptive';
-    this.llm = this.initializeLLM(team);
+    this.llm = null; // Will be initialized lazily in ensureLLMInitialized()
     this.conversationHistory = [];
     this.performanceMetrics = new Map();
     this.taskAdaptationHistory = [];
@@ -202,8 +227,8 @@ export class IntelligentOrchestrator {
       // Fallback 1: Use simple task selection logic
       if (this.availableTasks && this.availableTasks.length > 0) {
         const fallbackTasks = this.availableTasks
-          .filter((task) => task && task.template && task.adaptable)
-          .slice(0, 3); // Take first 3 adaptable template tasks
+          .filter((task) => task && task.adaptable)
+          .slice(0, 3); // Take first 3 adaptable backlog tasks
 
         logger.info(
           `📋 Fallback task selection: ${fallbackTasks.length} tasks selected`
@@ -333,7 +358,7 @@ export class IntelligentOrchestrator {
       }
 
       // If LLM is null, try to reinitialize
-      this.llm = this.initializeLLM(this.team);
+      this.llm = await this.initializeLLM(this.team);
       if (this.llm) {
         logger.info('✅ LLM reinitialized successfully');
         return { recovered: true, llm: this.llm };
@@ -439,7 +464,6 @@ export class IntelligentOrchestrator {
           'Workflow stability maintained and team coordination ensured',
         agent: agent,
         adaptable: false, // Keep it simple and safe
-        template: false,
         resourceRequirements: {
           estimatedTime: '30 minutes',
           skillsRequired: ['basic_coordination'],
@@ -482,9 +506,21 @@ export class IntelligentOrchestrator {
   }
 
   /**
+   * Ensure LLM is initialized (lazy initialization)
+   */
+  private async ensureLLMInitialized(): Promise<void> {
+    if (!this.llm) {
+      this.llm = await this.initializeLLM(this.team);
+    }
+  }
+
+  /**
    * Initialize LLM instance for the orchestrator
    */
-  private initializeLLM(team: Team): LangChainChatModel | null {
+  private async initializeLLM(team: Team): Promise<LangChainChatModel | null> {
+    // Load LLM providers first (browser-compatible)
+    await loadLLMProviders();
+
     if (team.llmInstance) {
       return team.llmInstance;
     }
@@ -503,13 +539,66 @@ export class IntelligentOrchestrator {
    * Create LLM instance from configuration
    */
   private createLLMFromConfig(config: LLMConfig): LangChainChatModel {
-    // Import LLM providers dynamically
-    const { ChatOpenAI } = require('@langchain/openai');
-    const { ChatAnthropic } = require('@langchain/anthropic');
-    const { ChatGoogleGenerativeAI } = require('@langchain/google-genai');
+    // Check if required provider is loaded
+    if (config.provider === 'openai' && !ChatOpenAI) {
+      throw new Error(
+        'OpenAI provider not loaded. This may be due to a module loading issue in the browser environment.'
+      );
+    }
+    if (config.provider === 'anthropic' && !ChatAnthropic) {
+      throw new Error(
+        'Anthropic provider not loaded. This may be due to a module loading issue in the browser environment.'
+      );
+    }
+    if (config.provider === 'google' && !ChatGoogleGenerativeAI) {
+      throw new Error(
+        'Google provider not loaded. This may be due to a module loading issue in the browser environment.'
+      );
+    }
 
-    // Get API key from environment if not provided in config
+    // Get API key from config or environment (same logic as classical agents)
     const getApiKey = (provider: string): string => {
+      // First, check if config.apiKey is provided
+      if (config.apiKey) {
+        // Check if it's an ENV placeholder (starts with 'ENV_')
+        if (config.apiKey.startsWith('ENV_')) {
+          // Extract the env var name: 'ENV_OPENAI_API_KEY' -> 'OPENAI_API_KEY'
+          const envVarName = config.apiKey.substring(4); // Remove 'ENV_' prefix
+
+          // Look up in team.env object (same as classical agents)
+          const teamEnv = this.team.store?.getState?.()?.env || {};
+          const envValue = teamEnv[envVarName];
+
+          if (envValue && envValue !== config.apiKey) {
+            logger.info(
+              `🔑 Resolved ENV placeholder ${config.apiKey} -> ${envVarName}`
+            );
+            return envValue;
+          }
+
+          // Fallback: try browser environment or process.env
+          if (
+            typeof window !== 'undefined' &&
+            (window as any).ENV?.[envVarName]
+          ) {
+            return (window as any).ENV[envVarName];
+          }
+
+          if (typeof process !== 'undefined' && process.env?.[envVarName]) {
+            return process.env[envVarName];
+          }
+
+          logger.warn(
+            `⚠️ ENV placeholder ${config.apiKey} could not be resolved. Using as literal value.`
+          );
+          return config.apiKey; // Use as-is if can't resolve
+        }
+
+        // It's a direct API key, use it
+        return config.apiKey;
+      }
+
+      // Fallback: try to get from environment variables (original logic)
       const envKeys: Record<string, string[]> = {
         openai: ['OPENAI_API_KEY', 'VITE_OPENAI_API_KEY'],
         anthropic: ['ANTHROPIC_API_KEY'],
@@ -518,8 +607,14 @@ export class IntelligentOrchestrator {
 
       const keys = envKeys[provider] || [];
       for (const key of keys) {
-        const value = process.env[key];
-        if (value) return value;
+        // Try team env first
+        const teamEnv = this.team.store?.getState?.()?.env || {};
+        if (teamEnv[key]) return teamEnv[key];
+
+        // Try process.env
+        if (typeof process !== 'undefined' && process.env?.[key]) {
+          return process.env[key];
+        }
       }
 
       throw new Error(
@@ -590,6 +685,9 @@ export class IntelligentOrchestrator {
     this.updatePerformanceMetric('orchestration_calls', 1);
 
     try {
+      // Initialize LLM if not already done (browser-compatible)
+      await this.ensureLLMInitialized();
+
       logger.info(
         `🎯 Starting intelligent orchestration for goal: ${projectGoal}`
       );
@@ -2624,7 +2722,6 @@ export class IntelligentOrchestrator {
         expectedOutput: taskData.expectedOutput,
         agent: tempAgent,
         adaptable: taskData.adaptable,
-        template: false,
         orchestrationRules: taskData.orchestrationRules,
         resourceRequirements: {
           estimatedTime: taskData.estimatedTime,
@@ -2998,8 +3095,10 @@ export class IntelligentOrchestrator {
    * Generate a key for task performance tracking
    */
   private getTaskPerformanceKey(task: Task): string {
-    // Use description hash for template tasks, or ID for specific tasks
-    if (task.template) {
+    // Use description hash for backlog tasks, or ID for specific tasks
+    const isBacklogTask =
+      this.availableTasks && this.availableTasks.some((t) => t.id === task.id);
+    if (isBacklogTask) {
       return `template_${this.hashString(task.description)}`;
     }
     return `task_${task.id}`;
@@ -3802,127 +3901,6 @@ export class IntelligentOrchestrator {
   }
 
   /**
-   * Start continuous optimization monitoring
-   */
-  async startContinuousOptimization(): Promise<void> {
-    if (this.team.adaptationInterval <= 0) {
-      return;
-    }
-
-    setInterval(async () => {
-      try {
-        const context = await this.analyzeCurrentContext();
-        await this.optimizeCurrentWorkflow(context);
-      } catch (error) {
-        logger.error('Continuous optimization error:', error);
-      }
-    }, this.team.adaptationInterval);
-
-    logger.info(
-      `🔄 Started continuous optimization (interval: ${this.team.adaptationInterval}ms)`
-    );
-  }
-
-  /**
-   * Optimize current workflow based on performance metrics
-   */
-  private async optimizeCurrentWorkflow(
-    context: OrchestrationContext
-  ): Promise<void> {
-    // Analyze current performance
-    const performanceIssues = this.identifyPerformanceIssues(context);
-
-    if (performanceIssues.length > 0) {
-      logger.info(
-        `🎯 Identified ${performanceIssues.length} performance optimization opportunities`
-      );
-
-      for (const issue of performanceIssues) {
-        await this.applyOptimization(issue, context);
-      }
-    }
-  }
-
-  private identifyPerformanceIssues(context: OrchestrationContext): string[] {
-    const issues: string[] = [];
-
-    if (context.blockedTasks.length > 0) {
-      issues.push('blocked_tasks');
-    }
-
-    if (context.activeTasks.length > this.team.maxActiveTasks) {
-      issues.push('task_overload');
-    }
-
-    if (context.availableAgents.length === 0) {
-      issues.push('no_available_agents');
-    }
-
-    return issues;
-  }
-
-  private async applyOptimization(
-    issue: string,
-    context: OrchestrationContext
-  ): Promise<void> {
-    switch (issue) {
-      case 'blocked_tasks':
-        await this.handleBlockedTasks(context.blockedTasks);
-        break;
-      case 'task_overload': {
-        // Calculate workload distribution for redistribution
-        const tasks = this.team.getTasks();
-        const agents = this.team.getStore().getState().agents;
-        const workloadMap = new Map<string, number>();
-
-        // Initialize workload map
-        agents.forEach((agent) => workloadMap.set(agent.id, 0));
-
-        // Calculate current workload
-        tasks.forEach((task) => {
-          if (
-            task.status === TASK_STATUS_enum.TODO ||
-            task.status === TASK_STATUS_enum.DOING
-          ) {
-            const complexity = this.estimateTaskComplexity(task);
-            const current = workloadMap.get(task.agent.id) || 0;
-            workloadMap.set(task.agent.id, current + complexity);
-          }
-        });
-
-        // Calculate target workload
-        const totalWorkload = Array.from(workloadMap.values()).reduce(
-          (sum, load) => sum + load,
-          0
-        );
-        const targetWorkload = totalWorkload / agents.length;
-
-        await this.redistributeTasks(tasks, workloadMap, targetWorkload);
-        break;
-      }
-      case 'no_available_agents':
-        await this.optimizeAgentUtilization(context);
-        break;
-      default:
-        logger.warn(`Unknown optimization issue: ${issue}`);
-    }
-  }
-
-  private async handleBlockedTasks(blockedTasks: Task[]): Promise<void> {
-    for (const task of blockedTasks) {
-      logger.info(`🔧 Attempting to unblock task: ${task.id}`);
-      // Implementation would analyze blocking reasons and attempt resolution
-    }
-  }
-
-  private async optimizeAgentUtilization(
-    _context: OrchestrationContext
-  ): Promise<void> {
-    logger.info('⚡ Optimizing agent utilization');
-    // Implementation would analyze agent efficiency and reassign tasks
-  }
-
-  /**
    * Robust JSON parsing with common issue fixes
    */
   private parseRobustJSON(jsonString: string): any {
@@ -4410,7 +4388,6 @@ export class IntelligentOrchestrator {
             `${taskData.description} - optimized for continuous workflow`,
           agent: agent,
           adaptable: true,
-          template: false,
           resourceRequirements: {
             estimatedTime: taskData.estimatedTime || '1-2 hours',
             skillsRequired: taskData.requiredSkills || [],
@@ -4581,7 +4558,7 @@ export class IntelligentOrchestrator {
     // Check available tasks
     if (!this.availableTasks || this.availableTasks.length === 0) {
       warnings.push(
-        'No template tasks available - orchestrator cannot select tasks'
+        'No backlog tasks available - orchestrator cannot select tasks'
       );
     }
 
@@ -4880,13 +4857,11 @@ export class IntelligentOrchestrator {
             break;
 
           case 'time-based-performance-variance': {
-            // Adjust adaptation interval based on performance
-            const optimalInterval = this.calculateOptimalAdaptationInterval();
-            if (
-              Math.abs(optimalInterval - this.team.adaptationInterval) > 60000
-            ) {
-              this.team.adaptationInterval = optimalInterval;
-            }
+            // Removed timer-based optimization - using continuous orchestration pattern instead
+            // This learning insight is noted but no timer-based action needed
+            logger.info(
+              '📈 Performance variance detected - using continuous orchestration for optimization'
+            );
             break;
           }
         }
@@ -4965,32 +4940,6 @@ export class IntelligentOrchestrator {
     const coefficientOfVariation = Math.sqrt(variance) / avg;
 
     return { variance: coefficientOfVariation };
-  }
-
-  /**
-   * Calculate optimal adaptation interval based on performance
-   */
-  private calculateOptimalAdaptationInterval(): number {
-    const avgTaskDuration =
-      this.performanceMetrics.get('avg_task_duration') || 300000;
-    const taskCount = this.team.getTasks().length;
-
-    // Base interval on task duration and count
-    let optimalInterval = avgTaskDuration * Math.min(taskCount, 5);
-
-    // Adjust based on mode
-    switch (this.team.mode) {
-      case 'conservative':
-        optimalInterval *= 2;
-        break;
-      case 'innovative':
-      case 'learning':
-        optimalInterval *= 0.5;
-        break;
-    }
-
-    // Clamp to reasonable range (1 minute to 1 hour)
-    return Math.max(60000, Math.min(3600000, optimalInterval));
   }
 
   /**

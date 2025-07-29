@@ -47,7 +47,6 @@ async function runAIDrivenPrioritizationExample() {
         'Patched authentication system with security audit report',
       agent: securityExpert,
       adaptable: false, // Critical - no modifications
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         CRITICALITY: CRITICAL
@@ -70,7 +69,6 @@ async function runAIDrivenPrioritizationExample() {
         'Complete payment integration with subscription management',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         CRITICALITY: HIGH
@@ -92,7 +90,6 @@ async function runAIDrivenPrioritizationExample() {
       expectedOutput: 'Optimized queries with <500ms response times',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         CRITICALITY: MEDIUM-HIGH
@@ -114,7 +111,6 @@ async function runAIDrivenPrioritizationExample() {
       expectedOutput: 'GDPR-compliant data handling with audit trail',
       agent: seniorDeveloper,
       adaptable: false,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         CRITICALITY: HIGH
@@ -136,7 +132,6 @@ async function runAIDrivenPrioritizationExample() {
       expectedOutput: 'Responsive dashboard with improved mobile UX',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         CRITICALITY: MEDIUM
@@ -158,7 +153,6 @@ async function runAIDrivenPrioritizationExample() {
       expectedOutput: 'Decoupled payment microservice with API',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         CRITICALITY: LOW-MEDIUM
@@ -180,7 +174,6 @@ async function runAIDrivenPrioritizationExample() {
       expectedOutput: 'Comprehensive E2E tests with 95% journey coverage',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         CRITICALITY: MEDIUM
@@ -202,7 +195,6 @@ async function runAIDrivenPrioritizationExample() {
       expectedOutput: 'Auto-scaling infrastructure handling 10x normal load',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         CRITICALITY: TIME-SENSITIVE
@@ -255,7 +247,7 @@ async function runAIDrivenPrioritizationExample() {
     tasks: [],
 
     enableOrchestration: true,
-    availableTemplateTasks: prioritizationTaskRepository,
+    backlogTasks: prioritizationTaskRepository,
     allowTaskGeneration: false, // Focus on prioritization
 
     // Use continuous orchestration for dynamic re-prioritization
@@ -327,7 +319,6 @@ async function runAIDrivenPrioritizationExample() {
     mode: 'adaptive',
     workloadDistribution: 'skills-based',
     maxActiveTasks: 4,
-    adaptationInterval: 60000, // Re-evaluate priorities every minute
 
     llmInstance: orchestrationLLM,
   });

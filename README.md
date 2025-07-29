@@ -167,21 +167,19 @@ const developer = new Agent({
   llmConfig: { provider: 'openai', model: 'gpt-4o' },
 });
 
-// Create template tasks for the AI to choose from
-const templateTasks = [
+// Create backlog tasks for the AI to choose from
+const backlogTasks = [
   new Task({
     description: 'Implement user authentication system',
     expectedOutput: 'Complete authentication with JWT tokens',
     agent: developer,
     adaptable: true,
-    template: true,
   }),
   new Task({
     description: 'Create responsive user interface',
     expectedOutput: 'Mobile-first responsive UI components',
     agent: developer,
     adaptable: true,
-    template: true,
   }),
 ];
 
@@ -192,7 +190,7 @@ const smartTeam = new Team({
   tasks: [], // Start empty - AI will select optimal tasks
   enableOrchestration: true, // Enable AI-powered orchestration
   continuousOrchestration: true, // Run AI after each task completion
-  availableTemplateTasks: templateTasks,
+  backlogTasks: backlogTasks,
   allowTaskGeneration: true,
   orchestrationStrategy: 'Build a secure, user-friendly web application',
   mode: 'adaptive',

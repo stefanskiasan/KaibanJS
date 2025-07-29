@@ -102,7 +102,6 @@ const OrchestrationComponent = () => {
         expectedOutput: 'Secure login system',
         agent: agents.developer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '6-8 hours',
           skillsRequired: ['backend', 'security'],
@@ -114,7 +113,6 @@ const OrchestrationComponent = () => {
         expectedOutput: 'Reusable components',
         agent: agents.designer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '8 hours',
           skillsRequired: ['frontend', 'components'],
@@ -126,7 +124,6 @@ const OrchestrationComponent = () => {
         expectedOutput: 'Test suite with 80%+ coverage',
         agent: agents.tester,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '6 hours',
           skillsRequired: ['testing', 'automation'],
@@ -138,7 +135,6 @@ const OrchestrationComponent = () => {
         expectedOutput: 'RESTful API',
         agent: agents.developer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '10 hours',
           skillsRequired: ['backend', 'api'],
@@ -212,7 +208,7 @@ const OrchestrationComponent = () => {
         agents: Object.values(agents),
         tasks: [...existingTasks],
         enableOrchestration: true, // Enable AI orchestration ✨
-        availableTemplateTasks: taskRepository,
+        backlogTasks: taskRepository,
         allowTaskGeneration: true,
         orchestrationStrategy: `
           Build a modern web application with:
@@ -231,7 +227,7 @@ const OrchestrationComponent = () => {
       });
 
       addLog(
-        `🎯 Orchestration enabled with ${team.availableTemplateTasks.length} available templates`
+        `🎯 Orchestration enabled with ${team.backlogTasks.length} available templates`
       );
       addLog('🤖 Starting AI-driven task orchestration...');
       addLog('Watch for orchestration events below! ⬇️', 'info');
@@ -311,15 +307,13 @@ const OrchestrationComponent = () => {
         agents: Object.values(agents),
         tasks: existingTasks,
         enableOrchestration: true,
-        availableTemplateTasks: taskRepository,
+        backlogTasks: taskRepository,
         allowTaskGeneration: false,
         mode: 'conservative',
         env: { OPENAI_API_KEY: import.meta.env.VITE_OPENAI_API_KEY || '' },
       });
 
-      addLog(
-        `📚 Initial repository: ${team.availableTemplateTasks.length} tasks`
-      );
+      addLog(`📚 Initial repository: ${team.backlogTasks.length} tasks`);
 
       // Add new task to repository
       const newTask = new Task({
@@ -327,7 +321,6 @@ const OrchestrationComponent = () => {
         expectedOutput: 'WebSocket notification system',
         agent: agents.developer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '8 hours',
           skillsRequired: ['backend', 'websockets', 'real_time'],
@@ -336,9 +329,9 @@ const OrchestrationComponent = () => {
       });
 
       addLog('📚 Adding new task to repository...');
-      team.addAvailableTemplateTasks([newTask]);
+      team.addBacklogTasks([newTask]);
       addLog(
-        `✅ Repository updated: ${team.availableTemplateTasks.length} tasks available`
+        `✅ Repository updated: ${team.backlogTasks.length} tasks available`
       );
 
       // Update strategy
@@ -357,7 +350,7 @@ const OrchestrationComponent = () => {
         ...prev,
         repository: {
           initialTasks: taskRepository.length,
-          finalTasks: team.availableTemplateTasks.length,
+          finalTasks: team.backlogTasks.length,
           newTaskAdded: newTask.description,
           updatedStrategy: true,
           updatedMode: 'innovative',

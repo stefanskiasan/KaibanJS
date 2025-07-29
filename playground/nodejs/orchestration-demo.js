@@ -68,7 +68,6 @@ const runDemo = async () => {
         expectedOutput: 'Secure user login system',
         agent: developer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '6-8 hours',
           skillsRequired: ['backend', 'security'],
@@ -80,7 +79,6 @@ const runDemo = async () => {
         expectedOutput: 'Reusable UI components',
         agent: designer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '8 hours',
           skillsRequired: ['frontend', 'components'],
@@ -92,7 +90,6 @@ const runDemo = async () => {
         expectedOutput: 'RESTful API',
         agent: developer,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '10 hours',
           skillsRequired: ['backend', 'api'],
@@ -104,7 +101,7 @@ const runDemo = async () => {
     console.log('📊 Setup complete:');
     console.log(`   - Agents: ${[developer, designer].length}`);
     console.log(`   - Existing tasks: ${existingTasks.length}`);
-    console.log(`   - Available templates: ${taskRepository.length}\n`);
+    console.log(`   - Available backlog tasks: ${taskRepository.length}\n`);
 
     // Demo 1: Traditional KaibanJS (no orchestration)
     console.log('🔴 DEMO 1: Traditional KaibanJS');
@@ -131,7 +128,7 @@ const runDemo = async () => {
       agents: [developer, designer],
       tasks: [...existingTasks], // Start with existing
       enableOrchestration: true, // Enable AI orchestration ✨
-      availableTemplateTasks: taskRepository,
+      backlogTasks: taskRepository,
       allowTaskGeneration: true,
       orchestrationStrategy: `
         Build a modern web application with:
@@ -179,13 +176,12 @@ const runDemo = async () => {
       description: 'Add real-time notifications',
       expectedOutput: 'WebSocket notification system',
       agent: developer,
-      template: true,
     });
 
     console.log('📚 Adding task to repository...');
-    orchestratedTeam.addAvailableTemplateTasks([newTask]);
+    orchestratedTeam.addBacklogTasks([newTask]);
     console.log(
-      `✅ Repository updated: ${orchestratedTeam.availableTemplateTasks.length} tasks`
+      `✅ Repository updated: ${orchestratedTeam.backlogTasks.length} tasks`
     );
 
     console.log('\n⚙️ Updating strategy...');

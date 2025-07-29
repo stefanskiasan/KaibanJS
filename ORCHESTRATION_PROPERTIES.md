@@ -34,7 +34,7 @@ const smartTeam = new Team({
   agents: [agent1, agent2],
   tasks: [],
   enableOrchestration: true, // REQUIRED for orchestration
-  availableTemplateTasks: templateTasks,
+  backlogTasks: templateTasks,
 });
 ```
 
@@ -62,7 +62,7 @@ Controls when orchestration runs during workflow execution. Provides granular co
 const initialOnlyTeam = new Team({
   enableOrchestration: true,
   continuousOrchestration: false, // Default
-  availableTemplateTasks: [...],
+  backlogTasks: [...],
   // ... other configuration
 });
 
@@ -70,7 +70,7 @@ const initialOnlyTeam = new Team({
 const continuousTeam = new Team({
   enableOrchestration: true,
   continuousOrchestration: true, // Enables continuous orchestration
-  availableTemplateTasks: [...],
+  backlogTasks: [...],
   // ... other configuration
 });
 
@@ -113,18 +113,18 @@ team.setContinuousOrchestration(false); // Disables to initial-only orchestratio
 
 ---
 
-### `availableTemplateTasks?: Task[]`
+### `backlogTasks?: Task[]`
 
 **Default:** `[]`  
 **Type:** Array of Task objects (optional)
 
 **Description:**
-Repository of template tasks that the orchestrator can select, adapt and instantiate.
+Repository of backlog tasks that the orchestrator can select, adapt and instantiate.
 
 **Effect:**
 
 - Provides the orchestrator with a library of available tasks
-- Tasks with `template: true` are ideal for this repository
+- All tasks in this repository are treated as reusable templates
 - Orchestrator can select these tasks based on project goals
 
 **Example:**
@@ -136,7 +136,6 @@ const templateTasks = [
     expectedOutput: 'Complete auth system',
     agent: developer,
     adaptable: true,
-    template: true,
     resourceRequirements: {
       estimatedTime: '4-6 hours',
       skillsRequired: ['backend', 'security'],
@@ -148,7 +147,6 @@ const templateTasks = [
     expectedOutput: 'Mobile-first UI components',
     agent: designer,
     adaptable: true,
-    template: true,
   }),
 ];
 
@@ -157,11 +155,11 @@ const team = new Team({
   agents: [developer, designer],
   tasks: [],
   enableOrchestration: true,
-  availableTemplateTasks: templateTasks, // Task repository
+  backlogTasks: templateTasks, // Task repository
 });
 ```
 
-**Best Practice:** Create reusable template tasks with clear descriptions and resource requirements.
+**Best Practice:** Create reusable backlog tasks with clear descriptions and resource requirements.
 
 ---
 
@@ -176,7 +174,7 @@ Allows the orchestrator to autonomously create new tasks when gaps in the workfl
 **Effect:**
 
 - `true`: Orchestrator can generate new tasks based on project goals
-- `false`: Orchestrator can only select from `availableTemplateTasks`
+- `false`: Orchestrator can only select from `backlogTasks`
 
 **Example:**
 
@@ -186,7 +184,7 @@ const team = new Team({
   agents: [developer, tester],
   tasks: [],
   enableOrchestration: true,
-  availableTemplateTasks: basicTasks,
+  backlogTasks: basicTasks,
   allowTaskGeneration: true, // Allows autonomous task creation
   orchestrationStrategy: 'Build a secure web application with modern UI',
 });
@@ -228,7 +226,7 @@ const team = new Team({
   agents: [developer, designer, tester],
   tasks: [],
   enableOrchestration: true,
-  availableTemplateTasks: ecommerceTasks,
+  backlogTasks: ecommerceTasks,
   allowTaskGeneration: true,
   orchestrationStrategy: `
     You are an intelligent orchestrator for an e-commerce development team.
@@ -268,7 +266,7 @@ Defines the behavior and risk tolerance of the orchestrator.
 
 #### `'conservative'`
 
-- **Characteristic:** Cautious task selection, strict template adherence
+- **Characteristic:** Cautious task selection, strict backlog task adherence
 - **Risk tolerance:** Minimal
 - **Task adaptation:** Limited, only safety-critical changes
 - **Generation:** Very conservative with new tasks
@@ -308,7 +306,7 @@ const criticalTeam = new Team({
   tasks: [],
   enableOrchestration: true,
   mode: 'conservative',
-  availableTemplateTasks: securityTasks,
+  backlogTasks: securityTasks,
 });
 
 // Innovative team for new features
@@ -348,7 +346,7 @@ const smallTeam = new Team({
   tasks: [],
   enableOrchestration: true,
   maxActiveTasks: 2, // Only 2 tasks simultaneously
-  availableTemplateTasks: startupTasks,
+  backlogTasks: startupTasks,
 });
 
 // Large team with high parallelism
@@ -358,7 +356,7 @@ const enterpriseTeam = new Team({
   tasks: [],
   enableOrchestration: true,
   maxActiveTasks: 8, // Up to 8 parallel tasks
-  availableTemplateTasks: enterpriseTasks,
+  backlogTasks: enterpriseTasks,
 });
 ```
 
@@ -459,56 +457,12 @@ const specializedTeam = new Team({
   tasks: [],
   enableOrchestration: true,
   workloadDistribution: 'skills-based', // Matching by expertise
-  availableTemplateTasks: specializedTasks,
+  backlogTasks: specializedTasks,
 });
 ```
 
 ---
 
-### `adaptationInterval?: number`
-
-**Default:** `300000` (5 minutes)  
-**Type:** Number in milliseconds (optional)
-
-**Description:**
-Defines how often the orchestrator checks workflow performance and makes optimizations.
-
-**Effect:**
-
-- More frequent intervals = More responsive adaptations, higher LLM costs
-- Longer intervals = More stable execution, lower costs
-
-**Example:**
-
-```javascript
-// High-frequency optimization for critical projects
-const criticalProject = new Team({
-  name: 'Critical Launch Team',
-  agents: [developer, tester, manager],
-  tasks: [],
-  enableOrchestration: true,
-  adaptationInterval: 60000, // Every minute (60 seconds)
-  availableTemplateTasks: criticalTasks,
-});
-
-// Infrequent optimization for stable projects
-const stableProject = new Team({
-  name: 'Maintenance Team',
-  agents: [developer],
-  tasks: [],
-  enableOrchestration: true,
-  adaptationInterval: 1800000, // Every 30 minutes
-  availableTemplateTasks: maintenanceTasks,
-});
-```
-
-**Recommendation:**
-
-- Development: 5-15 minutes
-- Production: 30-60 minutes
-- Critical systems: 1-5 minutes
-
----
 
 ### `llmConfig?: LLMConfig`
 
@@ -537,7 +491,7 @@ const team = new Team({
     temperature: 0.2, // Low temperature for consistent decisions
     maxRetries: 3,
   },
-  availableTemplateTasks: complexTasks,
+  backlogTasks: complexTasks,
 });
 ```
 
@@ -569,7 +523,7 @@ const team = new Team({
   tasks: [],
   enableOrchestration: true,
   llmInstance: customLLM, // Pre-configured instance
-  availableTemplateTasks: tasks,
+  backlogTasks: tasks,
 });
 ```
 
@@ -766,32 +720,6 @@ const complexTask = new Task({
 
 ---
 
-### `template?: boolean`
-
-**Default:** `false`  
-**Type:** Boolean (optional)
-
-**Description:**
-Marks the task as a reusable template for the `availableTemplateTasks` repository.
-
-**Example:**
-
-```javascript
-const templateTask = new Task({
-  description: 'Implement CRUD operations for {entity}',
-  expectedOutput: 'Complete CRUD API for {entity}',
-  agent: backendDev,
-  template: true, // Reusable template
-  adaptable: true, // Can be adapted for different entities
-  resourceRequirements: {
-    estimatedTime: '1-2 days',
-    skillsRequired: ['backend', 'database', 'api_design'],
-  },
-});
-```
-
----
-
 ## 💡 Property Interactions and Best Practices
 
 ### Recommended Combinations
@@ -825,7 +753,6 @@ const innovativeTeam = new Team({
   workloadDistribution: 'skills-based',
   maxActiveTasks: 5,
   allowTaskGeneration: true,
-  adaptationInterval: 120000,
 });
 ```
 
@@ -834,7 +761,7 @@ const innovativeTeam = new Team({
 1. **Agile Development:** `mode: 'adaptive'`, `taskPrioritization: 'dynamic'`
 2. **Critical Systems:** `mode: 'conservative'`, `allowTaskGeneration: false`
 3. **Research:** `mode: 'learning'`, `allowTaskGeneration: true`
-4. **Maintenance:** Longer `adaptationInterval`, `mode: 'conservative'`
+4. **Maintenance:** `mode: 'conservative'`, `continuousOrchestration: false`
 
 ### Troubleshooting
 
@@ -873,14 +800,14 @@ const team = new Team({
 const team = new Team({
   enableOrchestration: true,
   continuousOrchestration: false, // New parameter (optional)
-  availableTemplateTasks: templateTasks, // Renamed for clarity
+  backlogTasks: templateTasks, // Renamed for clarity
 });
 ```
 
 #### Step-by-step Migration
 
 1. **Step 1**: Leave existing code unchanged (backward compatible)
-2. **Step 2**: Rename `availableTasks` → `availableTemplateTasks`
+2. **Step 2**: Rename `availableTasks` → `backlogTasks`
 3. **Step 3**: Explicitly set `continuousOrchestration: false` (match previous behavior)
 4. **Step 4**: Test with `continuousOrchestration: true` for better optimization
 
@@ -905,7 +832,7 @@ const beginnerTeam = new Team({
   enableOrchestration: true,
   continuousOrchestration: false, // Simpler and cheaper
   mode: 'conservative',
-  availableTemplateTasks: basicTasks,
+  backlogTasks: basicTasks,
 });
 ```
 
@@ -918,7 +845,7 @@ const advancedTeam = new Team({
   continuousOrchestration: true, // Better optimization
   mode: 'adaptive',
   taskPrioritization: 'ai-driven',
-  availableTemplateTasks: complexTasks,
+  backlogTasks: complexTasks,
 });
 ```
 
@@ -933,8 +860,7 @@ const expertTeam = new Team({
   allowTaskGeneration: true,
   taskPrioritization: 'ai-driven',
   workloadDistribution: 'skills-based',
-  adaptationInterval: 60000, // Frequent optimization
-  availableTemplateTasks: expertTasks,
+  backlogTasks: expertTasks,
 });
 
 // Runtime adjustment based on project phase

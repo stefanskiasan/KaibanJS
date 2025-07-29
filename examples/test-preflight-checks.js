@@ -107,7 +107,6 @@ async function runPreFlightChecks() {
       expectedOutput: 'Orchestration test result',
       agent: testAgent,
       adaptable: true,
-      template: true,
     });
 
     const testTeam = new Team({
@@ -115,7 +114,7 @@ async function runPreFlightChecks() {
       agents: [testAgent],
       tasks: [],
       enableOrchestration: true,
-      availableTemplateTasks: [testTask],
+      backlogTasks: [testTask],
       orchestrationStrategy: 'Test strategy',
       llmInstance: new ChatOpenAI({
         modelName: 'gpt-4o-mini',
@@ -128,9 +127,7 @@ async function runPreFlightChecks() {
     console.log('✅ Basic orchestration setup successful');
     console.log(`   Team: ${testTeam.name}`);
     console.log(`   Orchestration enabled: ${testTeam.enableOrchestration}`);
-    console.log(
-      `   Available tasks: ${testTeam.availableTemplateTasks.length}`
-    );
+    console.log(`   Available tasks: ${testTeam.backlogTasks.length}`);
     results.orchestration = true;
   } catch (error) {
     console.log('❌ Orchestration setup failed:', error.message);

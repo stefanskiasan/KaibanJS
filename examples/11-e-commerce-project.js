@@ -44,7 +44,6 @@ async function runECommerceProjectExample() {
       expectedOutput: 'Scalable product catalog supporting millions of SKUs',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       dynamicPriority: true,
       orchestrationRules: `
         CATALOG FEATURES:
@@ -76,7 +75,6 @@ async function runECommerceProjectExample() {
         'Seamless cart and checkout experience with high conversion',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         CART FEATURES:
         - Add/remove/update items
@@ -108,7 +106,6 @@ async function runECommerceProjectExample() {
         'Secure payment system supporting cards, wallets, and BNPL',
       agent: backendDeveloper,
       adaptable: false, // Security critical - no modifications
-      template: true,
       orchestrationRules: `
         PAYMENT METHODS:
         - Credit/debit cards (Stripe)
@@ -141,7 +138,6 @@ async function runECommerceProjectExample() {
       expectedOutput: 'Complete user management with social login options',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         USER FEATURES:
         - Registration/login
@@ -172,7 +168,6 @@ async function runECommerceProjectExample() {
       expectedOutput: 'Complete OMS with automated fulfillment and tracking',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         ORDER LIFECYCLE:
         - Order placement
@@ -203,7 +198,6 @@ async function runECommerceProjectExample() {
         'Personalized recommendations increasing conversion by 20%',
       agent: dataArchitect,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         RECOMMENDATION TYPES:
         - Collaborative filtering
@@ -236,7 +230,6 @@ async function runECommerceProjectExample() {
       expectedOutput: 'High-performance mobile apps with offline support',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         MOBILE FEATURES:
         - Native performance
@@ -264,7 +257,6 @@ async function runECommerceProjectExample() {
       expectedOutput: 'Real-time analytics with actionable insights',
       agent: dataArchitect,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         ANALYTICS AREAS:
         - Sales metrics
@@ -294,7 +286,6 @@ async function runECommerceProjectExample() {
         'Platform handling 100x normal traffic with <2s load times',
       agent: performanceEngineer,
       adaptable: true,
-      template: true,
       orchestrationRules: `
         OPTIMIZATION AREAS:
         - Frontend performance
@@ -322,7 +313,6 @@ async function runECommerceProjectExample() {
       expectedOutput: 'Secure platform meeting all compliance requirements',
       agent: securityExpert,
       adaptable: false,
-      template: true,
       orchestrationRules: `
         SECURITY MEASURES:
         - OWASP Top 10 protection
@@ -374,7 +364,7 @@ async function runECommerceProjectExample() {
     tasks: [],
 
     enableOrchestration: true,
-    availableTemplateTasks: ecommerceTaskRepository,
+    backlogTasks: ecommerceTaskRepository,
     allowTaskGeneration: true, // Allow filling gaps
 
     // Enable continuous orchestration for dynamic e-commerce adaptation
@@ -444,7 +434,6 @@ async function runECommerceProjectExample() {
     `,
 
     maxActiveTasks: 5,
-    adaptationInterval: 120000, // 2 minutes
 
     llmInstance: orchestrationLLM,
   });

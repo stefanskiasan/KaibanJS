@@ -1,4 +1,4 @@
-.template-repository-viewer {
+.backlog-repository-viewer {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 20px;
@@ -102,11 +102,11 @@
 }
 
 /* Template Tasks List */
-.template-tasks-list {
+.backlog-tasks-list {
   space-y: 15px;
 }
 
-.template-task-card {
+.backlog-task-card {
   background: white;
   border: 1px solid #dee2e6;
   border-radius: 6px;
@@ -114,7 +114,7 @@
   transition: all 0.2s ease;
 }
 
-.template-task-card:hover {
+.backlog-task-card:hover {
   border-color: #339af0;
   box-shadow: 0 2px 8px rgba(51, 154, 240, 0.1);
 }

@@ -4,20 +4,20 @@ This directory contains the complete UI suite for KaibanJS intelligent orchestra
 
 ## 🧩 Components Overview
 
-### 1. TemplateRepositoryViewer
-**File:** `TemplateRepositoryViewer.jsx` + `TemplateRepositoryViewer.css`
+### 1. BacklogRepositoryViewer
+**File:** `BacklogRepositoryViewer.jsx` + `BacklogRepositoryViewer.css`
 
-**Purpose:** Browse, search, and manage the team's template task repository.
+**Purpose:** Browse, search, and manage the team's backlog task repository.
 
 **Features:**
-- Search and filter templates by category, complexity, and skills
+- Search and filter backlog tasks by category, complexity, and skills
 - Detailed view of task requirements and orchestration rules
 - Visual indicators for adaptable vs. fixed tasks
 - Statistics and analytics on repository composition
 - Action buttons for adding tasks to workflows
 
 **Props:**
-- `team` - KaibanJS team instance with availableTemplateTasks
+- `team` - KaibanJS team instance with backlogTasks
 - `onTaskSelect` - Callback when a task is selected for viewing
 - `onAddToWorkflow` - Callback when a task is added to workflow
 
@@ -80,7 +80,7 @@ This directory contains the complete UI suite for KaibanJS intelligent orchestra
 
 **Features:**
 - Kanban columns (To Do, In Progress, Review, Blocked, Done)
-- Task type indicators (AI Generated, Adapted, Template, Original)
+- Task type indicators (AI Generated, Adapted, Original)
 - Expandable task details with orchestration metadata
 - Adaptation history and generation information
 - Filtering by task type and orchestration status
@@ -165,7 +165,7 @@ All components are designed with mobile-first responsive principles:
 ```jsx
 import { Team } from 'kaibanjs';
 import {
-  TemplateRepositoryViewer,
+  BacklogRepositoryViewer,
   OrchestratorDecisionPanel,
   OrchestrationModeSelector,
   ContinuousOrchestrationToggle,
@@ -178,7 +178,7 @@ const MyOrchestrationDashboard = ({ team }) => {
     <div>
       <OrchestrationModeSelector team={team} />
       <ContinuousOrchestrationToggle team={team} />
-      <TemplateRepositoryViewer team={team} />
+      <BacklogRepositoryViewer team={team} />
       <EnhancedTaskBoard tasks={team.getTasks()} />
       <OrchestratorDecisionPanel team={team} />
       <OrchestrationMonitor team={team} />
@@ -232,7 +232,7 @@ Navigate to the "Enhanced Orchestration Demo" story to see all components in act
 
 ### Manual Testing Checklist
 
-1. **Template Repository:**
+1. **Backlog Repository:**
    - [ ] Search functionality works
    - [ ] Filtering by category and complexity
    - [ ] Task expansion shows all details

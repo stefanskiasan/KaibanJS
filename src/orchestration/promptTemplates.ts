@@ -214,7 +214,6 @@ export class TaskAdaptationPromptTemplate {
       task.resourceRequirements?.skillsRequired?.join(', ') || 'General'
     }
 **Current Priority**: Medium (default)
-**Template**: ${task.template ? 'Yes' : 'No'}
 **Adaptable**: ${task.adaptable ? 'Yes' : 'No'}
 
 ## ORCHESTRATION RULES

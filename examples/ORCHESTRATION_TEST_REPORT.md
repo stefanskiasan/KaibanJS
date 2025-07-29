@@ -72,7 +72,7 @@ A comprehensive 7-phase testing approach was implemented:
 
 ### ✅ WORKING CORRECTLY:
 - **Core Orchestration:** Activation, configuration, and coordination
-- **Task Repository Management:** Selection from available template tasks
+- **Task Repository Management:** Selection from available backlog tasks
 - **LLM Integration:** Intelligent task selection based on project goals
 - **Task Execution Pipeline:** Agent → Task → WorkflowResult flow
 - **WorkflowResult Generation:** Complete with stats and validation

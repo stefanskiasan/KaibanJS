@@ -37,7 +37,7 @@ This directory contains comprehensive examples demonstrating the intelligent orc
 
 **Key Concepts:**
 
-- Task repositories with `availableTasks`
+- Task repositories with `backlogTasks`
 - Orchestration strategies
 - Dynamic task selection
 - Team configuration basics
@@ -47,7 +47,7 @@ This directory contains comprehensive examples demonstrating the intelligent orc
 **Conservative Mode for Production**
 
 - Risk-averse orchestration for critical systems
-- Strict template adherence
+- Strict backlog task adherence
 - No autonomous task generation
 - Static prioritization
 
@@ -165,7 +165,6 @@ This directory contains comprehensive examples demonstrating the intelligent orc
 
 **Key Features:**
 
-- `adaptationInterval` configuration
 - Performance metrics tracking
 - Workload balancing
 - Quality maintenance
@@ -234,7 +233,7 @@ Pre-configured agent definitions including:
 
 ### [utils/tasks.js](utils/tasks.js)
 
-Reusable task templates for:
+Reusable backlog tasks for:
 
 - Authentication & Security
 - Frontend & UI Development
@@ -257,7 +256,7 @@ const team = new Team({
 
   // Orchestration features
   enableOrchestration: true, // Required to activate
-  availableTasks: taskRepository, // Template tasks
+  backlogTasks: taskRepository, // Backlog tasks for AI selection
   allowTaskGeneration: true, // Enable AI task creation
   orchestrationStrategy: '...', // Guide AI decisions
 
@@ -268,9 +267,6 @@ const team = new Team({
   maxActiveTasks: 3,
   taskPrioritization: 'ai-driven', // or 'static', 'dynamic'
   workloadDistribution: 'skills-based', // or 'balanced', 'availability'
-
-  // Optimization
-  adaptationInterval: 300000, // 5 minutes
 
   // LLM configuration
   llmConfig: {
@@ -292,7 +288,6 @@ const task = new Task({
 
   // Orchestration properties
   adaptable: true, // Allow runtime modifications
-  template: true, // Mark as reusable template
   dynamicPriority: true, // Allow priority adjustments
   splitStrategy: 'auto', // or 'manual', 'none'
   orchestrationRules: '...', // Constraints and guidelines
@@ -346,7 +341,7 @@ const task = new Task({
 
 ### 2. Task Repository Design
 
-- Create reusable task templates
+- Create reusable backlog tasks
 - Include clear `resourceRequirements`
 - Use `orchestrationRules` for constraints
 - Mark critical tasks as `adaptable: false`
@@ -381,7 +376,7 @@ const task = new Task({
 
 2. **"No tasks selected"**
 
-   - Check `availableTasks` has template tasks
+   - Check `backlogTasks` has backlog tasks
    - Verify orchestration strategy is clear
    - Ensure agents match task requirements
 
@@ -393,7 +388,6 @@ const task = new Task({
 
 4. **"High API costs"**
    - Use `gpt-4o-mini` for development
-   - Increase `adaptationInterval`
    - Reduce LLM temperature
    - Limit `maxActiveTasks`
 

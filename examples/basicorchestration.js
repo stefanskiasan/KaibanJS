@@ -36,7 +36,6 @@ const setupProjectTask = new Task({
     'Complete project setup with folder structure and npm packages',
   agent: seniorDeveloper,
   adaptable: true,
-  template: true,
   resourceRequirements: {
     estimatedTime: '1-2 hours',
     skillsRequired: ['project_setup', 'npm', 'architecture'],
@@ -49,7 +48,6 @@ const implementAuthTask = new Task({
   expectedOutput: 'Secure authentication with login/logout functionality',
   agent: seniorDeveloper,
   adaptable: true,
-  template: true,
   resourceRequirements: {
     estimatedTime: '3-4 hours',
     skillsRequired: ['authentication', 'security', 'backend'],
@@ -62,7 +60,6 @@ const createUITask = new Task({
   expectedOutput: 'Modern, accessible UI components with responsive design',
   agent: frontendDeveloper,
   adaptable: true,
-  template: true,
   resourceRequirements: {
     estimatedTime: '2-3 hours',
     skillsRequired: ['frontend', 'css', 'accessibility'],
@@ -75,7 +72,6 @@ const writeTestsTask = new Task({
   expectedOutput: 'Test suite with high coverage and reliable test cases',
   agent: qaEngineer,
   adaptable: true,
-  template: true,
   resourceRequirements: {
     estimatedTime: '2-3 hours',
     skillsRequired: ['testing', 'automation'],
@@ -102,8 +98,8 @@ const team = new Team({
   continuousOrchestration: false,
   allowTaskGeneration: false,
 
-  // Available template tasks for orchestration
-  availableTemplateTasks: [
+  // Available backlog tasks for orchestration
+  backlogTasks: [
     setupProjectTask,
     implementAuthTask,
     createUITask,

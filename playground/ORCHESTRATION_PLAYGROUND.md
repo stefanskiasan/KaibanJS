@@ -9,7 +9,7 @@ This playground demonstrates the new **Intelligent Orchestration** features in K
 - **🤖 AI-Driven Task Management**: Let AI select and adapt tasks based on project goals
 - **📋 Existing Tasks Support**: Build upon foundation work instead of starting fresh
 - **🔍 Gap Analysis**: Intelligent detection of missing skills and capabilities
-- **📚 Task Repository**: Dynamic template management with AI selection
+- **📚 Task Repository**: Dynamic backlog task management with AI selection
 - **⚙️ Adaptive Modes**: Conservative, adaptive, and innovative strategies
 - **📊 Comprehensive Logging**: Full visibility into AI decision-making
 
@@ -137,7 +137,7 @@ The AI analyzes existing tasks and identifies gaps:
 ### 3. Repository Management
 
 ```javascript
-// Add new task templates
+// Add new backlog tasks
 team.addAvailableTasks([newNotificationTask]);
 
 // Update strategy
@@ -255,7 +255,7 @@ const team = new Team({
 
 1. **Explore the Playgrounds** - Try all three environments
 2. **Experiment with Modes** - Test conservative vs innovative
-3. **Create Custom Repositories** - Build your own task templates
+3. **Create Custom Repositories** - Build your own backlog tasks
 4. **Monitor Logging** - Understand AI decision-making
 5. **Adapt to Your Needs** - Customize orchestration strategies
 

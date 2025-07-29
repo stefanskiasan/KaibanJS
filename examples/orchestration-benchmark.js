@@ -73,7 +73,6 @@ async function runOrchestrationBenchmark() {
       expectedOutput: 'Complete user profile system with CRUD operations',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '4-6 hours',
         skillsRequired: ['frontend', 'api_integration'],
@@ -86,7 +85,6 @@ async function runOrchestrationBenchmark() {
       expectedOutput: 'Automated build and deployment pipeline',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '3-4 hours',
         skillsRequired: ['devops', 'automation'],
@@ -212,7 +210,7 @@ async function runAdaptiveModeBenchmark(projectGoal, taskRepository) {
     tasks: [],
     enableOrchestration: true,
     continuousOrchestration: false,
-    availableTemplateTasks: taskRepository,
+    backlogTasks: taskRepository,
     allowTaskGeneration: false,
     orchestrationStrategy: `
       Build a modern web application with balanced approach.
@@ -276,7 +274,7 @@ async function runConservativeModeBenchmark(projectGoal, taskRepository) {
     tasks: [],
     enableOrchestration: true,
     continuousOrchestration: false,
-    availableTemplateTasks: conservativeTaskRepository,
+    backlogTasks: conservativeTaskRepository,
     allowTaskGeneration: false,
     orchestrationStrategy: `
       Production-ready deployment with maximum safety.
@@ -336,7 +334,7 @@ async function runInnovativeModeBenchmark(projectGoal, taskRepository) {
     tasks: [],
     enableOrchestration: true,
     continuousOrchestration: true, // Enable continuous for innovation
-    availableTemplateTasks: taskRepository,
+    backlogTasks: taskRepository,
     allowTaskGeneration: true, // Allow AI to generate new tasks
     orchestrationStrategy: `
       Revolutionary web application with cutting-edge technologies.
@@ -348,7 +346,6 @@ async function runInnovativeModeBenchmark(projectGoal, taskRepository) {
     maxActiveTasks: 4,
     taskPrioritization: 'ai-driven',
     workloadDistribution: 'skills-based',
-    adaptationInterval: 120000, // 2 minutes
     llmInstance: new ChatOpenAI({
       modelName: 'gpt-4o', // More powerful model
       temperature: 0.8, // High creativity

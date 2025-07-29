@@ -28,7 +28,6 @@ const _processingTask = new Task({
   aboutMe: {aboutMe}`,
   expectedOutput: 'Structured data ready to be used for a resume creation.',
   agent: profileAnalyst,
-  template: true,
 });
 
 const _resumeCreationTask = new Task({

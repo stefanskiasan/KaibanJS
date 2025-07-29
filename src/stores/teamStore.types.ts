@@ -100,16 +100,17 @@ export interface TeamStoreState {
   // Orchestration Extensions
   enableOrchestration?: boolean;
   continuousOrchestration?: boolean;
-  availableTemplateTasks?: Task[];
+  backlogTasks?: Task[];
   allowTaskGeneration?: boolean;
   orchestrationStrategy?: string;
   mode?: 'conservative' | 'adaptive' | 'innovative' | 'learning';
   maxActiveTasks?: number;
   taskPrioritization?: 'static' | 'dynamic' | 'ai-driven';
   workloadDistribution?: 'balanced' | 'skills-based' | 'availability';
-  adaptationInterval?: number;
   llmConfig?: LLMConfig;
   llmInstance?: LangChainChatModel;
+  // Team instance reference for calling actual team.start()
+  teamInstance?: any; // Using any to avoid circular dependency
 }
 
 export interface TeamStoreActions {
@@ -120,7 +121,10 @@ export interface TeamStoreActions {
   addTasks: (tasks: Task[]) => void;
   updateTaskStatus: (taskId: string, status: TASK_STATUS_enum) => void;
   setWorkflowExecutionStrategy: (strategy: string) => void;
-  startWorkflow: (inputs?: Record<string, unknown>) => Promise<void>;
+  startWorkflow: (
+    inputs?: Record<string, unknown>,
+    skipTeamStart?: boolean
+  ) => Promise<void>;
   resetWorkflowStateAction: () => void;
   finishWorkflowAction: () => void;
   setTeamWorkflowStatus: (status: WORKFLOW_STATUS_enum) => void;
@@ -140,9 +144,9 @@ export interface TeamStoreActions {
   ) => T;
   addWorkflowLog: (log: WorkflowLog) => void;
   // Orchestration Actions
-  setAvailableTemplateTasks: (tasks: Task[]) => void;
-  addAvailableTemplateTask: (task: Task) => void;
-  removeAvailableTemplateTask: (taskId: string) => void;
+  setBacklogTasks: (tasks: Task[]) => void;
+  addBacklogTask: (task: Task) => void;
+  removeBacklogTask: (taskId: string) => void;
   updateOrchestrationMode: (
     mode: 'conservative' | 'adaptive' | 'innovative' | 'learning'
   ) => void;

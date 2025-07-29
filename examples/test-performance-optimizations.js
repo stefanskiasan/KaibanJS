@@ -29,42 +29,36 @@ const createTestTasks = () => {
       expectedOutput: 'Dockerized development environment',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
     },
     {
       description: 'Implement user authentication system',
       expectedOutput: 'Secure authentication system',
       agent: seniorDeveloper,
       adaptable: true,
-      template: true,
     },
     {
       description: 'Create responsive UI components',
       expectedOutput: 'Mobile-first UI components',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
     },
     {
       description: 'Conduct security audit',
       expectedOutput: 'Security audit report',
       agent: securityExpert,
       adaptable: false, // Non-adaptable for testing
-      template: true,
     },
     {
       description: 'Write comprehensive test suite',
       expectedOutput: 'Test suite with >90% coverage',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
     },
     {
       description: 'Setup CI/CD pipeline',
       expectedOutput: 'Automated deployment pipeline',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
     },
   ];
 
@@ -101,7 +95,7 @@ async function testPerformanceOptimizations() {
       ],
       tasks: [],
       enableOrchestration: true,
-      availableTemplateTasks: testTasks,
+      backlogTasks: testTasks,
       orchestrationStrategy:
         'Performance optimization test - focus on speed and efficiency',
       mode: 'adaptive',

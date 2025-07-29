@@ -40,7 +40,6 @@ async function runTaskGenerationExample() {
       expectedOutput: 'Complete registration form with validation',
       agent: frontendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '3-4 hours',
         skillsRequired: ['frontend', 'forms', 'validation'],
@@ -53,7 +52,6 @@ async function runTaskGenerationExample() {
       expectedOutput: 'Database tables for user management',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '2-3 hours',
         skillsRequired: ['database', 'sql', 'schema_design'],
@@ -66,7 +64,6 @@ async function runTaskGenerationExample() {
       expectedOutput: 'REST API for user CRUD operations',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '4-5 hours',
         skillsRequired: ['backend', 'api', 'rest'],
@@ -109,7 +106,7 @@ async function runTaskGenerationExample() {
     continuousOrchestration: true,
 
     // Start with minimal tasks
-    availableTemplateTasks: minimalTaskRepository,
+    backlogTasks: minimalTaskRepository,
 
     // IMPORTANT: Enable autonomous task generation
     allowTaskGeneration: true,

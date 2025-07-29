@@ -67,7 +67,6 @@ async function runSkillsBasedDistributionExample() {
       expectedOutput: 'Interactive dashboard with charts and live updates',
       agent: frontendDeveloper, // Suggested agent, but orchestrator can override
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '6-8 hours',
         skillsRequired: ['react', 'data_visualization', 'd3js', 'websockets'],
@@ -82,7 +81,6 @@ async function runSkillsBasedDistributionExample() {
         'GraphQL API with queries, mutations, and real-time subscriptions',
       agent: backendDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '5-7 hours',
         skillsRequired: ['graphql', 'node.js', 'websockets', 'api_design'],
@@ -97,7 +95,6 @@ async function runSkillsBasedDistributionExample() {
         'Data warehouse design with ETL pipelines and optimization',
       agent: dataArchitect,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '8-10 hours',
         skillsRequired: ['data_warehousing', 'etl', 'sql', 'big_data'],
@@ -112,7 +109,6 @@ async function runSkillsBasedDistributionExample() {
         'User research findings and UX improvement recommendations',
       agent: uxDesigner,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '4-6 hours',
         skillsRequired: ['user_research', 'usability_testing', 'figma'],
@@ -126,7 +122,6 @@ async function runSkillsBasedDistributionExample() {
       expectedOutput: 'Secure authentication system with MFA support',
       agent: securityExpert,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '5-6 hours',
         skillsRequired: ['oauth2', 'security', 'authentication', 'encryption'],
@@ -141,7 +136,6 @@ async function runSkillsBasedDistributionExample() {
         'Production-ready K8s cluster with monitoring and scaling',
       agent: devOpsEngineer,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '6-8 hours',
         skillsRequired: [
@@ -161,7 +155,6 @@ async function runSkillsBasedDistributionExample() {
         'Mobile app for iOS and Android with offline capabilities',
       agent: mobileAppDeveloper,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '10-12 hours',
         skillsRequired: [
@@ -180,7 +173,6 @@ async function runSkillsBasedDistributionExample() {
       expectedOutput: 'Comprehensive test suite with CI/CD integration',
       agent: qaEngineer,
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '5-7 hours',
         skillsRequired: [
@@ -200,7 +192,6 @@ async function runSkillsBasedDistributionExample() {
         'Multi-user collaborative editing with conflict resolution',
       agent: null, // Let orchestrator decide based on skills
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '8-10 hours',
         skillsRequired: ['websockets', 'frontend', 'backend', 'algorithms'],
@@ -213,7 +204,6 @@ async function runSkillsBasedDistributionExample() {
       expectedOutput: 'Improved performance with <100ms response times',
       agent: null, // Could be backend or DevOps
       adaptable: true,
-      template: true,
       resourceRequirements: {
         estimatedTime: '4-6 hours',
         skillsRequired: [
@@ -245,7 +235,7 @@ async function runSkillsBasedDistributionExample() {
     tasks: [],
 
     enableOrchestration: true,
-    availableTemplateTasks: crossFunctionalTasks,
+    backlogTasks: crossFunctionalTasks,
     allowTaskGeneration: false, // Focus on distribution, not generation
 
     // Use initial-only orchestration to focus on optimal skill-based distribution

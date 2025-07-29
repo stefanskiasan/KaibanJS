@@ -90,7 +90,6 @@ export interface ITaskParams {
     skillsRequired?: string[];
     dependencies?: string[];
   };
-  template?: boolean;
   priority?: 'high' | 'medium' | 'low';
   qualityGates?: string[];
 }
@@ -110,14 +109,13 @@ export interface ITeamParams {
   // Orchestration Extensions
   enableOrchestration?: boolean;
   continuousOrchestration?: boolean;
-  availableTemplateTasks?: Task[];
+  backlogTasks?: Task[];
   allowTaskGeneration?: boolean;
   orchestrationStrategy?: string;
   mode?: 'conservative' | 'adaptive' | 'innovative' | 'learning';
   maxActiveTasks?: number;
   taskPrioritization?: 'static' | 'dynamic' | 'ai-driven';
   workloadDistribution?: 'balanced' | 'skills-based' | 'availability';
-  adaptationInterval?: number;
   llmConfig?: LLMConfig;
   llmInstance?: LangChainChatModel;
 }
@@ -257,7 +255,6 @@ export class Task {
     skillsRequired?: string[];
     dependencies?: string[];
   };
-  template: boolean;
   priority: 'high' | 'medium' | 'low';
   qualityGates: string[];
 
@@ -280,7 +277,6 @@ export class Task {
     splitStrategy = 'none',
     mergeCompatible = [],
     resourceRequirements,
-    template = false,
     priority = 'medium',
     qualityGates = [],
   }: ITaskParams) {
@@ -308,7 +304,6 @@ export class Task {
     this.splitStrategy = splitStrategy;
     this.mergeCompatible = mergeCompatible;
     this.resourceRequirements = resourceRequirements;
-    this.template = template;
     this.priority = priority;
     this.qualityGates = qualityGates;
   }
@@ -324,14 +319,13 @@ export class Team {
   // Orchestration Extensions
   enableOrchestration: boolean;
   continuousOrchestration: boolean;
-  availableTemplateTasks: Task[];
+  backlogTasks: Task[];
   allowTaskGeneration: boolean;
   orchestrationStrategy?: string;
   mode: 'conservative' | 'adaptive' | 'innovative' | 'learning';
   maxActiveTasks: number;
   taskPrioritization: 'static' | 'dynamic' | 'ai-driven';
   workloadDistribution: 'balanced' | 'skills-based' | 'availability';
-  adaptationInterval: number;
   llmConfig?: LLMConfig;
   llmInstance?: LangChainChatModel;
 
@@ -352,28 +346,26 @@ export class Team {
     // Orchestration Extensions
     enableOrchestration = false,
     continuousOrchestration = false,
-    availableTemplateTasks = [],
+    backlogTasks = [],
     allowTaskGeneration = false,
     orchestrationStrategy,
     mode = 'adaptive',
     maxActiveTasks = 5,
     taskPrioritization = 'dynamic',
     workloadDistribution = 'balanced',
-    adaptationInterval = 300000,
     llmConfig,
     llmInstance,
   }: ITeamParams) {
     // Initialize Orchestration Properties
     this.enableOrchestration = enableOrchestration;
     this.continuousOrchestration = continuousOrchestration;
-    this.availableTemplateTasks = availableTemplateTasks;
+    this.backlogTasks = backlogTasks;
     this.allowTaskGeneration = allowTaskGeneration;
     this.orchestrationStrategy = orchestrationStrategy;
     this.mode = mode;
     this.maxActiveTasks = maxActiveTasks;
     this.taskPrioritization = taskPrioritization;
     this.workloadDistribution = workloadDistribution;
-    this.adaptationInterval = adaptationInterval;
     this.llmConfig = llmConfig;
     this.llmInstance = llmInstance;
 
@@ -386,29 +378,31 @@ export class Team {
       );
     }
 
-    this.store = createTeamStore({
-      name,
-      agents: [],
-      tasks: [],
-      inputs,
-      env,
-      logLevel,
-      insights,
-      memory,
-      // Pass orchestration config to store
-      enableOrchestration,
-      continuousOrchestration,
-      availableTemplateTasks,
-      allowTaskGeneration,
-      orchestrationStrategy,
-      mode,
-      maxActiveTasks,
-      taskPrioritization,
-      workloadDistribution,
-      adaptationInterval,
-      llmConfig,
-      llmInstance,
-    });
+    this.store = createTeamStore(
+      {
+        name,
+        agents: [],
+        tasks: [],
+        inputs,
+        env,
+        logLevel,
+        insights,
+        memory,
+        // Pass orchestration config to store
+        enableOrchestration,
+        continuousOrchestration,
+        backlogTasks,
+        allowTaskGeneration,
+        orchestrationStrategy,
+        mode,
+        maxActiveTasks,
+        taskPrioritization,
+        workloadDistribution,
+        llmConfig,
+        llmInstance,
+      },
+      this
+    ); // Pass 'this' as teamInstance reference
 
     // Add agents and tasks to the store, they will be set with the store automatically
     this.store.getState().addAgents(agents);
@@ -516,8 +510,8 @@ export class Team {
       );
 
       try {
-        // Trigger the workflow
-        this.store.getState().startWorkflow(inputs);
+        // Trigger the workflow (skip team start to avoid recursion)
+        this.store.getState().startWorkflow(inputs, true);
       } catch (error) {
         reject(error);
         // Unsubscribe to prevent memory leaks in case of an error
@@ -755,33 +749,12 @@ export class Team {
   }
 
   /**
-   * Start continuous workflow optimization.
-   * This enables the orchestrator to continuously monitor and optimize the workflow.
-   */
-  async startContinuousOptimization(): Promise<void> {
-    if (!this.enableOrchestration) {
-      throw new Error(
-        'Orchestration is not enabled for this team. Set enableOrchestration: true in team configuration.'
-      );
-    }
-
-    if (!this.llmConfig && !this.llmInstance) {
-      throw new Error('LLM configuration required for continuous optimization');
-    }
-
-    const { IntelligentOrchestrator } = await import('./orchestration');
-    const orchestrator = new IntelligentOrchestrator(this);
-
-    await orchestrator.startContinuousOptimization();
-  }
-
-  /**
-   * Add tasks to the available template task repository.
+   * Add tasks to the backlog task repository.
    * These tasks can be selected and adapted by the orchestrator.
    *
-   * @param tasks - Array of template tasks to add to the repository
+   * @param tasks - Array of backlog tasks to add to the repository
    */
-  addAvailableTemplateTasks(tasks: Task[]): void {
+  addBacklogTasks(tasks: Task[]): void {
     if (!this.enableOrchestration) {
       console.warn(
         'Orchestration is not enabled for this team. Task repository operations are ignored.'
@@ -789,10 +762,8 @@ export class Team {
       return;
     }
 
-    this.availableTemplateTasks.push(...tasks);
-    this.store
-      .getState()
-      .setAvailableTemplateTasks(this.availableTemplateTasks);
+    this.backlogTasks.push(...tasks);
+    this.store.getState().setBacklogTasks(this.backlogTasks);
 
     // Log task repository update
     const log = createOrchestrationLog(
@@ -801,7 +772,7 @@ export class Team {
       {
         operation: 'ADD',
         taskCount: tasks.length,
-        repositorySize: this.availableTemplateTasks.length,
+        repositorySize: this.backlogTasks.length,
         affectedTaskIds: tasks.map((task) => task.id),
       }
     );
@@ -809,11 +780,11 @@ export class Team {
   }
 
   /**
-   * Remove a task from the available template task repository.
+   * Remove a task from the backlog task repository.
    *
    * @param taskId - ID of the task to remove
    */
-  removeAvailableTemplateTask(taskId: string): void {
+  removeBacklogTask(taskId: string): void {
     if (!this.enableOrchestration) {
       console.warn(
         'Orchestration is not enabled for this team. Task repository operations are ignored.'
@@ -821,10 +792,8 @@ export class Team {
       return;
     }
 
-    this.availableTemplateTasks = this.availableTemplateTasks.filter(
-      (task) => task.id !== taskId
-    );
-    this.store.getState().removeAvailableTemplateTask(taskId);
+    this.backlogTasks = this.backlogTasks.filter((task) => task.id !== taskId);
+    this.store.getState().removeBacklogTask(taskId);
 
     // Log task repository update
     const log = createOrchestrationLog(
@@ -833,7 +802,7 @@ export class Team {
       {
         operation: 'REMOVE',
         taskCount: 1,
-        repositorySize: this.availableTemplateTasks.length,
+        repositorySize: this.backlogTasks.length,
         affectedTaskIds: [taskId],
       }
     );

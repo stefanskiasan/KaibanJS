@@ -55,7 +55,6 @@ describe('Intelligent Orchestration', () => {
         expectedOutput: 'Working authentication system',
         agent: developer,
         adaptable: true,
-        template: true,
         orchestrationRules: 'Can be adapted based on security requirements',
         resourceRequirements: {
           estimatedTime: '4-6 hours',
@@ -68,7 +67,6 @@ describe('Intelligent Orchestration', () => {
         expectedOutput: 'Test suite with >80% coverage',
         agent: tester,
         adaptable: true,
-        template: true,
         resourceRequirements: {
           estimatedTime: '2-4 hours',
           skillsRequired: ['testing', 'automation'],
@@ -80,7 +78,6 @@ describe('Intelligent Orchestration', () => {
         expectedOutput: 'Security report with findings',
         agent: tester,
         adaptable: false, // Critical task - cannot be modified
-        template: true,
         orchestrationRules: 'CRITICAL - No modifications allowed',
         resourceRequirements: {
           estimatedTime: '4-6 hours',
@@ -96,7 +93,7 @@ describe('Intelligent Orchestration', () => {
       agents: [developer, tester],
       tasks: [],
       enableOrchestration: true, // Enable orchestration for testing
-      availableTemplateTasks: taskRepository,
+      backlogTasks: taskRepository,
       allowTaskGeneration: true,
       orchestrationStrategy: 'Test strategy for efficient development',
       mode: 'adaptive',
@@ -109,7 +106,7 @@ describe('Intelligent Orchestration', () => {
   describe('Team Configuration', () => {
     test('should initialize with orchestration properties', () => {
       expect(team.enableOrchestration).toBe(true);
-      expect(team.availableTemplateTasks).toHaveLength(3);
+      expect(team.backlogTasks).toHaveLength(3);
       expect(team.allowTaskGeneration).toBe(true);
       expect(team.orchestrationStrategy).toBe(
         'Test strategy for efficient development'
@@ -128,7 +125,7 @@ describe('Intelligent Orchestration', () => {
       });
 
       expect(minimalTeam.enableOrchestration).toBe(false);
-      expect(minimalTeam.availableTasks).toHaveLength(0);
+      expect(minimalTeam.backlogTasks).toHaveLength(0);
       expect(minimalTeam.allowTaskGeneration).toBe(false);
       expect(minimalTeam.mode).toBe('adaptive');
       expect(minimalTeam.maxActiveTasks).toBe(5);
@@ -156,12 +153,12 @@ describe('Intelligent Orchestration', () => {
       // Test that other methods show warnings but don't throw
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-      teamWithoutOrchestration.addAvailableTemplateTasks([]);
+      teamWithoutOrchestration.addBacklogTasks([]);
       expect(consoleSpy).toHaveBeenCalledWith(
         'Orchestration is not enabled for this team. Task repository operations are ignored.'
       );
 
-      teamWithoutOrchestration.removeAvailableTemplateTask('test-id');
+      teamWithoutOrchestration.removeBacklogTask('test-id');
       expect(consoleSpy).toHaveBeenCalledWith(
         'Orchestration is not enabled for this team. Task repository operations are ignored.'
       );
@@ -184,7 +181,6 @@ describe('Intelligent Orchestration', () => {
     test('should initialize tasks with orchestration properties', () => {
       const adaptableTask = taskRepository[0];
       expect(adaptableTask.adaptable).toBe(true);
-      expect(adaptableTask.template).toBe(true);
       expect(adaptableTask.orchestrationRules).toBeDefined();
       expect(adaptableTask.resourceRequirements).toBeDefined();
       expect(adaptableTask.splitStrategy).toBe('none'); // default
@@ -206,7 +202,6 @@ describe('Intelligent Orchestration', () => {
       });
 
       expect(basicTask.adaptable).toBe(false); // default
-      expect(basicTask.template).toBe(false); // default
       expect(basicTask.splitStrategy).toBe('none');
       expect(basicTask.mergeCompatible).toHaveLength(0);
       expect(basicTask.dynamicPriority).toBe(false);
@@ -219,21 +214,20 @@ describe('Intelligent Orchestration', () => {
         description: 'New task',
         expectedOutput: 'New output',
         agent: developer,
-        template: true,
       });
 
-      team.addAvailableTemplateTasks([newTask]);
-      expect(team.availableTemplateTasks).toHaveLength(4);
-      expect(team.store.getState().availableTemplateTasks).toHaveLength(4);
+      team.addBacklogTasks([newTask]);
+      expect(team.backlogTasks).toHaveLength(4);
+      expect(team.store.getState().backlogTasks).toHaveLength(4);
     });
 
     test('should remove tasks from repository', () => {
       const taskToRemove = taskRepository[0];
-      team.removeAvailableTemplateTask(taskToRemove.id);
+      team.removeBacklogTask(taskToRemove.id);
 
-      expect(team.availableTemplateTasks).toHaveLength(2);
+      expect(team.backlogTasks).toHaveLength(2);
       expect(
-        team.availableTemplateTasks.find((t) => t.id === taskToRemove.id)
+        team.backlogTasks.find((t) => t.id === taskToRemove.id)
       ).toBeUndefined();
     });
 
@@ -405,7 +399,6 @@ describe('Intelligent Orchestration', () => {
       expect(generatedTask).toBeDefined();
       expect(generatedTask.description).toContain('Generated task');
       expect(generatedTask.adaptable).toBe(true);
-      expect(generatedTask.template).toBe(false);
       expect(generatedTask.orchestrationRules).toContain('quality_assurance');
     });
 
@@ -549,19 +542,17 @@ describe('Intelligent Orchestration', () => {
         description: 'Store test task',
         expectedOutput: 'Store integration working',
         agent: developer,
-        template: true,
       });
 
-      team.store.getState().setAvailableTemplateTasks([newTask]);
-      expect(team.store.getState().availableTemplateTasks).toHaveLength(1);
-      expect(team.store.getState().availableTemplateTasks[0].description).toBe(
+      team.store.getState().setBacklogTasks([newTask]);
+      expect(team.store.getState().backlogTasks).toHaveLength(1);
+      expect(team.store.getState().backlogTasks[0].description).toBe(
         'Store test task'
       );
     });
 
     test('should add available task to store', () => {
-      const initialCount =
-        team.store.getState().availableTemplateTasks?.length || 0;
+      const initialCount = team.store.getState().backlogTasks?.length || 0;
 
       const newTask = new Task({
         description: 'Added task',
@@ -569,21 +560,16 @@ describe('Intelligent Orchestration', () => {
         agent: developer,
       });
 
-      team.store.getState().addAvailableTemplateTask(newTask);
-      expect(team.store.getState().availableTemplateTasks).toHaveLength(
-        initialCount + 1
-      );
+      team.store.getState().addBacklogTask(newTask);
+      expect(team.store.getState().backlogTasks).toHaveLength(initialCount + 1);
     });
 
     test('should remove available task from store', () => {
       const taskToRemove = taskRepository[0];
-      const initialCount =
-        team.store.getState().availableTemplateTasks?.length || 0;
+      const initialCount = team.store.getState().backlogTasks?.length || 0;
 
-      team.store.getState().removeAvailableTemplateTask(taskToRemove.id);
-      expect(team.store.getState().availableTemplateTasks).toHaveLength(
-        initialCount - 1
-      );
+      team.store.getState().removeBacklogTask(taskToRemove.id);
+      expect(team.store.getState().backlogTasks).toHaveLength(initialCount - 1);
     });
 
     test('should update orchestration mode in store', () => {
@@ -631,7 +617,7 @@ describe('Intelligent Orchestration', () => {
         agents: [developer],
         tasks: [],
         enableOrchestration: true,
-        availableTemplateTasks: taskRepository,
+        backlogTasks: taskRepository,
         allowTaskGeneration: true,
       });
 
@@ -644,7 +630,7 @@ describe('Intelligent Orchestration', () => {
         agents: [developer],
         tasks: [],
         enableOrchestration: true,
-        availableTemplateTasks: [],
+        backlogTasks: [],
         allowTaskGeneration: false,
       });
 
@@ -660,7 +646,7 @@ describe('Intelligent Orchestration', () => {
         agents: [developer],
         tasks: [],
         enableOrchestration: true,
-        availableTemplateTasks: taskRepository,
+        backlogTasks: taskRepository,
         allowTaskGeneration: false, // Generation not allowed
       });
 
@@ -707,7 +693,6 @@ describe('Orchestration Integration', () => {
       expectedOutput: 'Successfully integrated orchestration',
       agent: developer,
       adaptable: true,
-      template: true,
     });
 
     const team = new Team({
@@ -715,7 +700,7 @@ describe('Orchestration Integration', () => {
       agents: [developer],
       tasks: [integrationTask],
       enableOrchestration: true,
-      availableTasks: [integrationTask],
+      backlogTasks: [integrationTask],
       allowTaskGeneration: false,
       mode: 'conservative',
     });
@@ -724,7 +709,7 @@ describe('Orchestration Integration', () => {
     expect(() => team.start()).not.toThrow();
 
     // Should be able to use orchestration methods
-    expect(() => team.addAvailableTemplateTasks([])).not.toThrow();
+    expect(() => team.addBacklogTasks([])).not.toThrow();
     expect(() => team.updateOrchestrationMode('adaptive')).not.toThrow();
     expect(() =>
       team.updateOrchestrationStrategy('New strategy')

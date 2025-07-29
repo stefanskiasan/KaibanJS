@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `enableOrchestration` flag for AI-driven workflow optimization
   - Smart gap analysis and task selection based on project goals
   - Build upon existing tasks vs. starting fresh functionality
-  - Dynamic task repository management with template tasks
+  - Dynamic task repository management with backlog tasks
   - AI-driven task prioritization and skills-based workload distribution
   - Comprehensive orchestration logging and monitoring
   - Multiple orchestration modes: conservative, adaptive, innovative, learning
@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Task System** - Extended with orchestration-specific features
 
   - `Task.adaptable` - Mark tasks as AI-modifiable
-  - `Task.template` - Mark tasks as repository templates
+  - Tasks in `backlogTasks` are automatically treated as reusable templates
   - `Task.orchestrationRules` - Define AI adaptation guidelines
   - `Task.resourceRequirements` - Enhanced resource and skill tracking
   - Improved task dependency management
