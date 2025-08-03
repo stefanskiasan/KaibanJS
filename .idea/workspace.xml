@@ -4,7 +4,44 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="fix: Enhance null safety and add orchestration validation tests" />
+    <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="fix: Enhance null safety and add orchestration validation tests">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/01-basic-orchestration.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/01-classical-orchestration-fixed.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/01-classical-orchestration.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/13-continuous-orchestration-basic.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/15-runtime-orchestration-control.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/examples/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/basicorchestration.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/orchestration-benchmark.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/orchestration-demo.kban.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/test-all-examples-systematically.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-all-examples-systematically.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/test-key-examples-fast.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-key-examples-fast.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-execution.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-fixes.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-null-fixes.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-summary.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/performance.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/performance.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/system-metrics.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/system-metrics.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/task-metrics.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/task-metrics.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/docs/web-component-usage.md" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/docs/web-component-usage.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/examples/web-component-demo.html" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/examples/web-component-demo.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/rollup.config.webcomponent.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/rollup.config.webcomponent.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/src/components/KaibanBoard/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/src/components/KaibanBoard/index.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/src/components/KaibanBoard/store/store.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/src/components/KaibanBoard/store/store.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kanban-board/src/web-component/kaiban-board-element.js" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/src/web-component/kaiban-board-element.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/agents/reactChampionAgent.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/agents/reactChampionAgent.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/orchestration/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/stores/taskStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/taskStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/prompts.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/prompts.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -42,24 +79,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;JavaScript Debug.localhost:5173.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/intelligent-orchestration-ui&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/asanstefanski/KundenProjekte/KaibanJS/examples&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/prettier&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.localhost:5173.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feat/intelligent-orchestration-ui",
+    "last_opened_file_path": "/Users/asanstefanski/KundenProjekte/KaibanJS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/prettier",
+    "ts.external.directory.path": "/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/examples" />
@@ -89,7 +126,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1753640734318</updated>
-      <workItem from="1753640735894" duration="23415000" />
+      <workItem from="1753640735894" duration="24072000" />
+      <workItem from="1753831461549" duration="2239000" />
+      <workItem from="1754221777689" duration="3017000" />
     </task>
     <servers />
   </component>

@@ -15,41 +15,6 @@ import { logger } from '../utils/logger';
 import { createOrchestrationLog } from '../subscribers/orchestrationSubscriber';
 import { OrchestrationPromptFactory } from './promptTemplates';
 import { TASK_STATUS_enum } from '../utils/enums';
-import {
-  OrchestrationContext,
-  TaskGap,
-  TaskModificationPermissions,
-  TaskPerformanceHistory,
-  TaskAdaptationHistory,
-  OrchestrationMode,
-  SplitStrategyPreference,
-  OrchestrationMetrics,
-  LLMCacheEntry,
-  RecoveryStrategy,
-  AgentWorkload,
-  DependencyGraphNode,
-  DependencyGraphEdge,
-  DependencyGraphMetrics,
-  PerformanceInsights,
-  HealthCheckResult,
-  ControlStatus,
-  ConfigValidationResult,
-  TaskCompletionRecommendations
-} from './core/OrchestrationContext';
-import { PerformanceMetricsManager } from './core/OrchestrationMetrics';
-import { TaskRecoveryManager } from './recovery';
-
-// Import analysis modules
-import { ContextAnalyzer, GapAnalyzer, PerformanceAnalyzer, TaskAnalyzer } from './analysis';
-
-// Import strategy modules
-import { AdaptationStrategy, GenerationStrategy, SelectionStrategy } from './strategies';
-
-// Import optimization modules
-import { ResourceOptimizer, WorkflowOptimizer } from './optimization';
-
-// Import utility modules
-import { ParsingUtils, CalculationUtils, LoggingUtils, ContextUtils } from './utils';
 
 // Static imports for LLM providers (browser-compatible)
 let ChatOpenAI: any;
@@ -59,40 +24,65 @@ let ChatGoogleGenerativeAI: any;
 // Dynamic imports for browser compatibility
 const loadLLMProviders = async () => {
   try {
-    // Try to load each provider individually to handle partial failures
     if (!ChatOpenAI) {
-      try {
-        const openai = await import('@langchain/openai');
-        ChatOpenAI = openai.ChatOpenAI;
-        logger.debug('OpenAI provider loaded successfully');
-      } catch (error) {
-        logger.warn('OpenAI provider could not be loaded:', error);
-      }
+      const openai = await import('@langchain/openai');
+      ChatOpenAI = openai.ChatOpenAI;
     }
-    
     if (!ChatAnthropic) {
-      try {
-        const anthropic = await import('@langchain/anthropic');
-        ChatAnthropic = anthropic.ChatAnthropic;
-        logger.debug('Anthropic provider loaded successfully');
-      } catch (error) {
-        logger.warn('Anthropic provider could not be loaded:', error);
-      }
+      const anthropic = await import('@langchain/anthropic');
+      ChatAnthropic = anthropic.ChatAnthropic;
     }
-    
     if (!ChatGoogleGenerativeAI) {
-      try {
-        const google = await import('@langchain/google-genai');
-        ChatGoogleGenerativeAI = google.ChatGoogleGenerativeAI;
-        logger.debug('Google provider loaded successfully');
-      } catch (error) {
-        logger.warn('Google provider could not be loaded:', error);
-      }
+      const google = await import('@langchain/google-genai');
+      ChatGoogleGenerativeAI = google.ChatGoogleGenerativeAI;
     }
   } catch (error) {
-    logger.error('Unexpected error loading LLM providers:', error);
+    logger.warn('Some LLM providers could not be loaded:', error);
   }
 };
+
+/**
+ * Context information for orchestrator decision-making
+ */
+export interface OrchestrationContext {
+  activeTasks: Task[];
+  availableAgents: Agent[];
+  projectProgress: number;
+  blockedTasks: Task[];
+  codeCoverage: number;
+  performanceScore: number;
+  workload: string;
+  projectPhase: string;
+  similarTasks: Task[];
+  newPriorities?: string[];
+  resourceAvailability: string;
+  timeConstraints: string;
+  qualityRequirements: string;
+  existingTasks: Task[]; // All existing tasks in the team (including completed, pending, etc.)
+}
+
+/**
+ * Task gap information for new task generation
+ */
+export interface TaskGap {
+  id?: string;
+  description: string;
+  category: string;
+  estimatedComplexity: 'low' | 'medium' | 'high';
+  requirements: string[];
+  dependencies: string[];
+  priority?: 'high' | 'medium' | 'low';
+  suggestedSolution?: string;
+}
+
+/**
+ * Task modification permissions
+ */
+export interface TaskModificationPermissions {
+  canModify: boolean;
+  reason: string;
+  allowedActions: string[];
+}
 
 /**
  * Intelligent Orchestrator Class
@@ -103,36 +93,35 @@ export class IntelligentOrchestrator {
   private team: Team;
   private availableTasks: Task[];
   private orchestrationStrategy: string;
-  private mode: OrchestrationMode;
+  private mode: 'conservative' | 'adaptive' | 'innovative' | 'learning';
   private llm: LangChainChatModel | null;
   private conversationHistory: any[];
-  private performanceMetrics: PerformanceMetricsManager;
-  private taskAdaptationHistory: TaskAdaptationHistory[];
-  private taskPerformanceHistory: Map<string, TaskPerformanceHistory>;
-  private splitStrategyPreference: SplitStrategyPreference = 'moderate';
+  private performanceMetrics: Map<string, number>;
+  private taskAdaptationHistory: {
+    taskId: string;
+    timestamp: number;
+    adaptationLevel: string;
+    reasoning: string;
+  }[];
+  private taskPerformanceHistory: Map<
+    string,
+    {
+      successRate: number;
+      averageDuration: number;
+      completions: number;
+      failures: number;
+      lastUpdated: number;
+    }
+  >;
+  private performanceLogInterval?: NodeJS.Timeout;
+  private metricHistory?: Map<string, number[]>;
+  private splitStrategyPreference: 'conservative' | 'moderate' | 'aggressive' =
+    'moderate';
 
   // Performance optimization fields
-  private llmCache: Map<string, LLMCacheEntry>;
+  private llmCache: Map<string, { response: any; timestamp: number }>;
   private cacheTimeout: number;
   private adaptationTimeout: number;
-  
-  // Recovery management
-  private recoveryManager: TaskRecoveryManager;
-  
-  // Analysis modules
-  private contextAnalyzer: ContextAnalyzer;
-  private gapAnalyzer: GapAnalyzer;
-  private performanceAnalyzer: PerformanceAnalyzer;
-  private taskAnalyzer: TaskAnalyzer;
-  
-  // Strategy modules (initialized after LLM)
-  private adaptationStrategy!: AdaptationStrategy;
-  private generationStrategy!: GenerationStrategy;
-  private selectionStrategy!: SelectionStrategy;
-  
-  // Optimization modules
-  private resourceOptimizer: ResourceOptimizer;
-  private workflowOptimizer: WorkflowOptimizer;
 
   constructor(team: Team) {
     this.team = team;
@@ -141,7 +130,7 @@ export class IntelligentOrchestrator {
     this.mode = team.mode || 'adaptive';
     this.llm = null; // Will be initialized lazily in ensureLLMInitialized()
     this.conversationHistory = [];
-    this.performanceMetrics = new PerformanceMetricsManager();
+    this.performanceMetrics = new Map();
     this.taskAdaptationHistory = [];
     this.taskPerformanceHistory = new Map();
 
@@ -150,55 +139,45 @@ export class IntelligentOrchestrator {
     this.cacheTimeout = 5 * 60 * 1000; // 5 minutes cache
     this.adaptationTimeout = 30 * 1000; // 30 seconds per adaptation
 
-    // Initialize recovery manager
-    this.recoveryManager = new TaskRecoveryManager(
-      team,
-      (event, message, data) => this.logOrchestrationEvent(event, message, data)
-    );
-    
-    // Initialize analysis modules
-    this.contextAnalyzer = new ContextAnalyzer(team);
-    this.gapAnalyzer = new GapAnalyzer(
-      this.availableTasks,
-      (agent) => ContextUtils.extractAgentSkills(agent)
-    );
-    this.performanceAnalyzer = new PerformanceAnalyzer(team);
-    this.taskAnalyzer = new TaskAnalyzer(
-      (agent) => ContextUtils.extractAgentSkills(agent),
-      (task) => CalculationUtils.calculateTaskComplexity(task)
-    );
-    
-    // Note: Strategy modules will be initialized after LLM is initialized
-    // since they require LLM instance
-    
-    // Initialize optimization modules
-    this.resourceOptimizer = new ResourceOptimizer(
-      team,
-      (task) => CalculationUtils.calculateTaskComplexity(task),
-      (event, message, data) => this.logOrchestrationEvent(event, message, data)
-    );
-    this.workflowOptimizer = new WorkflowOptimizer(
-      team,
-      (event, message, data) => this.logOrchestrationEvent(event, message, data)
-    );
-
+    // Initialize performance tracking
+    this.initializePerformanceTracking();
     // Start performance metrics logging interval (every 5 minutes)
-    this.performanceMetrics.startPerformanceMetricsLogging();
+    this.startPerformanceMetricsLogging();
 
     // Performance optimization: Clean cache every 10 minutes
     setInterval(() => this.cleanExpiredCache(), 10 * 60 * 1000);
   }
 
+  /**
+   * Initialize performance tracking for orchestrator control
+   */
+  private initializePerformanceTracking(): void {
+    this.performanceMetrics.set('orchestration_calls', 0);
+    this.performanceMetrics.set('successful_operations', 0);
+    this.performanceMetrics.set('failed_operations', 0);
+    this.performanceMetrics.set('llm_calls', 0);
+    this.performanceMetrics.set('llm_failures', 0);
+    this.performanceMetrics.set('tasks_generated', 0);
+    this.performanceMetrics.set('tasks_adapted', 0);
+    this.performanceMetrics.set('priority_adjustments', 0);
+    this.performanceMetrics.set('task_splits', 0);
+    this.performanceMetrics.set('task_merges', 0);
+    this.performanceMetrics.set('tasks_tracked', 0);
+    this.performanceMetrics.set('total_execution_time', 0);
+  }
 
   /**
-   * Handle orchestration errors - fail fast, no fallbacks
+   * Enhanced error handling with fallback strategies
    */
   private async handleOrchestrationError(
     operation: string,
     error: Error,
     context?: any
   ): Promise<any> {
-    this.performanceMetrics.updateMetric('failed_operations', 1);
+    this.performanceMetrics.set(
+      'failed_operations',
+      (this.performanceMetrics.get('failed_operations') || 0) + 1
+    );
 
     logger.error(`Orchestration error in ${operation}:`, error.message);
 
@@ -211,51 +190,327 @@ export class IntelligentOrchestrator {
         error: error.message,
         errorStack: error.stack,
         context: context ? JSON.stringify(context).substring(0, 500) : null,
-        performanceMetrics: this.performanceMetrics.getAllMetrics(),
-        recoveryAttempt: false,
+        performanceMetrics: Object.fromEntries(this.performanceMetrics),
+        recoveryAttempt: true,
       }
     );
 
-    // Always throw error - no recovery attempts
-    throw new Error(
-      `Orchestration failed in ${operation}: ${error.message}. Orchestrator requires LLM to function.`
-    );
+    // Apply recovery strategies based on operation type
+    switch (operation) {
+      case 'task_selection':
+        return this.recoverFromTaskSelectionFailure(context);
+
+      case 'task_generation':
+        return this.recoverFromTaskGenerationFailure(context);
+
+      case 'task_adaptation':
+        return this.recoverFromTaskAdaptationFailure(context);
+
+      case 'llm_communication':
+        return this.recoverFromLLMFailure(context);
+
+      case 'workflow_orchestration':
+        return this.recoverFromWorkflowFailure(context);
+
+      default:
+        return this.applyGenericRecoveryStrategy(operation, context);
+    }
   }
 
+  /**
+   * Recover from task selection failures
+   */
+  private async recoverFromTaskSelectionFailure(context: any): Promise<Task[]> {
+    logger.warn('🔧 Attempting recovery from task selection failure');
 
+    try {
+      // Fallback 1: Use simple task selection logic
+      if (this.availableTasks && this.availableTasks.length > 0) {
+        const fallbackTasks = this.availableTasks
+          .filter((task) => task && task.adaptable)
+          .slice(0, 3); // Take first 3 adaptable backlog tasks
 
+        logger.info(
+          `📋 Fallback task selection: ${fallbackTasks.length} tasks selected`
+        );
 
+        this.logOrchestrationEvent(
+          'FALLBACK_TASK_SELECTION',
+          'Using fallback task selection after LLM failure',
+          {
+            fallbackTasksCount: fallbackTasks.length,
+            fallbackStrategy: 'simple_template_selection',
+            recoverySuccessful: true,
+          }
+        );
 
+        return fallbackTasks;
+      }
 
+      // Fallback 2: Create minimal safe task if no templates available
+      if (context?.availableAgents?.length > 0) {
+        const emergencyTask = await this.createEmergencyTask(context);
+        return emergencyTask ? [emergencyTask] : [];
+      }
 
+      return [];
+    } catch (recoveryError) {
+      logger.error(
+        'Recovery from task selection failure also failed:',
+        recoveryError
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Recover from task generation failures
+   */
+  private async recoverFromTaskGenerationFailure(
+    _context: any
+  ): Promise<Task[]> {
+    logger.warn('🔧 Attempting recovery from task generation failure');
+
+    try {
+      // Don't generate new tasks on failure - safer to return empty array
+      this.logOrchestrationEvent(
+        'FALLBACK_TASK_GENERATION',
+        'Skipping task generation due to failure',
+        {
+          fallbackStrategy: 'skip_generation',
+          recoverySuccessful: true,
+          safetyMeasure: true,
+        }
+      );
+
+      return [];
+    } catch (recoveryError) {
+      logger.error(
+        'Recovery from task generation failure also failed:',
+        recoveryError
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Recover from task adaptation failures
+   */
+  private async recoverFromTaskAdaptationFailure(
+    context: any
+  ): Promise<Task[]> {
+    logger.warn('🔧 Attempting recovery from task adaptation failure');
+
+    try {
+      // Return tasks without adaptation
+      const unadaptedTasks = context?.tasks || [];
+
+      this.logOrchestrationEvent(
+        'FALLBACK_TASK_ADAPTATION',
+        'Using tasks without adaptation due to failure',
+        {
+          fallbackStrategy: 'no_adaptation',
+          tasksCount: unadaptedTasks.length,
+          recoverySuccessful: true,
+        }
+      );
+
+      return unadaptedTasks;
+    } catch (recoveryError) {
+      logger.error(
+        'Recovery from task adaptation failure also failed:',
+        recoveryError
+      );
+      return context?.tasks || [];
+    }
+  }
+
+  /**
+   * Recover from LLM communication failures
+   */
+  private async recoverFromLLMFailure(_context: any): Promise<any> {
+    logger.warn('🔧 Attempting recovery from LLM communication failure');
+
+    this.performanceMetrics.set(
+      'llm_failures',
+      (this.performanceMetrics.get('llm_failures') || 0) + 1
+    );
+
+    try {
+      // Check LLM health and attempt reconnection
+      if (this.llm) {
+        // Test LLM with simple prompt
+        const testResponse = await this.llm.invoke(
+          'Test connection. Respond with OK.'
+        );
+        logger.info('✅ LLM connection restored');
+
+        this.logOrchestrationEvent(
+          'LLM_RECOVERY_SUCCESS',
+          'LLM connection restored successfully',
+          {
+            recoveryMethod: 'connection_test',
+            testResponse: testResponse.content.toString().substring(0, 100),
+          }
+        );
+
+        return { recovered: true, llm: this.llm };
+      }
+
+      // If LLM is null, try to reinitialize
+      this.llm = await this.initializeLLM(this.team);
+      if (this.llm) {
+        logger.info('✅ LLM reinitialized successfully');
+        return { recovered: true, llm: this.llm };
+      }
+
+      // Complete fallback - operate without LLM
+      logger.warn('⚠️ Operating in non-LLM mode due to persistent failures');
+
+      this.logOrchestrationEvent(
+        'LLM_RECOVERY_FAILED',
+        'Switching to non-LLM operation mode',
+        {
+          recoveryMethod: 'fallback_mode',
+          llmAvailable: false,
+          operationalMode: 'rule_based',
+        }
+      );
+
+      return { recovered: false, llm: null, fallbackMode: true };
+    } catch (recoveryError) {
+      logger.error('LLM recovery failed completely:', recoveryError);
+      return { recovered: false, llm: null, fallbackMode: true };
+    }
+  }
+
+  /**
+   * Recover from workflow orchestration failures
+   */
+  private async recoverFromWorkflowFailure(_context: any): Promise<any> {
+    logger.warn('🔧 Attempting recovery from workflow orchestration failure');
+
+    try {
+      // Fallback to basic workflow management
+      const safeWorkflow = {
+        tasks: _context?.existingTasks || [],
+        strategy: 'conservative_fallback',
+        mode: 'rule_based',
+        recoveryApplied: true,
+      };
+
+      this.logOrchestrationEvent(
+        'WORKFLOW_RECOVERY',
+        'Applied conservative workflow fallback',
+        {
+          fallbackStrategy: 'conservative_workflow',
+          tasksPreserved: safeWorkflow.tasks.length,
+          recoverySuccessful: true,
+        }
+      );
+
+      return safeWorkflow;
+    } catch (recoveryError) {
+      logger.error('Workflow recovery failed:', recoveryError);
+      return {
+        tasks: [],
+        strategy: 'minimal_fallback',
+        mode: 'emergency',
+        recoveryApplied: false,
+      };
+    }
+  }
+
+  /**
+   * Generic recovery strategy for unknown operations
+   */
+  private async applyGenericRecoveryStrategy(
+    operation: string,
+    context: any
+  ): Promise<any> {
+    logger.warn(`🔧 Applying generic recovery for operation: ${operation}`);
+
+    this.logOrchestrationEvent(
+      'GENERIC_RECOVERY',
+      `Applied generic recovery strategy for ${operation}`,
+      {
+        operation,
+        fallbackStrategy: 'generic_safe_mode',
+        contextPreserved: !!context,
+      }
+    );
+
+    return {
+      recovered: true,
+      strategy: 'generic_fallback',
+      data: context || null,
+      operation,
+    };
+  }
+
+  /**
+   * Create an emergency task when all else fails
+   */
+  private async createEmergencyTask(
+    context: OrchestrationContext
+  ): Promise<Task | null> {
+    try {
+      const agent = context.availableAgents[0];
+      if (!agent) return null;
+
+      const emergencyTask = new Task({
+        description: 'Emergency workflow continuation task',
+        expectedOutput:
+          'Workflow stability maintained and team coordination ensured',
+        agent: agent,
+        adaptable: false, // Keep it simple and safe
+        resourceRequirements: {
+          estimatedTime: '30 minutes',
+          skillsRequired: ['basic_coordination'],
+          dependencies: [],
+        },
+        orchestrationRules: `
+          EMERGENCY TASK - MINIMAL SAFE OPERATION
+          
+          This task was created as a safety measure when orchestration failed.
+          
+          Objectives:
+          - Maintain workflow continuity
+          - Ensure team has actionable work
+          - Prevent system deadlock
+          
+          Success criteria:
+          - Task can be completed safely
+          - No disruption to existing workflow
+          - Provides foundation for recovery
+        `,
+      });
+
+      logger.info('🚨 Created emergency task for workflow continuity');
+
+      this.logOrchestrationEvent(
+        'EMERGENCY_TASK_CREATED',
+        'Emergency task created for workflow continuity',
+        {
+          taskDescription: emergencyTask.description,
+          assignedAgent: agent.name,
+          creationReason: 'orchestration_failure_recovery',
+        }
+      );
+
+      return emergencyTask;
+    } catch (error) {
+      logger.error('Failed to create emergency task:', error);
+      return null;
+    }
+  }
 
   /**
    * Ensure LLM is initialized (lazy initialization)
    */
   private async ensureLLMInitialized(): Promise<void> {
     if (!this.llm) {
-      try {
-        this.llm = await this.initializeLLM(this.team);
-        
-        if (!this.llm) {
-          const errorMsg = 'LLM initialization failed. Orchestrator requires LLM to function. ' +
-            'Please provide llmInstance or llmConfig when creating the team. ' +
-            `Team has llmInstance: ${!!this.team?.llmInstance}, ` +
-            `Team has llmConfig: ${!!this.team?.llmConfig}`;
-          logger.error(errorMsg);
-          throw new Error(errorMsg);
-        }
-        
-        logger.info('LLM initialized successfully, initializing strategy modules');
-        
-        // Initialize strategy modules that require LLM
-        this.adaptationStrategy = new AdaptationStrategy(this.team, this.llm);
-        this.generationStrategy = new GenerationStrategy(this.team, this.llm, this.taskAnalyzer, this.gapAnalyzer);
-        this.selectionStrategy = new SelectionStrategy(this.team, this.llm, this.contextAnalyzer);
-      } catch (error) {
-        logger.error('Failed to initialize LLM in ensureLLMInitialized:', error);
-        throw error;
-      }
+      this.llm = await this.initializeLLM(this.team);
     }
   }
 
@@ -263,41 +518,21 @@ export class IntelligentOrchestrator {
    * Initialize LLM instance for the orchestrator
    */
   private async initializeLLM(team: Team): Promise<LangChainChatModel | null> {
-    try {
-      // Load LLM providers first (browser-compatible)
-      await loadLLMProviders();
-      
-      // Check if team has the expected structure
-      if (!team) {
-        logger.warn('Team object is null or undefined in initializeLLM');
-        return null;
-      }
-      
-      // Log the team structure for debugging
-      logger.debug('Team structure in initializeLLM:', {
-        hasLLMInstance: !!team.llmInstance,
-        hasLLMConfig: !!team.llmConfig,
-        llmConfigProvider: team.llmConfig?.provider,
-        teamKeys: Object.keys(team || {}).slice(0, 10) // First 10 keys to avoid log spam
-      });
+    // Load LLM providers first (browser-compatible)
+    await loadLLMProviders();
 
-      if (team.llmInstance) {
-        logger.info('Using provided LLM instance');
-        return team.llmInstance;
-      }
-
-      if (team.llmConfig) {
-        logger.info('Creating LLM from config:', team.llmConfig.provider);
-        return this.createLLMFromConfig(team.llmConfig);
-      }
-
-      // No LLM configuration - return null and let ensureLLMInitialized throw error
-      logger.warn('No LLM instance or config found in team object');
-      return null;
-    } catch (error) {
-      logger.error('Error in initializeLLM:', error);
-      throw error;
+    if (team.llmInstance) {
+      return team.llmInstance;
     }
+
+    if (team.llmConfig) {
+      return this.createLLMFromConfig(team.llmConfig);
+    }
+
+    logger.warn(
+      'No LLM configuration provided for orchestrator. Operating in manual mode.'
+    );
+    return null;
   }
 
   /**
@@ -441,45 +676,40 @@ export class IntelligentOrchestrator {
    * Analyzes context and optimally arranges tasks
    * @param projectGoal - The overall goal for the orchestrator to optimize towards
    * @param preserveExistingTasks - Whether to keep existing tasks and build upon them (default: true)
-   * @param inputs - User-provided inputs from team.start()
    */
   async orchestrateWorkflow(
     projectGoal: string,
-    preserveExistingTasks: boolean = true,
-    inputs: Record<string, unknown>
+    preserveExistingTasks: boolean = true
   ): Promise<Task[]> {
     const startTime = Date.now();
     this.updatePerformanceMetric('orchestration_calls', 1);
 
     try {
-      // Initialize LLM and log activation in parallel
-      const [_] = await Promise.all([
-        this.ensureLLMInitialized(),
-        (async () => {
-          logger.info(
-            `🎯 Starting intelligent orchestration for goal: ${projectGoal}`
-          );
-          
-          // Log orchestration activation
-          this.logOrchestrationEvent(
-            'ACTIVATED',
-            'Intelligent orchestration activated',
-            {
-              projectGoal,
-              preserveExistingTasks,
-              existingTasksCount: this.team.getTasks().length,
-              availableTasksCount: this.availableTasks.length,
-              mode: this.mode,
-              allowTaskGeneration: this.team.allowTaskGeneration,
-              orchestrationStrategy: this.orchestrationStrategy,
-            }
-          );
-        })()
-      ]);
+      // Initialize LLM if not already done (browser-compatible)
+      await this.ensureLLMInitialized();
+
+      logger.info(
+        `🎯 Starting intelligent orchestration for goal: ${projectGoal}`
+      );
+
+      // Log orchestration activation
+      this.logOrchestrationEvent(
+        'ACTIVATED',
+        'Intelligent orchestration activated',
+        {
+          projectGoal,
+          preserveExistingTasks,
+          existingTasksCount: this.team.getTasks().length,
+          availableTasksCount: this.availableTasks.length,
+          mode: this.mode,
+          allowTaskGeneration: this.team.allowTaskGeneration,
+          orchestrationStrategy: this.orchestrationStrategy,
+        }
+      );
 
       // Analyze current context
       const contextStartTime = Date.now();
-      const context = await this.contextAnalyzer.analyzeCurrentContext(inputs);
+      const context = await this.analyzeCurrentContext();
       this.updatePerformanceMetric(
         'context_analysis_time',
         Date.now() - contextStartTime
@@ -523,7 +753,7 @@ export class IntelligentOrchestrator {
 
       // Generate new tasks if necessary and allowed
       const generationStartTime = Date.now();
-      const generatedTasks = await this.generationStrategy.generateAdditionalTasks(
+      const generatedTasks = await this.generateAdditionalTasks(
         context,
         selectedTasks
       );
@@ -533,9 +763,9 @@ export class IntelligentOrchestrator {
       );
       this.updatePerformanceMetric('tasks_generated', generatedTasks.length);
 
-      // Adapt tasks to current circumstances (using batch processing for parallelization)
+      // Adapt tasks to current circumstances
       const adaptationStartTime = Date.now();
-      const newTasks = await this.adaptationStrategy.batchAdaptTasks([
+      const newTasks = await this.adaptTasksToContext([
         ...selectedTasks,
         ...generatedTasks,
       ]);
@@ -548,7 +778,7 @@ export class IntelligentOrchestrator {
       // Predict potential failures and create recovery strategies
       const failurePredictionStart = Date.now();
       const failureProbabilities = this.predictTaskFailures(newTasks);
-      const recoveryStrategies = this.recoveryManager.createTaskRecoveryStrategies(
+      const recoveryStrategies = this.createTaskRecoveryStrategies(
         newTasks,
         failureProbabilities
       );
@@ -583,7 +813,7 @@ export class IntelligentOrchestrator {
       }
 
       // Perform resource optimization
-      await this.resourceOptimizer.optimizeResourceUtilization(context, newTasks);
+      await this.optimizeResourceUtilization(context, newTasks);
 
       const endTime = Date.now();
       const duration = endTime - startTime;
@@ -610,7 +840,7 @@ export class IntelligentOrchestrator {
               totalTasks: allTasks.length,
             },
             finalWorkloadDistribution:
-              this.resourceOptimizer.calculateWorkloadDistribution(allTasks),
+              this.calculateWorkloadDistribution(allTasks),
             orchestrationStats: {
               llmCallsCount: this.conversationHistory.length,
               llmOperationsOnly: true,
@@ -643,7 +873,7 @@ export class IntelligentOrchestrator {
               totalTasks: newTasks.length,
             },
             finalWorkloadDistribution:
-              this.resourceOptimizer.calculateWorkloadDistribution(newTasks),
+              this.calculateWorkloadDistribution(newTasks),
             orchestrationStats: {
               llmCallsCount: this.conversationHistory.length,
               llmOperationsOnly: true,
@@ -661,44 +891,62 @@ export class IntelligentOrchestrator {
     } catch (error) {
       logger.error('❌ Orchestration failed:', error);
 
-      // Log error and fail fast - no recovery attempts
-      await this.handleOrchestrationError(
+      // Attempt intelligent recovery
+      const recoveryResult = await this.handleOrchestrationError(
         'workflow_orchestration',
         error instanceof Error ? error : new Error(String(error)),
         {
           projectGoal,
           preserveExistingTasks,
           existingTasksCount: this.team.getTasks().length,
+          context: this.buildOrchestrationContext(),
         }
       );
 
-      // This line will never be reached as handleOrchestrationError always throws
-      return [];
+      // If recovery successful, return recovered workflow
+      if (recoveryResult?.recoveryApplied && recoveryResult.tasks) {
+        logger.warn('⚠️ Using recovered workflow due to orchestration failure');
+
+        this.logOrchestrationEvent(
+          'RECOVERY_SUCCESS',
+          'Orchestration recovered from failure',
+          {
+            recoveryStrategy: recoveryResult.strategy,
+            recoveredTasksCount: recoveryResult.tasks.length,
+            originalError:
+              error instanceof Error ? error.message : String(error),
+          }
+        );
+
+        return recoveryResult.tasks;
+      }
+
+      // Log final orchestration error if recovery also failed
+      this.logOrchestrationEvent(
+        'ERROR',
+        'Intelligent orchestration failed - recovery also failed',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          errorStack: error instanceof Error ? error.stack : undefined,
+          operationFailed: 'orchestrateWorkflow',
+          recoveryAttempted: true,
+          recoverySuccessful: false,
+          partialResults: {
+            tasksProcessed: 0,
+            operationsCompleted: ['context_analysis'],
+          },
+        }
+      );
+
+      throw error;
     }
   }
 
   /**
    * Analyze current team and project context
    */
-  private async analyzeCurrentContext(inputs: Record<string, unknown>): Promise<OrchestrationContext> {
+  private async analyzeCurrentContext(): Promise<OrchestrationContext> {
     const teamState = this.team.store.getState();
-
-    // Parallel execution of independent calculations
-    const [
-      projectProgress,
-      workload,
-      projectPhase,
-      resourceAvailability,
-      timeConstraints,
-      qualityRequirements
-    ] = await Promise.all([
-      this.calculateProjectProgress(),
-      this.calculateCurrentWorkload(),
-      this.determineProjectPhase(),
-      this.assessResourceAvailability(),
-      this.assessTimeConstraints(),
-      this.assessQualityRequirements()
-    ]);
 
     return {
       activeTasks: (teamState.tasks || []).filter(
@@ -707,20 +955,19 @@ export class IntelligentOrchestrator {
       availableAgents: (teamState.agents || []).filter(
         (agent) => agent && agent.status !== 'BUSY'
       ),
-      projectProgress,
+      projectProgress: this.calculateProjectProgress(),
       blockedTasks: (teamState.tasks || []).filter(
         (task) => task && task.status === 'BLOCKED'
       ),
       codeCoverage: 75, // Mock value - would be calculated from project metrics
       performanceScore: 85, // Mock value - would be calculated from project metrics
-      workload,
-      projectPhase,
+      workload: this.calculateCurrentWorkload(),
+      projectPhase: this.determineProjectPhase(),
       similarTasks: [],
-      resourceAvailability,
-      timeConstraints,
-      qualityRequirements,
+      resourceAvailability: this.assessResourceAvailability(),
+      timeConstraints: this.assessTimeConstraints(),
+      qualityRequirements: this.assessQualityRequirements(),
       existingTasks: teamState.tasks || [], // All existing tasks in the team
-      inputs: inputs || teamState.inputs || {},
     };
   }
 
@@ -749,14 +996,12 @@ export class IntelligentOrchestrator {
           ? OrchestrationPromptFactory.createInitialTaskSelectionPrompt(
               context,
               projectGoal,
-              this.availableTasks,
-              this.orchestrationStrategy
+              this.availableTasks
             )
           : OrchestrationPromptFactory.createContinuousTaskSelectionPrompt(
               context,
               projectGoal,
-              this.availableTasks,
-              this.orchestrationStrategy
+              this.availableTasks
             );
 
       const llmStartTime = Date.now();
@@ -841,8 +1086,8 @@ export class IntelligentOrchestrator {
       this.updatePerformanceMetric('failed_operations', 1);
       this.updatePerformanceMetric('task_selection_failures', 1);
 
-      // Log error and fail fast
-      await this.handleOrchestrationError(
+      // Attempt recovery from task selection failure
+      const recoveredTasks = await this.handleOrchestrationError(
         'task_selection',
         error instanceof Error ? error : new Error(String(error)),
         {
@@ -852,9 +1097,21 @@ export class IntelligentOrchestrator {
           availableTasksCount: this.availableTasks.length,
         }
       );
-      
-      // This line will never be reached as handleOrchestrationError always throws
-      return [];
+
+      // If recovery provided tasks, use them
+      if (Array.isArray(recoveredTasks) && recoveredTasks.length > 0) {
+        logger.warn(
+          `⚠️ Using ${recoveredTasks.length} recovered tasks due to LLM failure`
+        );
+        return recoveredTasks;
+      }
+
+      // If no recovery possible, throw the original error
+      throw new Error(
+        `Intelligent orchestration failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
@@ -874,7 +1131,7 @@ export class IntelligentOrchestrator {
 
     // Identify gaps in task coverage
     const gapAnalysisStart = Date.now();
-    const gaps = await this.gapAnalyzer.identifyTaskGaps(context, selectedTasks);
+    const gaps = await this.identifyTaskGaps(context, selectedTasks);
     this.updatePerformanceMetric(
       'gap_analysis_time',
       Date.now() - gapAnalysisStart
@@ -886,39 +1143,33 @@ export class IntelligentOrchestrator {
       return [];
     }
 
-    // Parallel task generation for all gaps
-    const taskGenerationPromises = gaps.map(async (gap) => {
-      const taskGenStart = Date.now();
+    const generatedTasks: Task[] = [];
+    let taskGenerationSuccesses = 0;
+    let taskGenerationFailures = 0;
+
+    for (const gap of gaps) {
       try {
+        const taskGenStart = Date.now();
         const newTask = await this.generateTaskForGap(gap, context);
         this.updatePerformanceMetric(
           'individual_task_generation_time',
           Date.now() - taskGenStart
         );
-        return { success: true, task: newTask, gap };
+
+        if (newTask) {
+          generatedTasks.push(newTask);
+          taskGenerationSuccesses++;
+        } else {
+          taskGenerationFailures++;
+        }
       } catch (error) {
+        taskGenerationFailures++;
         logger.warn(
           `Failed to generate task for gap: ${gap.description}`,
           error
         );
-        return { success: false, task: null, gap, error };
       }
-    });
-
-    const taskGenerationResults = await Promise.all(taskGenerationPromises);
-    
-    const generatedTasks: Task[] = [];
-    let taskGenerationSuccesses = 0;
-    let taskGenerationFailures = 0;
-
-    taskGenerationResults.forEach(result => {
-      if (result.success && result.task) {
-        generatedTasks.push(result.task);
-        taskGenerationSuccesses++;
-      } else {
-        taskGenerationFailures++;
-      }
-    });
+    }
 
     this.updatePerformanceMetric(
       'task_generation_successes',
@@ -1059,9 +1310,8 @@ export class IntelligentOrchestrator {
       return [...adaptedTasks, ...nonAdaptableTasks];
     }
 
-    // For larger batches, use batch processing with dynamic batch size
-    const totalTasks = adaptableTasks.length;
-    const batchSize = totalTasks > 20 ? 10 : totalTasks > 10 ? 5 : 3; // Dynamic batch sizing
+    // For larger batches, use batch processing
+    const batchSize = Math.min(adaptableTasks.length, 5); // Max 5 at once
     const batches: Task[][] = [];
 
     for (let i = 0; i < adaptableTasks.length; i += batchSize) {
@@ -1070,25 +1320,16 @@ export class IntelligentOrchestrator {
 
     const allAdaptedTasks: Task[] = [];
 
-    // Process batches with controlled parallelism
-    const maxConcurrentBatches = 2; // Process up to 2 batches simultaneously
-    
-    for (let i = 0; i < batches.length; i += maxConcurrentBatches) {
-      const concurrentBatches = batches.slice(i, i + maxConcurrentBatches);
-      
-      const batchPromises = concurrentBatches.map(async (batch) => {
-        const batchResults = await Promise.all(
-          batch.map((task) => this.adaptTask(task))
-        );
-        return batchResults;
-      });
-      
-      const results = await Promise.all(batchPromises);
-      results.forEach(batchResults => allAdaptedTasks.push(...batchResults));
+    // Process batches sequentially to avoid overwhelming LLM
+    for (const batch of batches) {
+      const batchResults = await Promise.all(
+        batch.map((task) => this.adaptTask(task))
+      );
+      allAdaptedTasks.push(...batchResults);
 
-      // Small delay between batch groups to prevent rate limiting
-      if (i + maxConcurrentBatches < batches.length) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      // Small delay between batches to prevent rate limiting
+      if (batches.length > 1) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
 
@@ -1114,7 +1355,7 @@ export class IntelligentOrchestrator {
       }
 
       // Build context for adaptation
-      const context = ContextUtils.buildOrchestrationContext(this.team);
+      const context = this.buildOrchestrationContext();
       if (!context) {
         throw new Error('Failed to build orchestration context');
       }
@@ -1140,7 +1381,7 @@ export class IntelligentOrchestrator {
         throw new Error('No response received from LLM');
       }
 
-      const adaptationResult = ParsingUtils.parseAdaptationResponse(response);
+      const adaptationResult = this.parseAdaptationResponse(response);
 
       if (!adaptationResult || !adaptationResult.adaptedTask) {
         this.log('warn', 'No valid adaptation recommendations received', {
@@ -1376,8 +1617,8 @@ export class IntelligentOrchestrator {
 
         if (suggestedAgent) {
           // Use intelligent workload distribution to verify if this is the best choice
-          const context = ContextUtils.buildOrchestrationContext(this.team);
-          const optimalAgent = this.resourceOptimizer.findOptimalAgent(adaptedTask, context);
+          const context = this.buildOrchestrationContext();
+          const optimalAgent = this.findOptimalAgent(adaptedTask, context);
 
           if (optimalAgent) {
             adaptedTask.agent = optimalAgent;
@@ -1436,7 +1677,7 @@ export class IntelligentOrchestrator {
    * Apply dynamic priority ordering to tasks based on current context
    */
   private applyDynamicPriorityOrdering(tasks: Task[]): Task[] {
-    const context = ContextUtils.buildOrchestrationContext(this.team);
+    const context = this.buildOrchestrationContext();
 
     return tasks.sort((a, b) => {
       // First, sort by explicit priority
@@ -1471,9 +1712,8 @@ export class IntelligentOrchestrator {
 
     // Factor 1: Dependencies satisfaction (30 points)
     if (task.dependencies && task.dependencies.length > 0) {
-      const existingTasks = Array.isArray(context.existingTasks) ? context.existingTasks : [];
       const satisfiedDeps = (task.dependencies || []).filter((dep) =>
-        existingTasks.some(
+        (context.existingTasks || []).some(
           (t) => t && t.referenceId === dep && t.status === 'DONE'
         )
       ).length;
@@ -1483,14 +1723,11 @@ export class IntelligentOrchestrator {
     }
 
     // Factor 2: Agent availability (20 points)
-    if (task.agent && context.availableAgents) {
-      const availableAgents = Array.isArray(context.availableAgents) ? context.availableAgents : [];
-      const assignedAgent = availableAgents.find(
-        (a) => a && a.id === task.agent.id
-      );
-      if (assignedAgent) {
-        score += 20;
-      }
+    const assignedAgent = context.availableAgents.find(
+      (a) => a.id === task.agent.id
+    );
+    if (assignedAgent) {
+      score += 20;
     }
 
     // Factor 3: Skills match (20 points)
@@ -1521,17 +1758,13 @@ export class IntelligentOrchestrator {
     }
 
     // Factor 5: Workload balance (15 points)
-    if (task.agent && task.agent.id) {
-      // Ensure activeTasks is an array
-      const activeTasks = Array.isArray(context.activeTasks) ? context.activeTasks : [];
-      const agentTaskCount = activeTasks.filter(
-        (t) => t && t.agent && t.agent.id === task.agent.id
-      ).length;
-      if (agentTaskCount === 0) {
-        score += 15; // Agent is free
-      } else if (agentTaskCount === 1) {
-        score += 8; // Agent has light load
-      }
+    const agentTaskCount = (context.activeTasks || []).filter(
+      (t) => t && t.agent?.id === task.agent.id
+    ).length;
+    if (agentTaskCount === 0) {
+      score += 15; // Agent is free
+    } else if (agentTaskCount === 1) {
+      score += 8; // Agent has light load
     }
 
     // Bonus: Critical path tasks
@@ -1540,9 +1773,8 @@ export class IntelligentOrchestrator {
     }
 
     // Bonus: Blocking other tasks
-    const existingTasksForBlocking = Array.isArray(context.existingTasks) ? context.existingTasks : [];
-    const blocksOthers = existingTasksForBlocking.some((t) =>
-      t && t.dependencies && t.dependencies.includes(task.referenceId || task.id)
+    const blocksOthers = context.existingTasks.some((t) =>
+      t.dependencies?.includes(task.referenceId || task.id)
     );
     if (blocksOthers) {
       score += 10;
@@ -1723,10 +1955,10 @@ export class IntelligentOrchestrator {
     metadata: any
   ): void {
     try {
-      // More robust team/store checking
-      if (!this.team || !this.team.store || typeof this.team.store.getState !== 'function') {
+      // Validate team and store availability
+      if (!this.team || !this.team.store) {
         logger.warn(
-          'Cannot log orchestration event: team or store not properly initialized'
+          'Cannot log orchestration event: team or store not available'
         );
         return;
       }
@@ -1753,13 +1985,16 @@ export class IntelligentOrchestrator {
         timestamp: Date.now(),
         orchestratorId,
         mode: this.team.mode || 'unknown',
-        performanceMetrics: {
-          llmCalls: this.performanceMetrics.getMetric('llm_calls_total'),
-          tasksAnalyzed: this.performanceMetrics.getMetric('tasks_analyzed'),
-          decisionsGenerated: this.performanceMetrics.getMetric('decisions_generated'),
-          errorRate: this.calculateErrorRate(),
-          successRate: this.calculateSuccessRate(),
-        },
+        performanceMetrics: this.performanceMetrics
+          ? {
+              llmCalls: this.performanceMetrics.get('llm_calls_total') || 0,
+              tasksAnalyzed: this.performanceMetrics.get('tasks_analyzed') || 0,
+              decisionsGenerated:
+                this.performanceMetrics.get('decisions_generated') || 0,
+              errorRate: this.calculateErrorRate(),
+              successRate: this.calculateSuccessRate(),
+            }
+          : undefined,
         contextSnapshot: {
           totalTasks: this.team.getTasks ? this.team.getTasks().length : 0,
           activeTasks: this.team.getTasks
@@ -1834,16 +2069,95 @@ export class IntelligentOrchestrator {
    * Calculate error rate from performance metrics
    */
   private calculateErrorRate(): number {
-    return this.performanceMetrics.calculateErrorRate();
+    if (!this.performanceMetrics) return 0;
+
+    const totalOps =
+      this.performanceMetrics.get('orchestration_operations') || 0;
+    const failedOps = this.performanceMetrics.get('failed_operations') || 0;
+
+    return totalOps > 0 ? (failedOps / totalOps) * 100 : 0;
   }
 
   /**
    * Calculate success rate from performance metrics
    */
   private calculateSuccessRate(): number {
-    return this.performanceMetrics.calculateSuccessRate();
+    if (!this.performanceMetrics) return 100;
+
+    const totalOps =
+      this.performanceMetrics.get('orchestration_operations') || 0;
+    const successfulOps =
+      this.performanceMetrics.get('successful_operations') || 0;
+
+    return totalOps > 0 ? (successfulOps / totalOps) * 100 : 100;
   }
 
+  /**
+   * Log aggregated performance metrics
+   */
+  private logPerformanceMetrics(): void {
+    if (!this.performanceMetrics) return;
+
+    const metrics = {
+      llmPerformance: {
+        totalCalls: this.performanceMetrics.get('llm_calls_total') || 0,
+        avgResponseTime: this.performanceMetrics.get('llm_response_time') || 0,
+        failures: this.performanceMetrics.get('llm_failures') || 0,
+      },
+      taskOperations: {
+        analyzed: this.performanceMetrics.get('tasks_analyzed') || 0,
+        selected: this.performanceMetrics.get('tasks_selected') || 0,
+        adapted: this.performanceMetrics.get('tasks_adapted') || 0,
+        generated: this.performanceMetrics.get('tasks_generated') || 0,
+        rejected: this.performanceMetrics.get('tasks_rejected') || 0,
+      },
+      orchestrationEfficiency: {
+        avgDecisionTime: this.performanceMetrics.get('avg_decision_time') || 0,
+        contextAnalysisTime:
+          this.performanceMetrics.get('context_analysis_time') || 0,
+        totalOrchestrationTime:
+          this.performanceMetrics.get('total_orchestration_time') || 0,
+      },
+      systemHealth: {
+        errorRate: this.calculateErrorRate(),
+        successRate: this.calculateSuccessRate(),
+        recoveryAttempts: this.performanceMetrics.get('recovery_attempts') || 0,
+        fallbackOperations:
+          this.performanceMetrics.get('fallback_operations') || 0,
+      },
+    };
+
+    this.logOrchestrationEvent(
+      'PERFORMANCE_METRICS_SUMMARY',
+      'Orchestration performance metrics summary',
+      { metrics }
+    );
+  }
+
+  /**
+   * Start periodic performance metrics logging
+   */
+  private startPerformanceMetricsLogging(): void {
+    // Log metrics every 5 minutes
+    this.performanceLogInterval = setInterval(() => {
+      this.logPerformanceMetrics();
+    }, 5 * 60 * 1000);
+
+    // Also log on first start
+    setTimeout(() => {
+      this.logPerformanceMetrics();
+    }, 30000); // After 30 seconds
+  }
+
+  /**
+   * Stop performance metrics logging
+   */
+  private stopPerformanceMetricsLogging(): void {
+    if (this.performanceLogInterval) {
+      clearInterval(this.performanceLogInterval);
+      this.performanceLogInterval = undefined;
+    }
+  }
 
   /**
    * Get orchestration metrics summary for external reporting
@@ -1853,7 +2167,39 @@ export class IntelligentOrchestrator {
     taskStatistics: Record<string, any>;
     systemHealth: Record<string, any>;
   } {
-    return this.performanceMetrics.getOrchestrationMetrics();
+    const metrics = {
+      performance: {
+        llmCalls: this.performanceMetrics.get('llm_calls_total') || 0,
+        llmFailures: this.performanceMetrics.get('llm_failures') || 0,
+        avgResponseTime: this.performanceMetrics.get('llm_response_time') || 0,
+        orchestrationCalls:
+          this.performanceMetrics.get('orchestration_calls') || 0,
+        continuousOrchestrationCalls:
+          this.performanceMetrics.get('continuous_orchestration_calls') || 0,
+      },
+      taskStatistics: {
+        tasksAnalyzed: this.performanceMetrics.get('tasks_analyzed') || 0,
+        tasksSelected: this.performanceMetrics.get('tasks_selected') || 0,
+        tasksAdapted: this.performanceMetrics.get('tasks_adapted') || 0,
+        tasksGenerated: this.performanceMetrics.get('tasks_generated') || 0,
+        tasksRejected: this.performanceMetrics.get('tasks_rejected') || 0,
+        tasksSplit: this.performanceMetrics.get('tasks_split') || 0,
+        tasksMerged: this.performanceMetrics.get('tasks_merged') || 0,
+        tasksTracked: this.performanceMetrics.get('tasks_tracked') || 0,
+      },
+      systemHealth: {
+        errorRate: this.calculateErrorRate(),
+        successRate: this.calculateSuccessRate(),
+        healthChecksPassed:
+          this.performanceMetrics.get('health_checks_passed') || 0,
+        recoveryAttempts: this.performanceMetrics.get('recovery_attempts') || 0,
+        fallbackOperations:
+          this.performanceMetrics.get('fallback_operations') || 0,
+        lastHealthCheck: this.performanceMetrics.get('last_health_check') || 0,
+      },
+    };
+
+    return metrics;
   }
 
   /**
@@ -2044,7 +2390,7 @@ export class IntelligentOrchestrator {
 
     // Calculate total estimated time
     const totalEstimatedHours = selectedTasks.reduce((sum, task) => {
-      const hours = ParsingUtils.parseEstimatedTime(
+      const hours = this.parseEstimatedTime(
         task.resourceRequirements?.estimatedTime || '2 hours'
       );
       return sum + hours;
@@ -2184,7 +2530,7 @@ export class IntelligentOrchestrator {
     const skills: string[] = [];
     const roleLower = (agent.role || '').toLowerCase();
 
-    // Basic skill inference - let the LLM handle domain-specific skills
+    // Infer skills based on role
     if (roleLower.includes('developer') || roleLower.includes('engineer')) {
       skills.push('programming', 'debugging', 'architecture');
     }
@@ -2204,8 +2550,6 @@ export class IntelligentOrchestrator {
       skills.push('project_management', 'coordination', 'planning');
     }
 
-    // For domain-specific roles, the LLM will handle skill matching during orchestration
-    // This avoids hardcoding and allows flexible skill inference
     return skills;
   }
 
@@ -2236,7 +2580,7 @@ export class IntelligentOrchestrator {
 
     tasks.forEach((task) => {
       const agentName = task.agent?.name || 'unassigned';
-      const hours = ParsingUtils.parseEstimatedTime(
+      const hours = this.parseEstimatedTime(
         task.resourceRequirements?.estimatedTime || '2 hours'
       );
       workload.set(agentName, (workload.get(agentName) || 0) + hours);
@@ -2387,7 +2731,7 @@ export class IntelligentOrchestrator {
       });
 
       // Find optimal agent using intelligent workload distribution
-      const optimalAgent = this.resourceOptimizer.findOptimalAgent(newTask, context);
+      const optimalAgent = this.findOptimalAgent(newTask, context);
       if (optimalAgent && optimalAgent.id !== tempAgent.id) {
         newTask.agent = optimalAgent;
         this.log('info', 'Reassigned task to optimal agent', {
@@ -2496,7 +2840,7 @@ export class IntelligentOrchestrator {
       return 50; // Neutral score if no skills specified
     }
 
-    const agentSkills = ContextUtils.extractAgentSkills(agent);
+    const agentSkills = this.extractAgentSkills(agent);
     const requiredSkills = task.resourceRequirements.skillsRequired;
 
     // Calculate exact matches
@@ -2615,8 +2959,8 @@ export class IntelligentOrchestrator {
     const PERFORMANCE_WEIGHT = 0.1;
 
     // Calculate individual scores
-    const skillScore = ContextUtils.calculateSkillMatchScore(agent, task);
-    const workloadScore = this.resourceOptimizer.calculateAgentWorkloadScore(agent, context);
+    const skillScore = this.calculateSkillMatchScore(agent, task);
+    const workloadScore = this.calculateAgentWorkloadScore(agent, context);
     const affinityScore = this.calculateAgentAffinityScore(agent, task);
     const performanceScore = this.calculateAgentPerformanceScore(agent);
 
@@ -2741,7 +3085,7 @@ export class IntelligentOrchestrator {
     }
 
     // Weight success rate and recency
-    const recencyWeight = CalculationUtils.calculateRecencyWeight(performance.lastUpdated);
+    const recencyWeight = this.calculateRecencyWeight(performance.lastUpdated);
     const score = performance.successRate * recencyWeight;
 
     return Math.min(100, score);
@@ -2829,7 +3173,7 @@ export class IntelligentOrchestrator {
 
       // Check task complexity
       const complexity = task.resourceRequirements?.estimatedTime || '2 hours';
-      const hours = ParsingUtils.parseEstimatedTime(complexity);
+      const hours = this.parseEstimatedTime(complexity);
       if (hours > 8) {
         failureProbability += 0.15; // Complex tasks more likely to fail
       }
@@ -2858,6 +3202,57 @@ export class IntelligentOrchestrator {
     return failureProbabilities;
   }
 
+  /**
+   * Create recovery strategies for high-risk tasks
+   */
+  private createTaskRecoveryStrategies(
+    tasks: Task[],
+    failureProbabilities: Map<string, number>
+  ): Map<string, string[]> {
+    const recoveryStrategies = new Map<string, string[]>();
+
+    tasks.forEach((task) => {
+      const failureProb = failureProbabilities.get(task.id) || 0;
+
+      if (failureProb > 0.3) {
+        // High risk threshold
+        const strategies: string[] = [];
+
+        // Add backup agent strategy
+        if (task.agent) {
+          strategies.push(`Prepare backup agent for ${task.agent.name}`);
+        }
+
+        // Add checkpoint strategy for long tasks
+        const hours = this.parseEstimatedTime(
+          task.resourceRequirements?.estimatedTime || '2 hours'
+        );
+        if (hours > 4) {
+          strategies.push('Implement progress checkpoints every 2 hours');
+        }
+
+        // Add skill augmentation strategy
+        if (task.resourceRequirements?.skillsRequired) {
+          strategies.push('Pair with expert for skill gaps');
+        }
+
+        // Add dependency mitigation
+        if (task.dependencies && task.dependencies.length > 0) {
+          strategies.push('Pre-validate dependencies before execution');
+        }
+
+        // Add quality gates
+        if (failureProb > 0.5) {
+          strategies.push('Add intermediate quality review');
+          strategies.push('Enable detailed logging for debugging');
+        }
+
+        recoveryStrategies.set(task.id, strategies);
+      }
+    });
+
+    return recoveryStrategies;
+  }
 
   /**
    * Generate task dependency graph visualization data
@@ -3232,7 +3627,7 @@ export class IntelligentOrchestrator {
   private canAgentHandleTask(agent: Agent, task: Task): boolean {
     // Check if agent has required skills
     if (task.resourceRequirements?.skillsRequired) {
-      const agentSkills = ContextUtils.extractAgentSkills(agent);
+      const agentSkills = this.extractAgentSkills(agent);
       const hasRequiredSkills = task.resourceRequirements.skillsRequired.every(
         (skill) => agentSkills.includes(skill)
       );
@@ -3262,14 +3657,248 @@ export class IntelligentOrchestrator {
     failedTask: Task,
     failureReason: string
   ): Promise<void> {
-    await this.recoveryManager.performWorkflowRecovery(failedTask, failureReason);
+    const recoveryStrategies = this.determineRecoveryStrategies(
+      failedTask,
+      failureReason
+    );
+
+    for (const strategy of recoveryStrategies) {
+      try {
+        switch (strategy.type) {
+          case 'retry':
+            await this.retryTask(failedTask, strategy.config);
+            break;
+
+          case 'reassign':
+            await this.reassignTask(failedTask, strategy.config);
+            break;
+
+          case 'split':
+            await this.splitFailedTask(failedTask, strategy.config);
+            break;
+
+          case 'fallback':
+            await this.executeFallbackTask(failedTask, strategy.config);
+            break;
+
+          case 'skip':
+            await this.skipTask(failedTask, strategy.config);
+            break;
+        }
+
+        // If recovery succeeded, log and exit
+        this.logOrchestrationEvent(
+          'RECOVERY_SUCCESS',
+          `Successfully recovered from task failure using ${strategy.type} strategy`,
+          {
+            taskId: failedTask.id,
+            strategy: strategy.type,
+            config: strategy.config,
+          }
+        );
+        break;
+      } catch (_error) {
+        // Try next strategy
+        continue;
+      }
+    }
   }
 
+  /**
+   * Determine recovery strategies based on failure type
+   */
+  private determineRecoveryStrategies(
+    task: Task,
+    failureReason: string
+  ): Array<{ type: string; config: any }> {
+    const strategies: Array<{ type: string; config: any }> = [];
 
+    // Analyze failure reason
+    const isTimeoutError = failureReason.toLowerCase().includes('timeout');
+    const isResourceError = failureReason.toLowerCase().includes('resource');
+    const isSkillMismatch = failureReason.toLowerCase().includes('skill');
 
+    // Add appropriate strategies
+    if (isTimeoutError) {
+      strategies.push({
+        type: 'split',
+        config: { parts: 2, parallel: true },
+      });
+    }
 
+    if (isResourceError) {
+      strategies.push({
+        type: 'retry',
+        config: { delay: 5000, maxAttempts: 2 },
+      });
+    }
 
+    if (isSkillMismatch) {
+      strategies.push({
+        type: 'reassign',
+        config: { preferredSkills: task.resourceRequirements?.skillsRequired },
+      });
+    }
 
+    // Always add fallback and skip as last resorts
+    strategies.push({
+      type: 'fallback',
+      config: { simplify: true },
+    });
+
+    strategies.push({
+      type: 'skip',
+      config: { markAsOptional: true },
+    });
+
+    return strategies;
+  }
+
+  /**
+   * Retry a failed task with delay
+   */
+  private async retryTask(task: Task, config: any): Promise<void> {
+    const { delay = 3000, maxAttempts = 3 } = config;
+
+    // Wait before retry
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    // Reset task status
+    task.status = TASK_STATUS_enum.TODO;
+
+    this.logOrchestrationEvent(
+      'TASK_RETRY',
+      `Retrying task after ${delay}ms delay`,
+      { taskId: task.id, attempt: 1, maxAttempts }
+    );
+  }
+
+  /**
+   * Reassign task to a different agent
+   */
+  private async reassignTask(task: Task, config: any): Promise<void> {
+    const { preferredSkills = [] } = config;
+    const agents = this.team.store.getState().agents;
+
+    // Find best alternative agent
+    const alternativeAgent = agents.find((agent) => {
+      if (agent.id === task.agent.id) return false; // Skip current agent
+      if (agent.status === 'BUSY') return false;
+
+      // Check skills match
+      const agentSkills = this.extractAgentSkills(agent);
+      return preferredSkills.every((skill: string) =>
+        agentSkills.includes(skill)
+      );
+    });
+
+    if (alternativeAgent) {
+      task.agent = alternativeAgent;
+      task.status = TASK_STATUS_enum.TODO;
+
+      this.logOrchestrationEvent(
+        'TASK_REASSIGNED',
+        `Task reassigned to agent with better skill match`,
+        {
+          taskId: task.id,
+          newAgentId: alternativeAgent.id,
+          newAgentName: alternativeAgent.name,
+        }
+      );
+    } else {
+      throw new Error('No suitable alternative agent found');
+    }
+  }
+
+  /**
+   * Split a failed task into smaller subtasks
+   */
+  private async splitFailedTask(task: Task, config: any): Promise<void> {
+    const { parts = 2, parallel = false } = config;
+
+    // Mark original task as completed (will be replaced by subtasks)
+    task.status = TASK_STATUS_enum.DONE;
+
+    // Create subtasks
+    const subtasks: Task[] = [];
+    for (let i = 0; i < parts; i++) {
+      const subtask = new Task({
+        description: `${task.description} - Part ${i + 1}/${parts}`,
+        expectedOutput: `Part ${i + 1} of: ${task.expectedOutput}`,
+        agent: task.agent,
+        dependencies:
+          i > 0 && !parallel ? [subtasks[i - 1].id] : task.dependencies,
+        adaptable: task.adaptable,
+        priority: task.priority,
+        resourceRequirements: {
+          ...task.resourceRequirements,
+          estimatedTime: `1/${parts} of original estimate`,
+        },
+      });
+
+      subtasks.push(subtask);
+    }
+
+    // Add subtasks to workflow
+    this.team.store.getState().addTasks(subtasks);
+
+    this.logOrchestrationEvent(
+      'TASK_SPLIT_FOR_RECOVERY',
+      `Split failed task into ${parts} subtasks`,
+      {
+        originalTaskId: task.id,
+        subtaskIds: subtasks.map((t) => t.id),
+        parallel,
+      }
+    );
+  }
+
+  /**
+   * Execute a simplified fallback version of the task
+   */
+  private async executeFallbackTask(task: Task, config: any): Promise<void> {
+    const { simplify = true } = config;
+
+    if (simplify && task.adaptable) {
+      // Simplify task description
+      task.description = `[SIMPLIFIED] ${task.description}`;
+      task.expectedOutput = `Basic version of: ${task.expectedOutput}`;
+
+      // Reset status
+      task.status = TASK_STATUS_enum.TODO;
+
+      this.logOrchestrationEvent(
+        'FALLBACK_TASK_CREATED',
+        'Created simplified fallback version of failed task',
+        { taskId: task.id, simplified: true }
+      );
+    } else {
+      throw new Error('Cannot create fallback for non-adaptable task');
+    }
+  }
+
+  /**
+   * Skip a task and mark it as optional
+   */
+  private async skipTask(task: Task, config: any): Promise<void> {
+    const { markAsOptional = true } = config;
+
+    task.status = TASK_STATUS_enum.DONE;
+    task.result = {
+      content: 'Task skipped due to repeated failures',
+      success: false,
+    };
+
+    if (markAsOptional) {
+      task.description = `[OPTIONAL - SKIPPED] ${task.description}`;
+    }
+
+    this.logOrchestrationEvent(
+      'TASK_SKIPPED',
+      'Skipped task after recovery attempts failed',
+      { taskId: task.id, markedAsOptional: markAsOptional }
+    );
+  }
 
   /**
    * Robust JSON parsing with common issue fixes
@@ -3314,15 +3943,6 @@ export class IntelligentOrchestrator {
 
     const startTime = Date.now();
     this.updatePerformanceMetric('continuous_orchestration_calls', 1);
-    
-    // Ensure LLM is initialized for continuous orchestration
-    try {
-      await this.ensureLLMInitialized();
-    } catch (error) {
-      logger.warn('LLM initialization failed for continuous orchestration:', error);
-      this.updatePerformanceMetric('continuous_orchestration_skipped', 1);
-      return null;
-    }
 
     // Track task performance for learning
     const success = completedTask.status === 'DONE';
@@ -3352,7 +3972,7 @@ export class IntelligentOrchestrator {
 
       // Analyze current context including the completed task
       const contextAnalysisStart = Date.now();
-      const context = await this.contextAnalyzer.analyzeCurrentContext({});
+      const context = await this.analyzeCurrentContext();
       this.updatePerformanceMetric(
         'continuous_context_analysis_time',
         Date.now() - contextAnalysisStart
@@ -3451,26 +4071,10 @@ export class IntelligentOrchestrator {
     completedTask: Task,
     context: OrchestrationContext
   ): Promise<any> {
-    // Double-check LLM is initialized (this should already be done by ensureLLMInitialized)
     if (!this.llm) {
-      logger.error('LLM is null in generateTaskCompletionRecommendations despite ensureLLMInitialized call');
-      
-      // Try one more time to initialize
-      try {
-        await this.ensureLLMInitialized();
-      } catch (error) {
-        logger.error('Emergency LLM initialization also failed:', error);
-        throw new Error(
-          'LLM is required for generating task completion recommendations. Please configure an LLM for the orchestrator.'
-        );
-      }
-      
-      // Check again after emergency initialization
-      if (!this.llm) {
-        throw new Error(
-          'LLM is required for generating task completion recommendations. Please configure an LLM for the orchestrator.'
-        );
-      }
+      throw new Error(
+        'LLM is required for generating task completion recommendations. Please configure an LLM for the orchestrator.'
+      );
     }
 
     const operationStartTime = Date.now();
@@ -3613,16 +4217,29 @@ export class IntelligentOrchestrator {
         {
           completedTaskId: completedTask.id,
           error: error instanceof Error ? error.message : String(error),
-          fallbackApplied: false,
+          fallbackApplied: true,
         }
       );
 
-      // Throw error - orchestrator requires LLM to function
-      throw new Error(
-        `Task completion analysis failed: ${
-          error instanceof Error ? error.message : String(error)
-        }. Orchestrator requires LLM to function.`
-      );
+      // Return safe fallback recommendations
+      return {
+        analysis: {
+          taskImpact: 'Analysis failed - using fallback',
+          dependenciesUnblocked: [],
+          newOpportunities: [],
+          identifiedRisks: ['Analysis system unavailable'],
+          qualityAssessment: 'Could not assess',
+        },
+        recommendations: {
+          newTasks: [],
+          taskModifications: [],
+          priorityAdjustments: [],
+          resourceOptimizations: [],
+        },
+        urgency: 'next_review',
+        confidenceLevel: 'low',
+        nextReviewTrigger: 'When LLM analysis is available',
+      };
     }
   }
 
@@ -3835,7 +4452,7 @@ export class IntelligentOrchestrator {
     metrics: Record<string, number>;
     recommendations: string[];
   }> {
-    const metrics = this.performanceMetrics.getAllMetrics();
+    const metrics = Object.fromEntries(this.performanceMetrics);
     const recommendations: string[] = [];
     let healthy = true;
 
@@ -3901,7 +4518,25 @@ export class IntelligentOrchestrator {
    * Update performance metrics for tracking
    */
   private updatePerformanceMetric(metric: string, increment: number = 1): void {
-    this.performanceMetrics.updateMetric(metric, increment);
+    const current = this.performanceMetrics.get(metric) || 0;
+    this.performanceMetrics.set(metric, current + increment);
+
+    // Track metric history for learning
+    if (!this.metricHistory) {
+      this.metricHistory = new Map<string, number[]>();
+    }
+
+    if (!this.metricHistory.has(metric)) {
+      this.metricHistory.set(metric, []);
+    }
+
+    const history = this.metricHistory.get(metric)!;
+    history.push(increment);
+
+    // Keep only last 100 values for each metric
+    if (history.length > 100) {
+      history.shift();
+    }
   }
 
   /**
@@ -3936,23 +4571,9 @@ export class IntelligentOrchestrator {
         ? (adaptableTasks.length / this.availableTasks.length) * 100
         : 0;
 
-    if (adaptableRatio < 50 && this.availableTasks && this.availableTasks.length > 0) {
-      const nonAdaptableTasks = (this.availableTasks || []).filter(
-        (task) => task && !task.adaptable
-      );
-      
+    if (adaptableRatio < 50) {
       warnings.push(
-        `⚠️ Low ratio of adaptable tasks (${adaptableTasks.length}/${this.availableTasks.length} = ${Math.round(adaptableRatio)}%) - orchestrator flexibility limited. Consider marking more tasks as adaptable to allow dynamic adjustments based on user inputs and context.`
-      );
-      
-      // Log some examples of non-adaptable tasks for developer awareness
-      if (nonAdaptableTasks.length > 0) {
-        const examples = nonAdaptableTasks.slice(0, 3).map(t => t.title || t.description.substring(0, 50));
-        logger.warn('Examples of non-adaptable tasks:', examples);
-      }
-    } else if (adaptableRatio < 30 && this.availableTasks && this.availableTasks.length > 0) {
-      warnings.push(
-        `⚠️ Critical: Very low ratio of adaptable tasks (${Math.round(adaptableRatio)}%) - orchestrator cannot effectively optimize workflow. Most tasks are rigid and cannot be adjusted.`
+        'Low ratio of adaptable tasks - orchestrator flexibility limited'
       );
     }
 
@@ -4098,12 +4719,9 @@ export class IntelligentOrchestrator {
       { trend: 'improving' | 'declining' | 'stable'; rate: number }
     >();
 
-    // Get all metrics
-    const allMetrics = this.performanceMetrics.getAllMetrics();
-    
-    // Analyze each metric's history
-    Object.keys(allMetrics).forEach((metric) => {
-      const history = this.performanceMetrics.getMetricHistory(metric);
+    if (!this.metricHistory) return trends;
+
+    this.metricHistory.forEach((history, metric) => {
       if (history.length < 10) return;
 
       // Calculate moving averages
@@ -4311,7 +4929,7 @@ export class IntelligentOrchestrator {
    * Helper method to analyze time-based performance
    */
   private analyzeTimeBasedPerformance(): { variance: number } {
-    const timeMetrics = this.performanceMetrics.getMetricHistory('orchestration_duration');
+    const timeMetrics = this.metricHistory?.get('orchestration_duration') || [];
 
     if (timeMetrics.length < 5) return { variance: 0 };
 
@@ -4410,7 +5028,7 @@ export class IntelligentOrchestrator {
         task.resourceRequirements?.skillsRequired &&
         task.resourceRequirements.skillsRequired.length > 0
       ) {
-        const agentSkills = ContextUtils.extractAgentSkills(task.agent);
+        const agentSkills = this.extractAgentSkills(task.agent);
         const missingSkills = task.resourceRequirements.skillsRequired.filter(
           (skill) => !agentSkills.includes(skill)
         );
@@ -4502,14 +5120,13 @@ export class IntelligentOrchestrator {
       maxActiveTasks: this.team.maxActiveTasks,
       taskPrioritization: this.team.taskPrioritization,
       workloadDistribution: this.team.workloadDistribution,
-      performanceMetrics: this.performanceMetrics.getAllMetrics(),
+      performanceMetrics: Object.fromEntries(this.performanceMetrics),
       taskHistory: {
         adaptations: this.taskAdaptationHistory.slice(-10),
         performance: Array.from(this.taskPerformanceHistory.entries()).slice(
           -10
         ),
       },
-      inputs: state.inputs || {},
     };
   }
 

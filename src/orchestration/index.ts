@@ -9,4 +9,5 @@ export type {
   OrchestrationContext,
   TaskGap,
   TaskModificationPermissions,
-} from './intelligentOrchestrator';
+} from './core/OrchestrationContext';
+export { OrchestrationPromptFactory } from './promptTemplates';

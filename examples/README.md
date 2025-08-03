@@ -19,28 +19,97 @@ This directory contains comprehensive examples demonstrating the intelligent orc
 
 3. **Run Examples**
    ```bash
-   node 01-basic-orchestration.js
+   # Run individual industry example
+   node 01-healthcare-orchestration.js
+   
+   # Or use the index to see all examples
+   node orchestration-examples-index.js summary
    ```
 
 ## 📚 Examples Overview
 
-### All Examples (✅ Completed)
+### Industry-Specific Orchestration Examples
 
-#### [01-basic-orchestration.js](01-basic-orchestration.js)
+#### [01-healthcare-orchestration.js](01-healthcare-orchestration.js)
 
-**Basic Orchestration Setup**
+**Healthcare - Hospital Operations**
 
-- Introduction to intelligent orchestration
-- Enabling orchestration with `enableOrchestration: true`
-- Setting up task repositories
-- Using `activateOrchestration()` for AI task selection
+- Patient care coordination with safety-critical workflows
+- Conservative mode for medical safety
+- Skills-based workload distribution for specialties
+- Custom tools: PatientRecordTool, DiagnosisAssistantTool
 
-**Key Concepts:**
+**Key Features:**
 
-- Task repositories with `backlogTasks`
-- Orchestration strategies
-- Dynamic task selection
-- Team configuration basics
+- External validation for critical procedures
+- Quality gates for protocol compliance
+- Emergency response handling
+- Continuous orchestration for patient care
+
+#### [02-finance-orchestration.js](02-finance-orchestration.js)
+
+**Finance - Investment Portfolio Management**
+
+- Risk-aware portfolio optimization with compliance
+- AI-driven task prioritization for market conditions
+- Dynamic task generation for opportunities
+- Custom tools: MarketAnalysisTool, RiskCalculatorTool
+
+**Key Features:**
+
+- Compliance orchestration rules
+- Real-time market adaptation
+- External validation for high-value transactions
+- Security-focused orchestration
+
+#### [03-education-orchestration.js](03-education-orchestration.js)
+
+**Education - Online Course Development**
+
+- Adaptive learning content creation
+- Learning mode for continuous improvement
+- Auto-split strategies for modular content
+- Custom tools: CurriculumBuilderTool, LearningAnalyticsTool
+
+**Key Features:**
+
+- Student analytics-driven adaptation
+- Merge-compatible tasks for integrated experiences
+- Accessibility-first design
+- Multi-language support planning
+
+#### [04-retail-orchestration.js](04-retail-orchestration.js)
+
+**Retail/E-commerce - Inventory & Sales Management**
+
+- High-volume operations with dynamic optimization
+- Availability-based workload distribution
+- Dynamic priority adjustments for trends
+- Custom tools: InventoryTrackerTool, PricingOptimizerTool
+
+**Key Features:**
+
+- High concurrency (8 tasks) for peak periods
+- Seasonal orchestration strategies
+- Real-time pricing optimization
+- Customer experience focus
+
+#### [orchestration-examples-index.js](orchestration-examples-index.js)
+
+**Central Hub for All Industry Examples**
+
+- Run all examples sequentially
+- View summary of all industry examples
+- Easy command-line interface
+- Comprehensive overview of features
+
+**Usage:**
+```bash
+node orchestration-examples-index.js [command]
+# Commands: summary, all, healthcare, finance, education, retail
+```
+
+### Orchestration Mode Examples
 
 #### [02-conservative-mode.js](02-conservative-mode.js)
 
@@ -219,6 +288,19 @@ This directory contains comprehensive examples demonstrating the intelligent orc
 - Resilience patterns
 
 ## 🛠️ Utility Files
+
+### [utils/customTools.js](utils/customTools.js)
+
+Industry-specific custom tools including:
+
+- **Healthcare**: PatientRecordTool, DiagnosisAssistantTool
+- **Finance**: MarketAnalysisTool, RiskCalculatorTool
+- **Education**: CurriculumBuilderTool, LearningAnalyticsTool
+- **Retail**: InventoryTrackerTool, PricingOptimizerTool
+- **Manufacturing**: ProductionSchedulerTool, QualityInspectorTool
+- **Legal**: DocumentAnalyzerTool, CaseTimelineTool
+- **Marketing**: ContentGeneratorTool, AnalyticsDashboardTool
+- **Construction**: BlueprintAnalyzerTool, SafetyComplianceTool
 
 ### [utils/agents.js](utils/agents.js)
 
@@ -413,16 +495,21 @@ const task = new Task({
 
 ## 🚀 Next Steps
 
-1. Start with [01-basic-orchestration.js](01-basic-orchestration.js)
-2. Try different modes based on your needs
-3. Experiment with task generation
-4. Build your own task repositories
-5. Customize orchestration strategies
+1. Explore industry examples:
+   - [Healthcare](01-healthcare-orchestration.js) for safety-critical workflows
+   - [Finance](02-finance-orchestration.js) for compliance and risk management
+   - [Education](03-education-orchestration.js) for adaptive learning
+   - [Retail](04-retail-orchestration.js) for high-volume operations
+2. Try different orchestration modes (conservative, adaptive, innovative, learning)
+3. Create custom tools for your industry using [customTools.js](utils/customTools.js) as reference
+4. Build domain-specific task repositories
+5. Customize orchestration strategies for your use case
 
 ## 📖 Additional Resources
 
 - [Main KaibanJS Documentation](../README.md)
 - [Orchestration Properties Reference](../ORCHESTRATION_PROPERTIES.md)
+- [Orchestration Examples Guide](ORCHESTRATION_EXAMPLES_README.md)
 - [API Documentation](../docs/api.md)
 - [GitHub Repository](https://github.com/kaiban-ai/kaibanjs)
 

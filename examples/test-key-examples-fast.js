@@ -10,12 +10,17 @@ const path = require('path');
 
 // Key examples that cover the main orchestration features
 const keyExamples = [
-  '01-basic-orchestration.js',
+  // Key industry examples
+  '01-healthcare-orchestration.js',
+  '02-finance-orchestration.js',
+  
+  // Key mode examples
   '02-conservative-mode.js',
   '03-innovative-mode.js',
   '04-learning-mode.js',
+  
+  // Key feature example
   '05-skills-based-distribution.js',
-  '13-continuous-orchestration-basic.js',
 ];
 
 const results = [];

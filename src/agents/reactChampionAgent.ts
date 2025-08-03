@@ -420,6 +420,35 @@ export class ReactChampionAgent extends BaseAgent {
             );
             {
               const toolName = parsedLLMOutput.action;
+              
+              // Special handling for when LLM incorrectly uses "Final Answer" as an action
+              if (toolName && toolName.toLowerCase() === 'final answer') {
+                logger.debug('Intercepted "Final Answer" action, converting to finalAnswer response');
+                
+                // Extract the final answer from actionInput
+                let finalAnswer = 'Task completed';
+                if (parsedLLMOutput.actionInput) {
+                  if (typeof parsedLLMOutput.actionInput === 'string') {
+                    finalAnswer = parsedLLMOutput.actionInput;
+                  } else if (typeof parsedLLMOutput.actionInput === 'object' && parsedLLMOutput.actionInput !== null) {
+                    // If it's an object, try to extract answer or convert to string
+                    finalAnswer = (parsedLLMOutput.actionInput as any).answer || 
+                                  (parsedLLMOutput.actionInput as any).result ||
+                                  JSON.stringify(parsedLLMOutput.actionInput);
+                  }
+                }
+                
+                parsedLLMOutput.finalAnswer = finalAnswer;
+                delete parsedLLMOutput.action;
+                delete parsedLLMOutput.actionInput;
+                parsedResultWithFinalAnswer = this.handleFinalAnswer({
+                  agent,
+                  task,
+                  parsedLLMOutput,
+                });
+                break;
+              }
+              
               const tool = this.tools.find((tool) => tool.name === toolName);
               if (tool) {
                 try {

@@ -188,12 +188,21 @@ export const useTaskStore: StateCreator<
 
       task.status = TASK_STATUS_enum.DONE;
 
-      const tasks = get().tasks;
-      const allTasksDone = tasks.every(
-        (t) => t.status === TASK_STATUS_enum.DONE
-      );
-      if (allTasksDone) {
-        get().finishWorkflowAction();
+      // Check if workflow should be finished
+      // Skip this check if orchestration is enabled and continuous, as the orchestrator
+      // will handle workflow completion after analyzing the task completion
+      const state = get();
+      const isOrchestrationActive = state.enableOrchestration && state.continuousOrchestration;
+      
+      if (!isOrchestrationActive) {
+        // Only check for workflow completion if orchestration is not active
+        const tasks = get().tasks;
+        const allTasksDone = tasks.every(
+          (t) => t.status === TASK_STATUS_enum.DONE
+        );
+        if (allTasksDone) {
+          get().finishWorkflowAction();
+        }
       }
     }
   },

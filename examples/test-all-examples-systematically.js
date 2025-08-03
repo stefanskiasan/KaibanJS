@@ -10,10 +10,18 @@ const path = require('path');
 
 // List of all orchestration examples to test
 const examples = [
-  '01-basic-orchestration.js',
+  // Industry-specific orchestration examples
+  '01-healthcare-orchestration.js',
+  '02-finance-orchestration.js',
+  '03-education-orchestration.js',
+  '04-retail-orchestration.js',
+  
+  // Mode examples
   '02-conservative-mode.js',
   '03-innovative-mode.js',
   '04-learning-mode.js',
+  
+  // Feature examples
   '05-skills-based-distribution.js',
   '06-ai-driven-prioritization.js',
   '07-task-adaptation.js',
@@ -22,9 +30,7 @@ const examples = [
   '10-enterprise-setup.js',
   '11-e-commerce-project.js',
   '12-microservices-architecture.js',
-  '13-continuous-orchestration-basic.js',
   '14-continuous-vs-initial-comparison.js',
-  '15-runtime-orchestration-control.js',
 ];
 
 const results = [];

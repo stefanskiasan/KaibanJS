@@ -7,7 +7,9 @@
  */
 
 import { Task } from '../index';
-import { OrchestrationContext, TaskGap } from './intelligentOrchestrator';
+import { OrchestrationContext, TaskGap } from './core/OrchestrationContext';
+import { StrategyParser, ParsedStrategy } from './utils/StrategyParser';
+import { DomainPromptEnhancer } from './utils/DomainPromptEnhancer';
 
 /**
  * Template for task selection prompts
@@ -17,9 +19,20 @@ export class TaskSelectionPromptTemplate {
     context: OrchestrationContext,
     projectGoal: string,
     availableTasks: Task[],
-    orchestrationMode: 'initial' | 'continuous' = 'initial'
+    orchestrationMode: 'initial' | 'continuous' = 'initial',
+    orchestrationStrategy?: string
   ): string {
-    return `
+    // Parse the orchestration strategy
+    const parsedStrategy = orchestrationStrategy 
+      ? StrategyParser.parseStrategy(orchestrationStrategy)
+      : null;
+    
+    // Generate strategy-specific instructions
+    const strategyInstructions = parsedStrategy 
+      ? StrategyParser.generateStrategyInstructions(parsedStrategy, context.inputs || {})
+      : '';
+    
+    const basePrompt = `
 # INTELLIGENT TASK SELECTION - ${orchestrationMode.toUpperCase()} MODE
 
 ## ORCHESTRATION MODE: ${orchestrationMode.toUpperCase()}
@@ -34,13 +47,35 @@ ${
 ## PROJECT GOAL
 ${projectGoal}
 
+${
+  context.inputs && Object.keys(context.inputs).length > 0
+    ? `## 🎯 USER INPUTS (PRIMARY DECISION FACTOR)
+${Object.entries(context.inputs)
+  .map(([key, value]) => `- **${key}**: ${JSON.stringify(value)}`)
+  .join('\n')}
+
+**CRITICAL**: These user inputs should be the PRIMARY factor in all task selection decisions. Tasks that align with these inputs should receive the highest priority and consideration.
+`
+    : ''
+}
+
+${
+  strategyInstructions
+    ? `## 📋 ORCHESTRATION STRATEGY GUIDANCE
+${strategyInstructions}
+
+These strategic guidelines should inform your task selection and prioritization decisions.
+`
+    : ''
+}
+
 ## CURRENT CONTEXT
 - **Active Tasks**: ${context.activeTasks.length}
 - **Available Agents**: ${context.availableAgents.map((a) => a.name).join(', ')}
 - **Project Progress**: ${context.projectProgress}%
 - **Blocked Tasks**: ${context.blockedTasks.length}
-- **Code Coverage**: ${context.codeCoverage}%
-- **Performance Score**: ${context.performanceScore}
+- **Process Coverage**: ${context.processCoverage || context.codeCoverage}%
+- **Quality Score**: ${context.qualityScore || context.performanceScore}
 - **Current Workload**: ${context.workload}
 - **Project Phase**: ${context.projectPhase}
 
@@ -120,12 +155,13 @@ ${
 }
 
 ## TASK ORCHESTRATION RULES CONSIDERATION
-When selecting tasks, ALWAYS respect task-specific orchestration rules:
-- Tasks with explicit orchestrationRules MUST follow those rules
-- Priority levels (high/medium/low) should influence selection order
-- Dynamic priority tasks can be re-prioritized based on current context
-- Adaptable tasks can be modified to better fit current needs
-- Non-adaptable tasks must be used as-is without modifications
+When selecting tasks, follow this priority order:
+1. **USER INPUTS ARE PARAMOUNT**: Tasks that align with user inputs get highest priority
+2. Tasks with explicit orchestrationRules MUST follow those rules
+3. Priority levels (high/medium/low) should influence selection order
+4. Dynamic priority tasks can be re-prioritized based on current context
+5. Adaptable tasks can be modified to better fit current needs and user inputs
+6. Non-adaptable tasks must be used as-is without modifications
 
 ## ${orchestrationMode.toUpperCase()} INSTRUCTIONS
 ${
@@ -189,6 +225,9 @@ Respond with a JSON object:
 }
 \`\`\`
 `;
+
+    // Apply domain-specific enhancements
+    return DomainPromptEnhancer.enhancePromptForDomain(basePrompt, context);
   }
 }
 
@@ -201,7 +240,17 @@ export class TaskAdaptationPromptTemplate {
     context: OrchestrationContext,
     instructions: string
   ): string {
-    return `
+    // Parse the instructions as orchestration strategy
+    const parsedStrategy = instructions 
+      ? StrategyParser.parseStrategy(instructions)
+      : null;
+    
+    // Generate strategy-specific adaptation guidance
+    const strategyGuidance = parsedStrategy 
+      ? StrategyParser.generateStrategyInstructions(parsedStrategy, context.inputs || {})
+      : instructions;
+    
+    const basePrompt = `
 # INTELLIGENT TASK ADAPTATION
 
 ## TASK TO ADAPT
@@ -237,9 +286,20 @@ These rules take precedence over general adaptation guidelines.
 - **Quality Requirements**: ${context.qualityRequirements}
 - **Project Phase**: ${context.projectPhase}
 - **Current Workload**: ${context.workload}
+${
+  context.inputs && Object.keys(context.inputs).length > 0
+    ? `
+## 🎯 USER INPUTS (CRITICAL ADAPTATION CONTEXT)
+${Object.entries(context.inputs)
+  .map(([key, value]) => `- **${key}**: ${JSON.stringify(value)}`)
+  .join('\n')}
 
-## TEAM-LEVEL INSTRUCTIONS
-${instructions}
+**IMPORTANT**: Adapt the task to align with these user inputs. The adaptation should make the task more relevant to the user's specific context and requirements.`
+    : ''
+}
+
+## TEAM-LEVEL STRATEGY
+${strategyGuidance}
 
 ## ADAPTATION GUIDELINES
 1. **Agent Assignment**: Choose the best-suited agent based on skills and availability
@@ -309,6 +369,9 @@ Respond with a JSON object:
 }
 \`\`\`
 `;
+
+    // Apply domain-specific enhancements
+    return DomainPromptEnhancer.enhancePromptForDomain(basePrompt, context);
   }
 }
 
@@ -321,7 +384,17 @@ export class TaskGenerationPromptTemplate {
     context: OrchestrationContext,
     instructions: string
   ): string {
-    return `
+    // Parse the instructions as orchestration strategy
+    const parsedStrategy = instructions 
+      ? StrategyParser.parseStrategy(instructions)
+      : null;
+    
+    // Generate strategy-specific generation guidance
+    const strategyGuidance = parsedStrategy 
+      ? StrategyParser.generateStrategyInstructions(parsedStrategy, context.inputs || {})
+      : instructions;
+    
+    const basePrompt = `
 # INTELLIGENT TASK GENERATION
 
 ## IDENTIFIED GAP
@@ -339,9 +412,20 @@ export class TaskGenerationPromptTemplate {
 - **Project Phase**: ${context.projectPhase}
 - **Quality Requirements**: ${context.qualityRequirements}
 - **Resource Availability**: ${context.resourceAvailability}
+${
+  context.inputs && Object.keys(context.inputs).length > 0
+    ? `
+## 🎯 USER INPUTS (TASK GENERATION GUIDANCE)
+${Object.entries(context.inputs)
+  .map(([key, value]) => `- **${key}**: ${JSON.stringify(value)}`)
+  .join('\n')}
+
+**CRITICAL**: Generate tasks that specifically address these user inputs. The generated task should be highly relevant to the user's context and help achieve their specific goals.`
+    : ''
+}
 
 ## ORCHESTRATION STRATEGY
-${instructions}
+${strategyGuidance}
 
 ## GENERATION GUIDELINES
 1. **Gap Analysis**: Ensure the new task addresses the identified gap completely
@@ -389,6 +473,9 @@ Respond with a JSON object:
 }
 \`\`\`
 `;
+
+    // Apply domain-specific enhancements
+    return DomainPromptEnhancer.enhancePromptForDomain(basePrompt, context);
   }
 }
 
@@ -401,7 +488,17 @@ export class WorkflowOptimizationPromptTemplate {
     performanceIssues: string[],
     instructions: string
   ): string {
-    return `
+    // Parse the instructions as orchestration strategy
+    const parsedStrategy = instructions 
+      ? StrategyParser.parseStrategy(instructions)
+      : null;
+    
+    // Generate strategy-specific optimization guidance
+    const strategyGuidance = parsedStrategy 
+      ? StrategyParser.generateStrategyInstructions(parsedStrategy, context.inputs || {})
+      : instructions;
+    
+    const basePrompt = `
 # WORKFLOW OPTIMIZATION ANALYSIS
 
 ## CURRENT PERFORMANCE ISSUES
@@ -414,8 +511,8 @@ ${performanceIssues
 - **Blocked Tasks**: ${context.blockedTasks.length}
 - **Available Agents**: ${context.availableAgents.length}
 - **Project Progress**: ${context.projectProgress}%
-- **Performance Score**: ${context.performanceScore}
-- **Code Coverage**: ${context.codeCoverage}%
+- **Quality Score**: ${context.qualityScore || context.performanceScore}
+- **Process Coverage**: ${context.processCoverage || context.codeCoverage}%
 
 ## BOTTLENECK ANALYSIS
 ${
@@ -433,7 +530,7 @@ ${context.blockedTasks.map((task) => `- ${task.description}`).join('\n')}
 - **Skill Coverage**: Analyzing based on active tasks
 
 ## ORCHESTRATION STRATEGY
-${instructions}
+${strategyGuidance}
 
 ## OPTIMIZATION OBJECTIVES
 1. **Eliminate Blockers**: Remove impediments to workflow progress
@@ -480,6 +577,9 @@ Respond with a JSON object:
 }
 \`\`\`
 `;
+
+    // Apply domain-specific enhancements
+    return DomainPromptEnhancer.enhancePromptForDomain(basePrompt, context);
   }
 }
 
@@ -492,7 +592,17 @@ export class PerformanceAnalysisPromptTemplate {
     historicalData: any[],
     instructions: string
   ): string {
-    return `
+    // Parse the instructions as orchestration strategy
+    const parsedStrategy = instructions 
+      ? StrategyParser.parseStrategy(instructions)
+      : null;
+    
+    // Generate strategy-specific performance guidance
+    const strategyGuidance = parsedStrategy 
+      ? StrategyParser.generateStrategyInstructions(parsedStrategy, context.inputs || {})
+      : instructions;
+    
+    const basePrompt = `
 # PERFORMANCE ANALYSIS AND IMPROVEMENT
 
 ## CURRENT PERFORMANCE METRICS
@@ -500,7 +610,7 @@ export class PerformanceAnalysisPromptTemplate {
       context.activeTasks.length > 0 ? 'Calculating...' : 'No active tasks'
     }
 - **Quality Score**: ${context.performanceScore}
-- **Code Coverage**: ${context.codeCoverage}%
+- **Process Coverage**: ${context.processCoverage || context.codeCoverage}%
 - **Project Progress**: ${context.projectProgress}%
 - **Team Utilization**: ${context.workload}
 
@@ -512,7 +622,7 @@ ${
 }
 
 ## ORCHESTRATION STRATEGY
-${instructions}
+${strategyGuidance}
 
 ## PERFORMANCE DIMENSIONS
 1. **Velocity**: Task completion speed and throughput
@@ -571,6 +681,9 @@ Respond with a JSON object:
 }
 \`\`\`
 `;
+
+    // Apply domain-specific enhancements
+    return DomainPromptEnhancer.enhancePromptForDomain(basePrompt, context);
   }
 }
 
@@ -584,7 +697,17 @@ export class TaskCompletionAnalysisPromptTemplate {
     taskResult: any,
     instructions: string
   ): string {
-    return `
+    // Parse the instructions as orchestration strategy
+    const parsedStrategy = instructions 
+      ? StrategyParser.parseStrategy(instructions)
+      : null;
+    
+    // Generate strategy-specific completion guidance
+    const strategyGuidance = parsedStrategy 
+      ? StrategyParser.generateStrategyInstructions(parsedStrategy, context.inputs || {})
+      : instructions;
+    
+    const basePrompt = `
 # INTELLIGENT TASK COMPLETION ANALYSIS
 
 ## COMPLETED TASK ANALYSIS
@@ -629,7 +752,7 @@ ${(context.existingTasks || [])
   .join('')}
 
 ## ORCHESTRATION STRATEGY
-${instructions}
+${strategyGuidance}
 
 ## CONTINUOUS ORCHESTRATION ANALYSIS
 Analyze the completed task's impact and determine if workflow adjustments are needed:
@@ -718,6 +841,9 @@ Respond with a JSON object:
 }
 \`\`\`
 `;
+
+    // Apply domain-specific enhancements
+    return DomainPromptEnhancer.enhancePromptForDomain(basePrompt, context);
   }
 }
 
@@ -741,13 +867,15 @@ export class OrchestrationPromptFactory {
   static createInitialTaskSelectionPrompt(
     context: OrchestrationContext,
     projectGoal: string,
-    availableTasks: Task[]
+    availableTasks: Task[],
+    orchestrationStrategy?: string
   ): string {
     return TaskSelectionPromptTemplate.build(
       context,
       projectGoal,
       availableTasks,
-      'initial'
+      'initial',
+      orchestrationStrategy
     );
   }
 
@@ -757,13 +885,15 @@ export class OrchestrationPromptFactory {
   static createContinuousTaskSelectionPrompt(
     context: OrchestrationContext,
     projectGoal: string,
-    availableTasks: Task[]
+    availableTasks: Task[],
+    orchestrationStrategy?: string
   ): string {
     return TaskSelectionPromptTemplate.build(
       context,
       projectGoal,
       availableTasks,
-      'continuous'
+      'continuous',
+      orchestrationStrategy
     );
   }
 }

@@ -217,19 +217,64 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
       TASK_STATUS_enum.TODO,
       TASK_STATUS_enum.REVISE,
     ];
+    
+    // Debug logging
+    console.log('[DEBUG] _queueTasksReadyToExecute called');
+    console.log('[DEBUG] Graph size:', executionDepGraph.size());
+    console.log('[DEBUG] Entry nodes:', entryNodes);
+    console.log('[DEBUG] Total tasks:', teamStoreState.tasks.length);
+    console.log('[DEBUG] TODO tasks:', teamStoreState.tasks.filter(t => t.status === TASK_STATUS_enum.TODO).map(t => ({ id: t.id, title: t.title, hasAgent: !!t.agent })));
+    
     entryNodes.forEach((taskId) => {
       const task = teamStoreState.tasks.find((t) => t.id === taskId);
-      if (!task) return;
+      if (!task) {
+        console.log('[DEBUG] Task not found for ID:', taskId);
+        return;
+      }
 
       const isTaskAgentBusy = _isTaskAgentBusy(task, teamStoreState.tasks);
+      console.log('[DEBUG] Checking task:', task.id, 'Status:', task.status, 'Agent busy:', isTaskAgentBusy);
 
       if (
         allowedStatusesToRun.includes(task.status as TASK_STATUS_enum) &&
         !isTaskAgentBusy
       ) {
+        console.log('[DEBUG] Queueing task:', task.id);
         _queueTask({ teamStoreState, task });
       }
     });
+    
+    // Fallback: If graph is empty but we have TODO tasks, queue them directly
+    if (entryNodes.length === 0) {
+      console.log('[DEBUG] No entry nodes found, checking for orphaned TODO tasks');
+      const todoTasks = teamStoreState.tasks.filter(
+        t => t.status === TASK_STATUS_enum.TODO && t.agent
+      );
+      
+      if (todoTasks.length > 0) {
+        console.log('[DEBUG] Found', todoTasks.length, 'orphaned TODO tasks, reinitializing graph');
+        // Reinitialize the graph to include all tasks
+        _initializeGraph();
+        
+        // Try again to get entry nodes
+        const newEntryNodes = executionDepGraph.entryNodes();
+        console.log('[DEBUG] After reinitialization - Graph size:', executionDepGraph.size(), 'Entry nodes:', newEntryNodes);
+        
+        // If still no entry nodes, queue tasks without dependencies directly
+        if (newEntryNodes.length === 0) {
+          console.log('[DEBUG] Still no entry nodes, queueing tasks without dependencies');
+          todoTasks.forEach(task => {
+            if (!task.dependencies || task.dependencies.length === 0) {
+              const isTaskAgentBusy = _isTaskAgentBusy(task, teamStoreState.tasks);
+              if (!isTaskAgentBusy) {
+                console.log('[DEBUG] Directly queueing task:', task.id);
+                _queueTask({ teamStoreState, task });
+              }
+            }
+          });
+        }
+      }
+    }
   };
 
   const _clearGraph = (graph: DependencyGraph): void => {
@@ -288,6 +333,34 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
   };
 
   /**
+   * Transform orchestrator recommendations to decisions format
+   */
+  const _transformRecommendationsToDecisions = (recommendations: any): any => {
+    if (!recommendations) {
+      return null;
+    }
+
+    const decisions: any = {};
+
+    // Map newTasks to addTasks
+    if (recommendations.recommendations?.newTasks) {
+      decisions.addTasks = recommendations.recommendations.newTasks;
+    }
+
+    // Map taskModifications to modifyTasks
+    if (recommendations.recommendations?.taskModifications) {
+      decisions.modifyTasks = recommendations.recommendations.taskModifications;
+    }
+
+    // Map other potential fields
+    if (recommendations.recommendations?.removeTasks) {
+      decisions.removeTasks = recommendations.recommendations.removeTasks;
+    }
+
+    return decisions;
+  };
+
+  /**
    * Handle orchestration decisions after task completion
    */
   const _handleOrchestrationTaskCompletion = async (
@@ -301,6 +374,7 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
       // Create temporary team object for orchestrator
       const tempTeam = {
         enableOrchestration: state.enableOrchestration,
+        continuousOrchestration: state.continuousOrchestration,
         backlogTasks: state.backlogTasks || [],
         allowTaskGeneration: state.allowTaskGeneration,
         orchestrationStrategy: state.orchestrationStrategy,
@@ -312,16 +386,24 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
         llmInstance: state.llmInstance,
         getTasks: () => state.tasks,
         agents: state.agents,
+        // Add store property for orchestrator compatibility
+        store: {
+          getState: () => state,
+          subscribe: state.subscribe || (() => () => {}),
+        },
       } as any;
 
       const orchestrator = new IntelligentOrchestrator(tempTeam);
 
       // Let orchestrator analyze task completion and make decisions
-      const orchestrationDecisions =
+      const recommendations =
         await orchestrator.orchestrateTaskCompletion(
           completedTask,
           state.tasks
         );
+
+      // Transform recommendations to decisions format
+      const orchestrationDecisions = _transformRecommendationsToDecisions(recommendations);
 
       // Apply orchestration decisions
       await _applyOrchestrationDecisions(orchestrationDecisions, state);
@@ -370,11 +452,12 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
       }
     }
 
+    let graphNeedsUpdate = false;
+
     if (decisions.addTasks && decisions.addTasks.length > 0) {
       // Add new tasks to the team
       state.addTasks(decisions.addTasks);
-      // Reinitialize graphs to include new tasks
-      _initializeGraph();
+      graphNeedsUpdate = true;
     }
 
     if (decisions.removeTasks && decisions.removeTasks.length > 0) {
@@ -385,7 +468,27 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
           state.tasks.splice(taskIndex, 1);
         }
       }
+      graphNeedsUpdate = true;
+    }
+
+    // Check if task modifications might have made tasks ready to execute
+    let shouldCheckQueue = graphNeedsUpdate;
+    
+    // If tasks were modified, we should also check the queue
+    if (taskModifications && taskModifications.length > 0) {
+      shouldCheckQueue = true;
+    }
+
+    // If graph was updated, reinitialize
+    if (graphNeedsUpdate) {
+      console.log('[DEBUG] Graph needs update - reinitializing');
       _initializeGraph();
+    }
+    
+    // If we need to check the queue (new tasks, removed tasks, or modified tasks)
+    if (shouldCheckQueue) {
+      console.log('[DEBUG] Should check queue - calling _queueTasksReadyToExecute');
+      _queueTasksReadyToExecute(state);
     }
   };
 
@@ -408,7 +511,22 @@ export const subscribeDeterministicExecution = (teamStore: TeamStore): void => {
           await _handleOrchestrationTaskCompletion(task, state);
         }
 
+        // Always queue tasks ready to execute after task completion
+        // This ensures existing TODO tasks are started even if orchestration didn't add new ones
         _queueTasksReadyToExecute(state);
+        
+        // Check if all tasks are completed after orchestration
+        // This ensures workflow is only marked as finished after orchestrator has run
+        if (state.enableOrchestration && state.continuousOrchestration) {
+          const allTasksDone = state.tasks.every(
+            (t) => t.status === TASK_STATUS_enum.DONE
+          );
+          
+          if (allTasksDone && state.teamWorkflowStatus === WORKFLOW_STATUS_enum.RUNNING) {
+            // All tasks are done and workflow is still running, finish it
+            state.finishWorkflowAction();
+          }
+        }
         break;
 
       case TASK_STATUS_enum.REVISE: {

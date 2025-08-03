@@ -257,6 +257,17 @@ export class Task {
   };
   priority: 'high' | 'medium' | 'low';
   qualityGates: string[];
+  adaptationHistory?: Array<{
+    timestamp: number;
+    changes: {
+      description?: string;
+      priority?: string;
+      estimatedTime?: string;
+      agent?: string;
+      dependencies?: string[];
+    };
+    reasoning: string;
+  }>;
 
   constructor({
     title = '',
@@ -306,6 +317,7 @@ export class Task {
     this.resourceRequirements = resourceRequirements;
     this.priority = priority;
     this.qualityGates = qualityGates;
+    this.adaptationHistory = [];
   }
 }
 
@@ -464,13 +476,19 @@ export class Team {
       preserveExistingTasks?: boolean;
     }
   ): Promise<WorkflowResult> {
+    // Set inputs in store before orchestration
+    if (inputs && Object.keys(inputs).length > 0) {
+      this.store.getState().setInputs(inputs);
+    }
+
     // Automatically run orchestration if enabled and a project goal is available
     if (this.enableOrchestration) {
       const goal = options?.projectGoal || this.orchestrationStrategy;
       if (goal) {
         await this.activateOrchestration(
           goal,
-          options?.preserveExistingTasks ?? true
+          options?.preserveExistingTasks ?? true,
+          inputs || {}
         );
       }
     }
@@ -734,7 +752,8 @@ export class Team {
    */
   async activateOrchestration(
     projectGoal: string,
-    preserveExistingTasks: boolean = true
+    preserveExistingTasks: boolean = true,
+    inputs: Record<string, unknown>
   ): Promise<Task[]> {
     if (!this.enableOrchestration) {
       throw new Error(
@@ -745,7 +764,7 @@ export class Team {
     const { IntelligentOrchestrator } = await import('./orchestration');
     const orchestrator = new IntelligentOrchestrator(this);
 
-    return orchestrator.orchestrateWorkflow(projectGoal, preserveExistingTasks);
+    return orchestrator.orchestrateWorkflow(projectGoal, preserveExistingTasks, inputs);
   }
 
   /**
@@ -927,3 +946,6 @@ export class Team {
     }
   }
 }
+
+// Export orchestration namespace for advanced usage
+export * as orchestration from './orchestration';

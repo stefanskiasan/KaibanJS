@@ -163,15 +163,15 @@ ${
 
 ## Format of your output
 
-You will return just one of the following:
+You will return just one of the following JSON formats:
 
-- Thought + (Action or Self Question)
-OR
-- Observation
-OR
-- Final Answer
+1. Thought + (Action or Self Question)
+2. Observation
+3. Final Answer (NOT an action - this is a special response format)
 
-Below is the explanation of each one:
+**IMPORTANT**: "Final Answer" is NOT a tool or action. It is a response format with a "finalAnswer" field.
+
+Below is the explanation of each format:
 
 ### Thought + (Action or Self Question)
 
@@ -204,7 +204,10 @@ other
     "isFinalAnswerReady": false // If you have the final answer or not
 }
 
-### Final Answer
+### Final Answer (Response Format - NOT an Action)
+
+When you have completed the task and have the final answer ready, use this format:
+**DO NOT** use "action": "Final Answer" - that is incorrect!
 
 IMPORTANT: (Please respect the expected output requirements from the user): ${
       task.outputSchema
@@ -219,6 +222,8 @@ IMPORTANT: (Please respect the expected output requirements from the user): ${
 {
     "finalAnswer": "The final answer to the Task."
 }
+
+Remember: This is a response format with a "finalAnswer" field, NOT an action!
 
 **IMPORTANT**: You must return a valid JSON object. As if you were returning a JSON object from a function.
 `;
