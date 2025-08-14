@@ -39,6 +39,10 @@ import {
   WorkflowFinishedLog,
   WorkflowResult,
   WorkflowStats,
+  OrchestrationStatusLog,
+  WorkflowLog,
+  TaskStatusLog,
+  AgentStatusLog,
 } from './types/logs';
 import { BaseTool } from './tools/baseTool';
 import { LangChainChatModel } from './utils/agents';
@@ -772,7 +776,11 @@ export class Team {
     const { IntelligentOrchestrator } = await import('./orchestration');
     const orchestrator = new IntelligentOrchestrator(this);
 
-    return orchestrator.orchestrateWorkflow(projectGoal, preserveExistingTasks, inputs);
+    return orchestrator.orchestrateWorkflow(
+      projectGoal,
+      preserveExistingTasks,
+      inputs
+    );
   }
 
   /**
@@ -916,6 +924,95 @@ export class Team {
       console.error('Failed to retrieve orchestration metrics:', error);
       return null;
     }
+  }
+
+  /**
+   * Subscribe to orchestration events.
+   * This method allows external consumers to listen to all orchestration events
+   * for real-time monitoring and visualization.
+   *
+   * @param callback - Function to call when an orchestration event occurs
+   * @returns Unsubscribe function to stop listening to events
+   */
+  subscribeToOrchestrationEvents(
+    callback: (event: OrchestrationStatusLog) => void
+  ): () => void {
+    if (!this.enableOrchestration) {
+      console.warn(
+        'Orchestration is not enabled for this team. No events will be emitted.'
+      );
+      return () => {}; // Return a no-op unsubscribe function
+    }
+
+    // Subscribe to workflow logs and filter for orchestration events
+    return this.store.subscribe(
+      (state: CombinedStoresState) => state.workflowLogs,
+      // @ts-expect-error: Zustand subscribe overload is not properly typed
+      (newLogs: WorkflowLog[], previousLogs: WorkflowLog[]) => {
+        if (newLogs.length > previousLogs.length) {
+          const newLog = newLogs[newLogs.length - 1];
+
+          // Check if this is an orchestration log
+          if (newLog.logType === 'OrchestrationStatusUpdate') {
+            const orchestrationLog = newLog as OrchestrationStatusLog;
+            callback(orchestrationLog);
+          }
+        }
+      }
+    );
+  }
+
+  /**
+   * Subscribe to execution events (Task and Agent events).
+   * This method allows monitoring of task execution and agent activities
+   * after orchestration has completed.
+   *
+   * @param callback - Function to call when a task or agent event occurs
+   * @returns Unsubscribe function to stop listening to events
+   */
+  subscribeToExecutionEvents(
+    callback: (event: TaskStatusLog | AgentStatusLog) => void
+  ): () => void {
+    // Subscribe to workflow logs and filter for task and agent events
+    return this.store.subscribe(
+      (state: CombinedStoresState) => state.workflowLogs,
+      // @ts-expect-error: Zustand subscribe overload is not properly typed
+      (newLogs: WorkflowLog[], previousLogs: WorkflowLog[]) => {
+        if (newLogs.length > previousLogs.length) {
+          const newLog = newLogs[newLogs.length - 1];
+
+          // Check if this is a task or agent log
+          if (
+            newLog.logType === 'TaskStatusUpdate' ||
+            newLog.logType === 'AgentStatusUpdate'
+          ) {
+            callback(newLog as TaskStatusLog | AgentStatusLog);
+          }
+        }
+      }
+    );
+  }
+
+  /**
+   * Subscribe to all workflow events.
+   * This method provides a complete event stream including orchestration,
+   * task execution, agent activities, and workflow status changes.
+   *
+   * @param callback - Function to call when any workflow event occurs
+   * @returns Unsubscribe function to stop listening to events
+   */
+  subscribeToAllEvents(callback: (event: WorkflowLog) => void): () => void {
+    // Subscribe to all workflow logs without filtering
+    return this.store.subscribe(
+      (state: CombinedStoresState) => state.workflowLogs,
+      // @ts-expect-error: Zustand subscribe overload is not properly typed
+      (newLogs: WorkflowLog[], previousLogs: WorkflowLog[]) => {
+        if (newLogs.length > previousLogs.length) {
+          const newLog = newLogs[newLogs.length - 1];
+          callback(newLog);
+        }
+      }
+    );
   }
 
   /**

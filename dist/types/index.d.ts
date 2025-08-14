@@ -19,7 +19,7 @@ import { BaseAgent, Env } from './agents';
 import { AGENT_STATUS_enum, TASK_STATUS_enum } from './utils/enums';
 import { TeamStore } from './stores/teamStore.types';
 import { ZodSchema } from 'zod';
-import { WorkflowResult, WorkflowStats } from './types/logs';
+import { WorkflowResult, WorkflowStats, OrchestrationStatusLog, WorkflowLog, TaskStatusLog, AgentStatusLog } from './types/logs';
 import { BaseTool } from './tools/baseTool';
 import { LangChainChatModel } from './utils/agents';
 import { LLMConfig } from './agents/baseAgent';
@@ -358,6 +358,33 @@ export declare class Team {
         taskStatistics: Record<string, any>;
         systemHealth: Record<string, any>;
     } | null>;
+    /**
+     * Subscribe to orchestration events.
+     * This method allows external consumers to listen to all orchestration events
+     * for real-time monitoring and visualization.
+     *
+     * @param callback - Function to call when an orchestration event occurs
+     * @returns Unsubscribe function to stop listening to events
+     */
+    subscribeToOrchestrationEvents(callback: (event: OrchestrationStatusLog) => void): () => void;
+    /**
+     * Subscribe to execution events (Task and Agent events).
+     * This method allows monitoring of task execution and agent activities
+     * after orchestration has completed.
+     *
+     * @param callback - Function to call when a task or agent event occurs
+     * @returns Unsubscribe function to stop listening to events
+     */
+    subscribeToExecutionEvents(callback: (event: TaskStatusLog | AgentStatusLog) => void): () => void;
+    /**
+     * Subscribe to all workflow events.
+     * This method provides a complete event stream including orchestration,
+     * task execution, agent activities, and workflow status changes.
+     *
+     * @param callback - Function to call when any workflow event occurs
+     * @returns Unsubscribe function to stop listening to events
+     */
+    subscribeToAllEvents(callback: (event: WorkflowLog) => void): () => void;
     /**
      * Generate task dependency graph visualization data.
      * Returns nodes, edges, and metrics for visualizing task dependencies.
