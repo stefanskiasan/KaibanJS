@@ -68,7 +68,9 @@ export interface ITaskParams {
         dependencies?: string[];
     };
     priority?: 'high' | 'medium' | 'low';
+    goal?: string;
     qualityGates?: string[];
+    allowAgentReassignment?: boolean;
 }
 /**
  * Interface for Team configuration
@@ -152,7 +154,9 @@ export declare class Task {
         dependencies?: string[];
     };
     priority: 'high' | 'medium' | 'low';
+    goal?: string;
     qualityGates: string[];
+    allowAgentReassignment: boolean;
     adaptationHistory?: Array<{
         timestamp: number;
         changes: {
@@ -164,7 +168,7 @@ export declare class Task {
         };
         reasoning: string;
     }>;
-    constructor({ title, id, description, expectedOutput, agent, dependencies, isDeliverable, externalValidationRequired, outputSchema, allowParallelExecution, referenceId, adaptable, orchestrationRules, dynamicPriority, splitStrategy, mergeCompatible, resourceRequirements, priority, qualityGates, }: ITaskParams);
+    constructor({ title, id, description, expectedOutput, agent, dependencies, isDeliverable, externalValidationRequired, outputSchema, allowParallelExecution, referenceId, adaptable, orchestrationRules, dynamicPriority, splitStrategy, mergeCompatible, resourceRequirements, priority, goal, qualityGates, allowAgentReassignment, }: ITaskParams);
 }
 /**
  * Represents a team of AI agents working on a set of tasks.

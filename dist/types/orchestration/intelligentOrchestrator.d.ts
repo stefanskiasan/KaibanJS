@@ -47,6 +47,10 @@ export declare class IntelligentOrchestrator {
      */
     private ensureLLMInitialized;
     /**
+     * Validate LLM connection with a simple test call
+     */
+    private validateLLMConnection;
+    /**
      * Initialize LLM instance for the orchestrator
      */
     private initializeLLM;

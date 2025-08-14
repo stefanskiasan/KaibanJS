@@ -91,7 +91,9 @@ export interface ITaskParams {
     dependencies?: string[];
   };
   priority?: 'high' | 'medium' | 'low';
+  goal?: string; // Explicit goal for better input-task matching
   qualityGates?: string[];
+  allowAgentReassignment?: boolean; // Control whether orchestrator can change the assigned agent (default: false)
 }
 
 /**
@@ -256,7 +258,9 @@ export class Task {
     dependencies?: string[];
   };
   priority: 'high' | 'medium' | 'low';
+  goal?: string; // New: Explicit goal for better input-task matching
   qualityGates: string[];
+  allowAgentReassignment: boolean; // Control whether orchestrator can change the assigned agent
   adaptationHistory?: Array<{
     timestamp: number;
     changes: {
@@ -289,7 +293,9 @@ export class Task {
     mergeCompatible = [],
     resourceRequirements,
     priority = 'medium',
+    goal,
     qualityGates = [],
+    allowAgentReassignment = false, // Default: agent cannot be reassigned
   }: ITaskParams) {
     this.id = id;
     this.title = title; // Title is now optional with a default empty string
@@ -316,7 +322,9 @@ export class Task {
     this.mergeCompatible = mergeCompatible;
     this.resourceRequirements = resourceRequirements;
     this.priority = priority;
+    this.goal = goal;
     this.qualityGates = qualityGates;
+    this.allowAgentReassignment = allowAgentReassignment;
     this.adaptationHistory = [];
   }
 }

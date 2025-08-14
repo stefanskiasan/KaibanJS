@@ -4,43 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="fix: Enhance null safety and add orchestration validation tests">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="feat: Enhance orchestration system with new utilities and context management">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/01-basic-orchestration.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/01-classical-orchestration-fixed.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/01-classical-orchestration.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/13-continuous-orchestration-basic.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/15-runtime-orchestration-control.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/examples/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/basicorchestration.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/orchestration-benchmark.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/orchestration-demo.kban.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-all-examples-systematically.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-all-examples-systematically.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-key-examples-fast.js" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test-key-examples-fast.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-execution.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-fixes.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-null-fixes.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/test-orchestration-summary.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/performance.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/performance.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/bundle.cjs" beforeDir="false" afterPath="$PROJECT_DIR$/dist/bundle.cjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/bundle.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/bundle.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/bundle.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/dist/bundle.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/types/orchestration/intelligentOrchestrator.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/types/orchestration/intelligentOrchestrator.d.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/system-metrics.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/system-metrics.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/task-metrics.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/task-metrics.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/docs/web-component-usage.md" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/docs/web-component-usage.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/examples/web-component-demo.html" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/examples/web-component-demo.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/rollup.config.webcomponent.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/rollup.config.webcomponent.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/src/components/KaibanBoard/index.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/src/components/KaibanBoard/index.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/src/components/KaibanBoard/store/store.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/src/components/KaibanBoard/store/store.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kanban-board/src/web-component/kaiban-board-element.js" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/src/web-component/kaiban-board-element.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/agents/reactChampionAgent.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/agents/reactChampionAgent.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/orchestration/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/promptTemplates.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/stores/taskStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/taskStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/subscribers/deterministicExecutionSubscriber.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/prompts.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/prompts.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/orchestration/strategies/AdaptationStrategy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/strategies/AdaptationStrategy.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,7 +27,8 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/kanban-board" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -79,24 +53,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "JavaScript Debug.localhost:5173.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feat/intelligent-orchestration-ui",
-    "last_opened_file_path": "/Users/asanstefanski/KundenProjekte/KaibanJS",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "prettierjs.PrettierConfiguration.Package": "/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/prettier",
-    "ts.external.directory.path": "/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;JavaScript Debug.localhost:5173.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/orchestration-team-templates&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/asanstefanski/KundenProjekte/KaibanJS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/prettier&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/examples" />
@@ -128,8 +102,21 @@
       <updated>1753640734318</updated>
       <workItem from="1753640735894" duration="24072000" />
       <workItem from="1753831461549" duration="2239000" />
-      <workItem from="1754221777689" duration="3017000" />
+      <workItem from="1754221777689" duration="3702000" />
+      <workItem from="1754294600886" duration="1589000" />
+      <workItem from="1754319093771" duration="588000" />
+      <workItem from="1754862509162" duration="4972000" />
+      <workItem from="1754957479211" duration="44000" />
     </task>
+    <task id="LOCAL-00001" summary="feat: Enhance orchestration system with new utilities and context management">
+      <option name="closed" value="true" />
+      <created>1754249104560</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1754249104560</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -210,6 +197,8 @@
     <MESSAGE value=" Implement orchestration module with logging and task management capabilities" />
     <MESSAGE value="feat: Implement orchestration module with continuous optimization and task management capabilities" />
     <MESSAGE value="fix: Enhance null safety and add orchestration validation tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: Enhance null safety and add orchestration validation tests" />
+    <MESSAGE value="feat: Enhance orchestration system with new utilities and context management" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Enhance orchestration system with new utilities and context management" />
+    <option name="NON_MODAL_COMMIT_POSTPONE_SLOW_CHECKS" value="false" />
   </component>
 </project>

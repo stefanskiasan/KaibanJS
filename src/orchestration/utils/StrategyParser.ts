@@ -271,24 +271,115 @@ export class StrategyParser {
   ): string {
     const instructions: string[] = ['USER CONTEXT ALIGNMENT:'];
 
-    // Process each input
+    // AUTONOMOUS INPUT ANALYSIS
+    instructions.push('\n### DYNAMIC INPUT ANALYSIS:');
+    instructions.push('The following inputs were provided - analyze their content, not just their keys:');
+    
+    Object.entries(inputs).forEach(([key, value]) => {
+      const valueType = Array.isArray(value) ? 'array' : typeof value;
+      const valuePreview = this.getValuePreview(value);
+      instructions.push(`- **${key}** (${valueType}): ${valuePreview}`);
+    });
+
+    instructions.push('\n### INPUT INTERPRETATION GUIDANCE:');
+    instructions.push('- Question-like strings → Primary query requiring answer');
+    instructions.push('- Arrays of messages → Conversation history for context');
+    instructions.push('- Numeric/ID values → Entity references or measurements');
+    instructions.push('- User/Session IDs → Context for personalization');
+    instructions.push('- Product/Item codes → Specific entity queries');
+    
+    instructions.push('\n### TASK MATCHING REQUIREMENTS:');
+    instructions.push('- Match input CONTENT with task goals and expected outputs');
+    instructions.push('- Prioritize tasks that can answer questions found in inputs');
+    instructions.push('- Adapt tasks to specifically address input values');
+    instructions.push('- Forward ALL inputs to selected tasks for processing');
+
+    // Process each input for specific patterns
     Object.entries(inputs).forEach(([key, value]) => {
       const valueStr = String(value);
       
-      // Special handling for specific input types
-      if (key === 'businessType' || key === 'projectType') {
-        instructions.push(`- Optimize all decisions for ${valueStr} domain`);
-      } else if (key === 'priority' && value === 'high') {
-        instructions.push(`- Apply URGENT prioritization to all selections`);
-      } else if (key === 'currentPhase' || key === 'projectPhase') {
-        instructions.push(`- Align tasks with ${valueStr} phase requirements`);
-      } else if (key.includes('deadline') || key.includes('time')) {
-        instructions.push(`- Consider time constraint: ${valueStr}`);
-      } else if (key === 'focusArea') {
-        instructions.push(`- Concentrate efforts on: ${valueStr}`);
+      // Detect question patterns
+      if (this.isQuestion(valueStr)) {
+        instructions.push(`\n**DETECTED QUESTION**: "${valueStr}"`);
+        instructions.push('→ Select tasks that can answer this specific question');
+      }
+      
+      // Detect product/item references
+      if (this.hasProductReference(valueStr)) {
+        instructions.push(`\n**DETECTED PRODUCT REFERENCE**: "${valueStr}"`);
+        instructions.push('→ Select product-related tasks and adapt them for this specific item');
+      }
+      
+      // Detect measurement/quantity queries
+      if (this.hasMeasurement(valueStr)) {
+        instructions.push(`\n**DETECTED MEASUREMENT QUERY**: "${valueStr}"`);
+        instructions.push('→ Select calculation or measurement tasks');
       }
     });
 
     return instructions.join('\n');
+  }
+
+  /**
+   * Get a preview of a value for display
+   */
+  private static getValuePreview(value: unknown): string {
+    if (value === null || value === undefined) {
+      return 'null';
+    }
+    
+    if (Array.isArray(value)) {
+      return `[${value.length} items]${value.length > 0 ? ` - First: ${JSON.stringify(value[0]).substring(0, 50)}...` : ''}`;
+    }
+    
+    if (typeof value === 'object') {
+      const keys = Object.keys(value);
+      return `{${keys.length} fields: ${keys.slice(0, 3).join(', ')}${keys.length > 3 ? '...' : ''}}`;
+    }
+    
+    const str = String(value);
+    return str.length > 100 ? str.substring(0, 100) + '...' : str;
+  }
+
+  /**
+   * Check if a string appears to be a question
+   */
+  private static isQuestion(str: string): boolean {
+    if (typeof str !== 'string') return false;
+    const questionPatterns = [
+      /^(what|where|when|who|why|how|which|can|could|would|should|is|are|do|does|did)\s/i,
+      /\?$/,
+      /(tell me|show me|find|get|retrieve|fetch|search|lookup|check)\s/i
+    ];
+    return questionPatterns.some(pattern => pattern.test(str));
+  }
+
+  /**
+   * Check if a string contains product/item references
+   */
+  private static hasProductReference(str: string): boolean {
+    if (typeof str !== 'string') return false;
+    const productPatterns = [
+      /\b\d{5,}\b/, // Product codes (5+ digits)
+      /\b[A-Z]{2,}-\d+\b/, // Pattern like ABC-123
+      /\bproduct\s+\w+/i,
+      /\bitem\s+\w+/i,
+      /\barticle\s+\w+/i,
+      /\bsku\s+\w+/i
+    ];
+    return productPatterns.some(pattern => pattern.test(str));
+  }
+
+  /**
+   * Check if a string contains measurements or quantities
+   */
+  private static hasMeasurement(str: string): boolean {
+    if (typeof str !== 'string') return false;
+    const measurementPatterns = [
+      /\b\d+\s*(mm|cm|m|km|kg|g|l|ml|°C|°F)\b/i,
+      /\b(DN|diameter|length|width|height|weight|volume|temperature)\s*\d+/i,
+      /\b\d+\s*(meter|kilogram|liter|degree)/i
+    ];
+    return measurementPatterns.some(pattern => pattern.test(str));
   }
 }

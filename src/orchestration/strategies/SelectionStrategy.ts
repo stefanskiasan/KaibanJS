@@ -23,6 +23,9 @@ export class SelectionStrategy {
   ): Promise<Task[]> {
     logger.info(`🎯 Selecting optimal tasks from ${availableTasks.length} available options`);
 
+    // The LLM will handle task selection based on task properties
+    // No hardcoded fallback logic needed
+
     // If preserving existing tasks, filter them out from selection
     let tasksToSelect = availableTasks;
     if (preserveExisting && context.existingTasks.length > 0) {

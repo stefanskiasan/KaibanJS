@@ -54,7 +54,27 @@ ${Object.entries(context.inputs)
   .map(([key, value]) => `- **${key}**: ${JSON.stringify(value)}`)
   .join('\n')}
 
-**CRITICAL**: These user inputs should be the PRIMARY factor in all task selection decisions. Tasks that align with these inputs should receive the highest priority and consideration.
+### 🧠 AUTONOMOUS INPUT ANALYSIS INSTRUCTIONS
+**CRITICAL**: You must autonomously analyze the input structure above to understand:
+1. **Identify Purpose**: Determine which input fields contain the main request/question
+2. **Extract Context**: Find supplementary information (history, session, user data)
+3. **Detect Patterns**: Recognize domain-specific data (product IDs, measurements, queries)
+4. **No Assumptions**: Do NOT assume field names - analyze actual content to understand purpose
+5. **Dynamic Matching**: Match input content with task goals, descriptions, and expected outputs
+
+**EXAMPLE ANALYSIS**:
+- If an input contains a question-like string → likely the main query
+- If an input contains an array of previous messages → likely conversation history
+- If an input contains IDs or codes → likely entity references
+- If an input contains user/session identifiers → likely context data
+
+**TASK SELECTION BASED ON INPUTS**:
+- Analyze WHAT the inputs are asking for (not just field names)
+- Match input content semantically with task goals and expected outputs
+- Select tasks that can fulfill the actual request in the inputs
+- Adapt task descriptions to specifically address the input content
+
+**REMEMBER**: The input structure is dynamic - you must understand it autonomously!
 `
     : ''
 }
@@ -86,7 +106,13 @@ ${
         .map(
           (task, index) => `
 ### Existing Task ${index + 1}: ${task.description}
+**IDENTIFICATION:**
+- **ID**: ${task.id}
+${task.title ? `- **Title**: ${task.title}` : ''}
 - **Status**: ${task.status}
+${task.duration ? `- **Duration So Far**: ${task.duration}ms` : ''}
+
+**ASSIGNMENT & RESOURCES:**
 - **Agent**: ${task.agent?.name || 'Unassigned'}
 - **Skills Required**: ${
             task.resourceRequirements?.skillsRequired?.join(', ') ||
@@ -95,7 +121,22 @@ ${
 - **Dependencies**: ${
             task.resourceRequirements?.dependencies?.join(', ') || 'None'
           }
+
+**OUTPUT & GOALS:**
 - **Expected Output**: ${task.expectedOutput}
+${task.goal ? `- **Goal**: ${task.goal}` : ''}
+- **Is Deliverable**: ${task.isDeliverable ? 'Yes' : 'No'}
+
+**ORCHESTRATION STATE:**
+- **Priority**: ${task.priority || 'medium'}
+- **Adaptable**: ${task.adaptable ? 'Yes' : 'No'}
+- **Parallel Execution**: ${task.allowParallelExecution ? 'Yes' : 'No'}
+${
+  task.qualityGates && task.qualityGates.length > 0
+    ? `- **Quality Gates**: ${task.qualityGates.join(', ')}`
+    : ''
+}
+${task.result ? `- **Has Result**: Yes (Task has been executed)` : ''}
 `
         )
         .join('')
@@ -107,32 +148,61 @@ ${(availableTasks || [])
   .map(
     (task, index) => `
 ### Task ${index + 1}: ${task.description}
-- **Category**: ${
+**CORE PROPERTIES:**
+- **REFERENCE ID**: ${task.referenceId || task.id || `task_${index}`} (USE THIS ID IN YOUR RESPONSE!)
+- **ID**: ${task.id}
+- **Index**: ${index} (for backward compatibility only - DO NOT USE)
+${task.title ? `- **Title**: ${task.title}` : ''}
+- **Expected Output**: ${task.expectedOutput}
+${task.goal ? `- **Goal**: ${task.goal}` : ''}
+- **Is Deliverable**: ${task.isDeliverable ? 'Yes - Final output' : 'No - Intermediate step'}
+
+**RESOURCE & SKILLS:**
+- **Agent**: ${task.agent?.name || 'Auto-select'}${
+  task.allowAgentReassignment === false ? ' (FIXED - Cannot be reassigned)' : ' (Can be reassigned)'
+}
+- **Required Skills**: ${
       task.resourceRequirements?.skillsRequired?.join(', ') || 'General'
     }
 - **Estimated Time**: ${
       task.resourceRequirements?.estimatedTime || 'Not specified'
     }
-- **Required Skills**: ${
-      task.resourceRequirements?.skillsRequired?.join(', ') || 'General'
-    }
 - **Dependencies**: ${
       task.resourceRequirements?.dependencies?.join(', ') || 'None'
     }
-- **Adaptable**: ${task.adaptable ? 'Yes' : 'No'}
-- **Agent**: ${task.agent?.name || 'Auto-select'}
-${
-  task.orchestrationRules
-    ? `- **Orchestration Rules**: ${task.orchestrationRules}`
-    : ''
-}
-- **Priority**: ${task.priority || 'medium'}
+
+**ORCHESTRATION SETTINGS:**
+- **Priority**: ${task.priority || 'medium'}${task.dynamicPriority ? ' (Dynamic)' : ' (Static)'}
+- **Adaptable**: ${task.adaptable ? 'Yes - Can be modified' : 'No - Fixed requirements'}
+- **Parallel Execution**: ${task.allowParallelExecution ? 'Yes - Can run in parallel' : 'No - Must run sequentially'}
 - **Split Strategy**: ${task.splitStrategy || 'none'}
 ${
   task.mergeCompatible && task.mergeCompatible.length > 0
     ? `- **Merge Compatible**: ${task.mergeCompatible.join(', ')}`
     : ''
 }
+${
+  task.orchestrationRules
+    ? `- **Orchestration Rules**: ${task.orchestrationRules}`
+    : ''
+}
+
+**SPECIAL ACTIVATION PROPERTIES:**
+${(task as any).isFallback ? '- **🚨 IS FALLBACK TASK**: This task handles unanswerable questions' : ''}
+${(task as any).activateOnLowRelevance ? '- **🔄 ACTIVATE ON LOW RELEVANCE**: Select this when no other tasks match well' : ''}
+${(task as any).isFinalizer ? '- **🏁 IS FINALIZER**: This task must run last to format the output' : ''}
+${(task as any).mustRunLast ? '- **⏭️ MUST RUN LAST**: This task should be executed after all others' : ''}
+
+**VALIDATION & QUALITY:**
+- **External Validation Required**: ${task.externalValidationRequired ? 'Yes' : 'No'}
+${
+  task.qualityGates && task.qualityGates.length > 0
+    ? `- **Quality Gates**: ${task.qualityGates.join(', ')}`
+    : ''
+}
+${task.referenceId ? `- **Reference ID**: ${task.referenceId}` : ''}
+
+**MATCHING CRITERIA**: Analyze ALL properties above (ID, title, description, goal, expected output, deliverable status, skills, etc.) to match with user inputs.
 `
   )
   .join('')}
@@ -154,14 +224,41 @@ ${
 5. **Adaptive Optimization** (10%): Tasks that optimize workflow based on current performance`
 }
 
-## TASK ORCHESTRATION RULES CONSIDERATION
-When selecting tasks, follow this priority order:
-1. **USER INPUTS ARE PARAMOUNT**: Tasks that align with user inputs get highest priority
-2. Tasks with explicit orchestrationRules MUST follow those rules
-3. Priority levels (high/medium/low) should influence selection order
-4. Dynamic priority tasks can be re-prioritized based on current context
-5. Adaptable tasks can be modified to better fit current needs and user inputs
-6. Non-adaptable tasks must be used as-is without modifications
+## INTELLIGENT TASK SELECTION RULES
+When selecting tasks, apply this decision framework:
+
+### 1. **RELEVANCE ASSESSMENT**
+First, evaluate if ANY normal tasks can properly handle the user input:
+- If user input is clear and domain-relevant → Select appropriate domain tasks
+- If user input is unclear, test-like, or outside domain → GO TO FALLBACK MODE
+
+### 2. **FALLBACK MODE ACTIVATION**
+Automatically activate fallback mode when:
+- User input appears to be a test (single words like "test", "hello", "hi")
+- Question is outside the system's knowledge domain
+- No normal tasks have high confidence for handling the input
+- Input is too vague or ambiguous to process
+
+When in fallback mode:
+1. **MUST SELECT** tasks with activateOnLowRelevance=true or isFallback=true
+2. **MUST ALSO SELECT** the finalizer task (isFinalizer=true or mustRunLast=true)
+3. Set proper dependencies: Finalizer depends on fallback task
+
+### 3. **TASK PROPERTY PRIORITIES**
+- Tasks with isFallback=true → Use for unanswerable questions
+- Tasks with activateOnLowRelevance=true → Use when confidence is low
+- Tasks with isFinalizer=true → ALWAYS include for output formatting
+- Tasks with mustRunLast=true → Execute after all other tasks
+
+## EXAMPLE: FALLBACK MODE SELECTION
+When you determine that fallback mode is needed (test input, unanswerable question, etc.):
+
+**Selected Tasks Pattern:**
+1. Select the task with isFallback=true or activateOnLowRelevance=true
+2. Select the task with isFinalizer=true or mustRunLast=true
+3. Ensure proper dependency: Finalizer depends on Fallback
+
+**Remember**: The system relies on task properties, not hardcoded names!
 
 ## ${orchestrationMode.toUpperCase()} INSTRUCTIONS
 ${
@@ -205,14 +302,17 @@ ${
 ## RESPONSE FORMAT
 Respond with a JSON object:
 
+**IMPORTANT**: Use the exact "REFERENCE ID" shown for each task, NOT the index number!
+For example, if you see REFERENCE ID: TASK-FALLBACK-001, use that exact ID in your response.
+
 \`\`\`json
 {
   "selectedTasks": [
     {
-      "taskIndex": 0,
+      "taskId": "TASK-FALLBACK-001",  // Use the REFERENCE ID shown for the task!
       "priority": "high|medium|low",
       "reasoning": "Why this task was selected and why now",
-      "suggestedAgent": "agent_name or auto_select",
+      "suggestedAgent": "agent_name or auto_select (IMPORTANT: If task.allowAgentReassignment is false, you MUST use the pre-assigned agent from task.agent)",
       "estimatedImpact": "Expected impact on project progress",
       "riskFactors": "Potential risks or challenges",
       "adaptations": "Suggested modifications if allowed"
@@ -302,7 +402,11 @@ ${Object.entries(context.inputs)
 ${strategyGuidance}
 
 ## ADAPTATION GUIDELINES
-1. **Agent Assignment**: Choose the best-suited agent based on skills and availability
+1. **Agent Assignment**: ${
+  task.allowAgentReassignment 
+    ? 'Choose the best-suited agent based on skills and availability'
+    : 'AGENT IS FIXED - Use the pre-assigned agent (task.agent). DO NOT reassign to another agent.'
+}
 2. **Scope Adjustment**: Scale complexity based on time constraints and priorities
 3. **Skill Matching**: Ensure required skills align with assigned agent capabilities
 4. **Quality Standards**: Maintain or improve quality requirements
@@ -318,7 +422,11 @@ ${strategyGuidance}
   - Verify merged scope remains manageable
   - Ensure agent can handle combined workload
 - **Priority Adjustment**: Increase/decrease based on current needs
-- **Agent Reassignment**: Optimize for skills and workload
+- **Agent Reassignment**: ${
+  task.allowAgentReassignment 
+    ? 'Optimize for skills and workload' 
+    : 'NOT ALLOWED - This task must use its pre-assigned agent'
+}
 - **Scope Modification**: Adjust deliverables based on constraints
 - **Quality Level**: Adapt quality gates based on project phase
 

@@ -94,7 +94,7 @@
     "@langchain/deepseek": "^0.0.1",
     "@langchain/google-genai": "^0.2.5",
     "@langchain/mistralai": "^0.2.0",
-    "@langchain/openai": "^0.5.7",
+    "@langchain/openai": "^0.6.7",
     "@langchain/xai": "^0.1.0",
     "@telemetrydeck/sdk": "^2.0.4",
     "ansis": "^3.3.2",

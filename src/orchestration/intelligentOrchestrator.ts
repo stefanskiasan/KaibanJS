@@ -246,7 +246,12 @@ export class IntelligentOrchestrator {
           throw new Error(errorMsg);
         }
         
-        logger.info('LLM initialized successfully, initializing strategy modules');
+        logger.info('LLM initialized successfully, testing connection...');
+        
+        // Validate LLM connection before proceeding
+        await this.validateLLMConnection(this.llm);
+        
+        logger.info('LLM connection validated, initializing strategy modules');
         
         // Initialize strategy modules that require LLM
         this.adaptationStrategy = new AdaptationStrategy(this.team, this.llm);
@@ -256,6 +261,33 @@ export class IntelligentOrchestrator {
         logger.error('Failed to initialize LLM in ensureLLMInitialized:', error);
         throw error;
       }
+    }
+  }
+
+  /**
+   * Validate LLM connection with a simple test call
+   */
+  private async validateLLMConnection(llm: LangChainChatModel): Promise<void> {
+    try {
+      logger.info('🔍 Testing LLM connection...');
+      
+      const testPrompt = 'Test connection. Respond with: OK';
+      const startTime = Date.now();
+      
+      const response = await llm.invoke(testPrompt);
+      const duration = Date.now() - startTime;
+      
+      if (!response || !response.content) {
+        throw new Error('LLM returned empty response during connection test');
+      }
+      
+      logger.info(`✅ LLM connection successful! Response time: ${duration}ms`);
+      logger.debug('LLM test response:', response.content.toString().substring(0, 100));
+      
+    } catch (error) {
+      const errorMsg = `❌ LLM connection test failed: ${error instanceof Error ? error.message : String(error)}`;
+      logger.error(errorMsg);
+      throw new Error(`LLM connection validation failed. ${errorMsg}. Please check your API key and network connection.`);
     }
   }
 
@@ -282,12 +314,23 @@ export class IntelligentOrchestrator {
       });
 
       if (team.llmInstance) {
-        logger.info('Using provided LLM instance');
+        logger.info('🔧 Using provided LLM instance');
+        logger.debug('LLM instance details:', {
+          constructor: team.llmInstance.constructor.name,
+          hasInvoke: typeof team.llmInstance.invoke === 'function'
+        });
         return team.llmInstance;
       }
 
       if (team.llmConfig) {
-        logger.info('Creating LLM from config:', team.llmConfig.provider);
+        logger.info(`🔧 Creating LLM from config - Provider: ${team.llmConfig.provider}, Model: ${team.llmConfig.model}`);
+        logger.debug('LLM config details:', {
+          provider: team.llmConfig.provider,
+          model: team.llmConfig.model,
+          temperature: team.llmConfig.temperature,
+          maxRetries: team.llmConfig.maxRetries,
+          hasApiKey: !!team.llmConfig.apiKey
+        });
         return this.createLLMFromConfig(team.llmConfig);
       }
 
@@ -390,18 +433,44 @@ export class IntelligentOrchestrator {
     };
 
     try {
+      logger.info(`🚀 Creating ${config.provider} LLM instance...`);
+      
       switch (config.provider) {
         case 'openai': {
           const apiKey = config.apiKey || getApiKey('openai');
-          return new ChatOpenAI({
-            modelName: config.model || 'gpt-4o-mini',
-            temperature: config.temperature || 0.3,
+          const modelName = config.model || 'gpt-4o-mini';
+          logger.info(`🔑 Using OpenAI with model: ${modelName}`);
+          
+          // GPT-5 models don't support temperature parameter - only default 1.0
+          // and use maxCompletionTokens instead of maxTokens
+          const isGPT5 = modelName.startsWith('gpt-5') || modelName.startsWith('o3');
+          
+          const openAIConfig: any = {
+            modelName: modelName,
             openAIApiKey: apiKey,
             maxRetries: config.maxRetries || 2,
             ...(config.configuration && {
               configuration: config.configuration,
             }),
-          });
+          };
+          
+          // Handle GPT-5 specific parameters
+          if (isGPT5) {
+            // GPT-5 uses maxCompletionTokens instead of maxTokens
+            // Set default of 16384 tokens for orchestration responses to prevent truncation
+            openAIConfig.maxCompletionTokens = config.maxTokens || 16384;
+            // GPT-5 doesn't support temperature parameter - only default 1.0
+          } else {
+            // Regular models support temperature and maxTokens
+            if (config.temperature !== undefined) {
+              openAIConfig.temperature = config.temperature || 0.3;
+            }
+            if (config.maxTokens) {
+              openAIConfig.maxTokens = config.maxTokens;
+            }
+          }
+          
+          return new ChatOpenAI(openAIConfig);
         }
 
         case 'anthropic': {
@@ -484,6 +553,9 @@ export class IntelligentOrchestrator {
         'context_analysis_time',
         Date.now() - contextStartTime
       );
+
+      // Pass inputs directly to context without any pre-filtering
+      // The LLM will decide based on task properties whether to use fallback tasks
 
       // Log context analysis
       this.logOrchestrationEvent(
@@ -733,6 +805,9 @@ export class IntelligentOrchestrator {
     projectGoal: string,
     orchestrationMode: 'initial' | 'continuous' = 'initial'
   ): Promise<Task[]> {
+    // Let the LLM handle all task selection intelligently
+    // The LLM will select fallback tasks when needed based on task properties
+
     if (!this.llm) {
       this.updatePerformanceMetric('failed_operations', 1);
       throw new Error(
@@ -780,23 +855,87 @@ export class IntelligentOrchestrator {
       }
 
       const responseData = JSON.parse(jsonMatch[1]);
+      
+      // Debug logging to understand LLM response
+      logger.info('🔍 LLM Response Data:', {
+        selectedTasksCount: responseData.selectedTasks?.length || 0,
+        selectedTaskIds: responseData.selectedTasks?.map((s: any) => s.taskId || s.taskIndex) || [],
+        overallStrategy: responseData.overallStrategy?.substring(0, 100)
+      });
+      
+      // Debug: Log initial selection
+      logger.info('🔍 Processing selected tasks:', {
+        taskIds: responseData.selectedTasks.map((s: any) => s.taskId || `index:${s.taskIndex}`),
+        availableTasksCount: this.availableTasks?.length || 0
+      });
+
       let selectedTasks = responseData.selectedTasks
         .filter(
-          (selection: any) =>
-            selection.taskIndex >= 0 &&
-            this.availableTasks &&
-            selection.taskIndex < this.availableTasks.length
+          (selection: any) => {
+            // Support both ID-based and index-based selection for backward compatibility
+            if (selection.taskId) {
+              // Find task by reference ID
+              const taskExists = this.availableTasks?.some((t: any) => 
+                t.referenceId === selection.taskId || t.id === selection.taskId
+              );
+              if (!taskExists) {
+                logger.warn(`🚫 Task ID ${selection.taskId} not found`);
+              }
+              return taskExists;
+            } else if (selection.taskIndex !== undefined) {
+              // Fallback to index-based selection
+              const isValid = selection.taskIndex >= 0 &&
+                this.availableTasks &&
+                selection.taskIndex < this.availableTasks.length;
+              if (!isValid) {
+                logger.warn(`🚫 Task index ${selection.taskIndex} is out of bounds or invalid`);
+              }
+              return isValid;
+            }
+            return false;
+          }
         )
         .map((selection: any) => {
-          const task = this.availableTasks[selection.taskIndex];
+          let task;
+          if (selection.taskId) {
+            // Find task by reference ID or regular ID
+            task = this.availableTasks.find((t: any) => 
+              t.referenceId === selection.taskId || t.id === selection.taskId
+            );
+            logger.info(`📋 Mapped task by ID ${selection.taskId}:`, {
+              title: task?.title || task?.description?.substring(0, 50),
+              agent: task?.agent?.name || 'unknown',
+              referenceId: task?.referenceId
+            });
+          } else {
+            // Fallback to index-based selection
+            task = this.availableTasks[selection.taskIndex];
+            logger.info(`📋 Mapped task at index ${selection.taskIndex}:`, {
+              title: task?.title || task?.description?.substring(0, 50),
+              agent: task?.agent?.name || 'unknown',
+              referenceId: task?.referenceId
+            });
+          }
           // Apply priority from LLM recommendation if task supports dynamic priority
-          if (task.dynamicPriority && selection.priority) {
+          if (task && task.dynamicPriority && selection.priority) {
             task.priority = selection.priority;
           }
           return task;
         })
         .filter(
-          (task: Task) => task && this.validateTaskAgainstRules(task, context)
+          (task: Task) => {
+            if (!task) {
+              logger.warn('🚫 Task is null or undefined, filtering out');
+              return false;
+            }
+            const isValid = this.validateTaskAgainstRules(task, context);
+            if (!isValid) {
+              logger.warn(`🚫 Task failed validation: ${task.title || task.description?.substring(0, 50)}`);
+            } else {
+              logger.info(`✅ Task passed validation: ${task.title || task.description?.substring(0, 50)}`);
+            }
+            return isValid;
+          }
         );
 
       // Apply performance-based learning if in learning mode
@@ -813,6 +952,23 @@ export class IntelligentOrchestrator {
         }
       }
 
+      // Post-process selected tasks to ensure proper dependencies
+      // If we have both a fallback task and a finalizer, set dependencies
+      const fallbackTask = selectedTasks.find((task: any) => 
+        task.isFallback === true || task.activateOnLowRelevance === true
+      );
+      const finalizerTask = selectedTasks.find((task: any) =>
+        task.isFinalizer === true || task.mustRunLast === true
+      );
+      
+      if (fallbackTask && finalizerTask && fallbackTask.id !== finalizerTask.id) {
+        // Ensure the finalizer depends on the fallback task
+        if (!finalizerTask.dependencies || finalizerTask.dependencies.length === 0) {
+          finalizerTask.dependencies = [fallbackTask.id || fallbackTask.referenceId || 'fallback'];
+          logger.info(`🔗 Set finalizer to depend on fallback task: ${finalizerTask.dependencies[0]}`);
+        }
+      }
+      
       logger.info(
         `🤖 LLM selected ${selectedTasks.length} tasks (${orchestrationMode} mode) with strategy: ${responseData.overallStrategy}`
       );
@@ -1256,7 +1412,7 @@ export class IntelligentOrchestrator {
       return true; // No rules to validate against
     }
 
-    const rules = (task.orchestrationRules || '').toLowerCase();
+    const rules = (typeof task.orchestrationRules === 'string' ? task.orchestrationRules : '').toLowerCase();
 
     // Check phase-specific rules
     if (rules.includes('phase:')) {
@@ -1352,7 +1508,7 @@ export class IntelligentOrchestrator {
       // Check if description change is allowed by orchestration rules
       if (
         !originalTask.orchestrationRules ||
-        !(originalTask.orchestrationRules || '')
+        !(typeof originalTask.orchestrationRules === 'string' ? originalTask.orchestrationRules : '')
           .toLowerCase()
           .includes('fixed description')
       ) {
@@ -1361,13 +1517,28 @@ export class IntelligentOrchestrator {
     }
 
     if (adaptations.agent) {
-      // Check if agent reassignment is allowed by orchestration rules
-      if (
+      // First check the new allowAgentReassignment property
+      if (originalTask.allowAgentReassignment === false) {
+        // Agent reassignment is explicitly forbidden
+        this.log(
+          'warn',
+          'Agent reassignment blocked by allowAgentReassignment=false',
+          {
+            taskId: adaptedTask.id,
+            attemptedAgent: adaptations.agent,
+            fixedAgent: originalTask.agent.name,
+          }
+        );
+        // Keep the original agent
+        adaptedTask.agent = originalTask.agent;
+      } else if (
+        // Also check orchestration rules for backward compatibility
         !originalTask.orchestrationRules ||
-        !(originalTask.orchestrationRules || '')
+        !(typeof originalTask.orchestrationRules === 'string' ? originalTask.orchestrationRules : '')
           .toLowerCase()
           .includes('fixed agent')
       ) {
+        // Agent reassignment is allowed
         // Try to find the suggested agent
         const suggestedAgent = this.team
           .getStore()
@@ -1397,6 +1568,18 @@ export class IntelligentOrchestrator {
             adaptedTask.agent = suggestedAgent;
           }
         }
+      } else {
+        // Agent reassignment blocked by orchestration rules
+        this.log(
+          'warn',
+          'Agent reassignment blocked by orchestration rules',
+          {
+            taskId: adaptedTask.id,
+            attemptedAgent: adaptations.agent,
+            fixedAgent: originalTask.agent.name,
+          }
+        );
+        adaptedTask.agent = originalTask.agent;
       }
     }
 
@@ -1418,6 +1601,16 @@ export class IntelligentOrchestrator {
     if (adaptations.qualityGates) {
       // Store quality gates for later validation
       adaptedTask.qualityGates = adaptations.qualityGates;
+    }
+
+    // CRITICAL: Forward inputs from context to adapted task
+    const context = ContextUtils.buildOrchestrationContext(this.team);
+    if (context && context.inputs) {
+      adaptedTask.inputs = context.inputs;
+      this.log('debug', 'Forwarded inputs to adapted task', {
+        taskId: adaptedTask.id,
+        inputKeys: Object.keys(context.inputs),
+      });
     }
 
     return adaptedTask;
@@ -1512,7 +1705,7 @@ export class IntelligentOrchestrator {
 
     // Factor 4: Project phase alignment (15 points)
     if (task.orchestrationRules) {
-      const rules = (task.orchestrationRules || '').toLowerCase();
+      const rules = (typeof task.orchestrationRules === 'string' ? task.orchestrationRules : '').toLowerCase();
       if (
         rules.includes(`phase: ${(context.projectPhase || '').toLowerCase()}`)
       ) {
@@ -1535,7 +1728,7 @@ export class IntelligentOrchestrator {
     }
 
     // Bonus: Critical path tasks
-    if ((task.orchestrationRules || '').toLowerCase().includes('critical')) {
+    if ((typeof task.orchestrationRules === 'string' ? task.orchestrationRules : '').toLowerCase().includes('critical')) {
       score += 10;
     }
 

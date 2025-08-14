@@ -79,6 +79,9 @@ Task:
 - Priority: ${task.priority || 'medium'}
 - Estimated Time: ${task.resourceRequirements?.estimatedTime || 'unknown'}
 - Current Dependencies: ${task.dependencies?.length > 0 ? task.dependencies.join(', ') : 'None'}
+- Allow Agent Reassignment: ${task.allowAgentReassignment === false ? 'NO - AGENT IS FIXED' : 'Yes'}
+- Current Agent: ${task.agent?.name || 'unassigned'}
+${task.allowAgentReassignment === false ? '\n🔒 CRITICAL: This task has allowAgentReassignment=false. DO NOT suggest a different agent!' : ''}
 ${task.orchestrationRules ? `\n⚠️ ORCHESTRATION RULES (MUST FOLLOW):
 ${task.orchestrationRules}` : ''}
 
@@ -102,6 +105,7 @@ Consider:
 3. Should the priority be adjusted based on user inputs and current workload?
 4. Should the estimated time be updated based on current context?
 5. Which agent is best suited for this task given current availability and skills?
+   ${task.allowAgentReassignment === false ? '⚠️ IMPORTANT: Agent reassignment is DISABLED for this task - keep the current agent!' : ''}
 6. Should dependencies be adjusted based on current workflow structure?
 7. Are there any user-specific requirements that should be incorporated?
 ${task.orchestrationRules ? '\n⚠️ IMPORTANT: Any adaptation MUST comply with the orchestration rules specified above.' : ''}
@@ -118,7 +122,7 @@ Provide your response in this JSON format:
   "description": "updated task description that considers user inputs",
   "priority": "high|medium|low",
   "estimatedTime": "updated time estimate",
-  "suggestedAgent": "agent name from available agents or null for auto-select",
+  "suggestedAgent": "agent name from available agents or null for auto-select${task.allowAgentReassignment === false ? ' (MUST BE NULL - agent reassignment disabled!)' : ''}",
   "dependencies": ["task_id1", "task_id2"] or null to keep current dependencies,
   "reasoning": "brief explanation of adaptations, especially how inputs influenced changes"
 }
@@ -165,32 +169,57 @@ Provide your response in this JSON format:
         }
         
         if (adaptationResult.estimatedTime) {
+          // Ensure estimatedTime is a string before calling trim
+          const estimatedTimeStr = typeof adaptationResult.estimatedTime === 'string' 
+            ? adaptationResult.estimatedTime 
+            : String(adaptationResult.estimatedTime);
+          
           // Validate estimatedTime format (e.g., "2 hours", "30 minutes", "1-2 days")
           const timePattern = /^\d+(-\d+)?\s*(hour|hours|minute|minutes|day|days|week|weeks)$/i;
-          if (timePattern.test(adaptationResult.estimatedTime.trim())) {
+          const trimmedTime = estimatedTimeStr.trim();
+          
+          if (timePattern.test(trimmedTime)) {
             if (!adaptedTask.resourceRequirements) {
               adaptedTask.resourceRequirements = {};
             }
-            changes.estimatedTime = adaptationResult.estimatedTime.trim();
-            adaptedTask.resourceRequirements.estimatedTime = adaptationResult.estimatedTime.trim();
+            changes.estimatedTime = trimmedTime;
+            adaptedTask.resourceRequirements.estimatedTime = trimmedTime;
           } else {
-            logger.warn(`Invalid estimatedTime format: ${adaptationResult.estimatedTime}, keeping original`);
+            logger.warn(`Invalid estimatedTime format: ${estimatedTimeStr}, keeping original`);
           }
         }
         
+        // Debug logging for agent reassignment
+        logger.info(`🔍 Debug: Task '${task.title}' allowAgentReassignment=${task.allowAgentReassignment}, current agent=${task.agent?.name}, suggested agent=${adaptationResult.suggestedAgent}`);
+        
         if (adaptationResult.suggestedAgent) {
-          // Find the suggested agent in available agents
-          const suggestedAgentName = adaptationResult.suggestedAgent.trim();
-          const newAgent = teamState.agents.find(
-            (agent) => agent.name.toLowerCase() === suggestedAgentName.toLowerCase()
-          );
-          
-          if (newAgent) {
-            changes.agent = newAgent.name;
-            adaptedTask.agent = newAgent;
-            logger.info(`🔄 Task agent reassigned from ${task.agent?.name || 'unassigned'} to ${newAgent.name}`);
+          // Check if agent reassignment is allowed
+          if (task.allowAgentReassignment === false) {
+            logger.warn(`⚠️ Agent reassignment blocked for task '${task.id}' - allowAgentReassignment is false`, {
+              taskId: task.id,
+              taskTitle: task.title,
+              currentAgent: task.agent?.name || 'unassigned',
+              suggestedAgent: adaptationResult.suggestedAgent,
+              reason: 'Task has allowAgentReassignment=false'
+            });
           } else {
-            logger.warn(`Suggested agent '${suggestedAgentName}' not found in available agents`);
+            // Ensure suggestedAgent is a string before calling trim
+            const suggestedAgentStr = typeof adaptationResult.suggestedAgent === 'string' 
+              ? adaptationResult.suggestedAgent 
+              : String(adaptationResult.suggestedAgent);
+            
+            const suggestedAgentName = suggestedAgentStr.trim();
+            const newAgent = teamState.agents.find(
+              (agent) => agent.name.toLowerCase() === suggestedAgentName.toLowerCase()
+            );
+            
+            if (newAgent) {
+              changes.agent = newAgent.name;
+              adaptedTask.agent = newAgent;
+              logger.info(`🔄 Task agent reassigned from ${task.agent?.name || 'unassigned'} to ${newAgent.name}`);
+            } else {
+              logger.warn(`Suggested agent '${suggestedAgentName}' not found in available agents`);
+            }
           }
         }
         

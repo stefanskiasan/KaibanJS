@@ -37,4 +37,20 @@ export declare class StrategyParser {
      * Generate instructions based on user inputs and strategy
      */
     private static generateInputBasedInstructions;
+    /**
+     * Get a preview of a value for display
+     */
+    private static getValuePreview;
+    /**
+     * Check if a string appears to be a question
+     */
+    private static isQuestion;
+    /**
+     * Check if a string contains product/item references
+     */
+    private static hasProductReference;
+    /**
+     * Check if a string contains measurements or quantities
+     */
+    private static hasMeasurement;
 }

@@ -94,7 +94,9 @@ export class ResourceOptimizer {
 
       // Find tasks from this agent that can be reassigned
       const agentTasks = tasks.filter(
-        (t) => t.agent?.id === overloadedId && t.status === 'TODO'
+        (t) => t.agent?.id === overloadedId && 
+               t.status === 'TODO' && 
+               t.allowAgentReassignment !== false  // Don't reassign tasks that are locked to their agent
       );
 
       for (const task of agentTasks) {
@@ -109,6 +111,12 @@ export class ResourceOptimizer {
             .agents.find((a) => a.id === underloadedId);
 
           if (underloadedAgent && this.canHandleTask(underloadedAgent, task)) {
+            // Double-check that reassignment is allowed
+            if (task.allowAgentReassignment === false) {
+              logger.warn(`⚠️ Skipping reassignment for task '${task.title}' - allowAgentReassignment is false`);
+              continue;
+            }
+            
             // Reassign task
             task.agent = underloadedAgent;
 
