@@ -351,7 +351,16 @@ export const useAgentStore: StateCreator<
     });
 
     logger.warn(
-      `🤔 ${AGENT_STATUS_enum.WEIRD_LLM_OUTPUT} - Agent: ${agent.name}`
+      `🤔 ${AGENT_STATUS_enum.WEIRD_LLM_OUTPUT} - Agent: ${agent.name}`,
+      `\nRaw Output: ${
+        typeof output === 'string'
+          ? output
+          : output === undefined
+          ? 'undefined'
+          : output === null
+          ? 'null'
+          : JSON.stringify(output, null, 2)
+      }`
     );
     set((state) => ({ workflowLogs: [...state.workflowLogs, newLog] }));
   },

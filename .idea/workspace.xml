@@ -7,13 +7,10 @@
     <list default="true" id="fb42951c-2ec5-47a0-a7ce-d3c6eab9491f" name="Changes" comment="feat: Enhance orchestration system with new utilities and context management">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/bundle.cjs" beforeDir="false" afterPath="$PROJECT_DIR$/dist/bundle.cjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/bundle.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/bundle.d.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dist/bundle.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/dist/bundle.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/types/orchestration/intelligentOrchestrator.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/dist/types/orchestration/intelligentOrchestrator.d.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/system-metrics.json" beforeDir="false" afterPath="$PROJECT_DIR$/kanban-board/.claude-flow/metrics/system-metrics.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/intelligentOrchestrator.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/orchestration/strategies/AdaptationStrategy.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/orchestration/strategies/AdaptationStrategy.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/stores/agentStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/agentStore.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +24,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/kanban-board" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -53,24 +50,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;JavaScript Debug.localhost:5173.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/orchestration-team-templates&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/asanstefanski/KundenProjekte/KaibanJS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/prettier&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.localhost:5173.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feat/intelligent-orchestration-ui",
+    "last_opened_file_path": "/Users/asanstefanski/KundenProjekte/KaibanJS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/prettier",
+    "ts.external.directory.path": "/Users/asanstefanski/KundenProjekte/KaibanJS/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/examples" />
@@ -107,6 +104,7 @@
       <workItem from="1754319093771" duration="588000" />
       <workItem from="1754862509162" duration="4972000" />
       <workItem from="1754957479211" duration="44000" />
+      <workItem from="1755195375276" duration="1246000" />
     </task>
     <task id="LOCAL-00001" summary="feat: Enhance orchestration system with new utilities and context management">
       <option name="closed" value="true" />
